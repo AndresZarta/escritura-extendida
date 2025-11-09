@@ -6,7 +6,7 @@ import mdx from '@astrojs/mdx';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://AndresZarta.github.io',
-  base: '/escritura-expandida',
+  base: '/escritura-extendida',
   integrations: [mdx()],
   markdown: {
     // Example: switch highlight type or theme

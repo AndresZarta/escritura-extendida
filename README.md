@@ -1,4 +1,4 @@
-# escritura::expandida
+# escritura::extendida
 
 ## 🧞 Commands
 
