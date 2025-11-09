@@ -6,7 +6,7 @@ const { links = [] as Link[] } = Astro.props;
 <ul class="social">
   {links.map((l: Link) => {
     const iconName = l.icon ?? l.label.toLowerCase().replace(/\s+/g, '-')
-      .replace(/[^a-z0-9\-]/g, '')
+      .replace(/[^a-z0-9-]/g, '')
     const iconSrc = `/icons/${iconName}.svg`;
     return (
       <li>
