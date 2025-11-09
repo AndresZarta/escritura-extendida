@@ -40,7 +40,7 @@ const { page } = Astro.props;
         {page.data.map((post: CollectionEntry<'blog'>) => (
           <article class="post-item">
             {post.data.image && (
-              <a href={`/blog/${post.slug}/`} class="post-thumbnail">
+              <a href={`/escritura-extendida/blog/${post.slug}/`} class="post-thumbnail">
                 <img 
                   src={post.data.image} 
                   alt={post.data.title}
@@ -54,7 +54,7 @@ const { page } = Astro.props;
             
             <div class="post-header">
               <h3 class="post-item-title">
-                <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+                <a href={`/escritura-extendida/blog/${post.slug}/`}>{post.data.title}</a>
               </h3>
               <time class="post-date" datetime={post.data.pubDate.toISOString()}>
                 {post.data.pubDate.toLocaleDateString('es-ES', {

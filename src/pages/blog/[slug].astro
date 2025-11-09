@@ -51,13 +51,13 @@ const next = currentIndex > 0 ? allEntries[currentIndex - 1] : null;
       <!-- Prev / Next navigation -->
       <nav class="post-nav" aria-label="Navegación de entradas">
         {previous ? (
-          <a class="prev-post" href={`/blog/${previous.slug}/`} rel="prev">
+          <a class="prev-post" href={`/escritura-extendida/blog/${previous.slug}/`} rel="prev">
             ← ./anterior
           </a>
         ) : <span />}
 
         {next ? (
-          <a class="next-post" href={`/blog/${next.slug}/`} rel="next">
+          <a class="next-post" href={`/escritura-extendida/blog/${next.slug}/`} rel="next">
             ./siguiente →
           </a>
         ) : <span />}
