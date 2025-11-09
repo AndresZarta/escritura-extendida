@@ -1,0 +1,99 @@
+---
+import Base from "../../layouts/Base.astro";
+import { getCollection } from "astro:content";
+import type { CollectionEntry } from "astro:content";
+import type { GetStaticPaths, Page } from 'astro';
+
+export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
+  const allPosts = await getCollection('blog', ({ data }) => {
+    return data.draft !== true;
+  });
+
+  const posts = allPosts
+    .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf());
+
+  return paginate(posts, { pageSize: 10 });
+};
+
+type Props = {
+  page: Page<CollectionEntry<'blog'>>;
+};
+
+const { page } = Astro.props;
+---
+<Base title="Blog - escritura::expandida">
+  <!-- Spacer -->
+  <div class="spacer-large" aria-hidden="true"></div>
+
+  <!-- Posts Section -->
+  <div class="posts-container">
+    <div class="posts-wrapper">
+      <!-- Left Column: Sticky Heading -->
+      <aside class="posts-sidebar">
+        <div class="posts-sidebar-content">
+          <h2 class="posts-heading">Todos los Posts:</h2>
+        </div>
+      </aside>
+
+      <!-- Right Column: Posts List -->
+      <div class="posts-list">
+        {page.data.map((post: CollectionEntry<'blog'>) => (
+          <article class="post-item">
+            {post.data.image && (
+              <a href={`/blog/${post.slug}/`} class="post-thumbnail">
+                <img 
+                  src={post.data.image} 
+                  alt={post.data.title}
+                  width="50"
+                  height="50"
+                  loading="lazy"
+                  decoding="async"
+                />
+              </a>
+            )}
+            
+            <div class="post-header">
+              <h3 class="post-item-title">
+                <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+              </h3>
+              <time class="post-date" datetime={post.data.pubDate.toISOString()}>
+                {post.data.pubDate.toLocaleDateString('es-ES', {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}
+              </time>
+            </div>
+
+            <p class="post-excerpt">{post.data.description}</p>
+
+            <div class="post-spacer"></div>
+          </article>
+        ))}
+
+        <!-- Pagination controls -->
+        <nav class="pagination" aria-label="Paginación de posts">
+          {page.url.prev ? (
+            <a class="pagination-prev" href={page.url.prev} rel="prev">← ./anterior</a>
+          ) : (<span />)}
+
+          <div class="pagination-pages">
+            {Array.from({ length: page.lastPage }).map((_, i) => {
+              const p = i + 1;
+              const url = p === 1 ? '/blog' : `/blog/${p}`;
+              return page.currentPage === p ? (
+                <span class="pagination-current">{p}</span>
+              ) : (
+                <a class="pagination-page" href={url}>{p}</a>
+              );
+            })}
+          </div>
+
+          {page.url.next ? (
+            <a class="pagination-next" href={page.url.next} rel="next">./siguiente →</a>
+          ) : (<span />)}
+        </nav>
+      </div>
+    </div>
+  </div>
+</Base>

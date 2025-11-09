@@ -1,0 +1,30 @@
+---
+import SocialLinks from "./SocialLinks.astro";
+
+const {
+  handle = ".andres_zarta",
+  tagline = "[programador, artista, ingeniero]",
+  imgSrc = "/profile.jpg",
+  links = [
+    { href: "https://bsky.app/profile/nicozarta.bsky.social", label: "Bluesky" },
+    { href: "https://github.com/AndresZarta", label: "GitHub" },
+  ]
+} = Astro.props;
+---
+<aside class="sidebar">
+  <p class="handle">{handle}</p>
+  {imgSrc ? (
+    <div class="avatar">
+      <img
+        src={imgSrc}
+        alt={handle || "Profile"}
+        width="320"
+        height="320"
+        decoding="async"
+        loading="lazy"
+      />
+    </div>
+  ) : null}
+  <p class="tagline">{tagline}</p>
+  <SocialLinks links={links} />
+</aside>

@@ -1,0 +1,7 @@
+---
+const { src, alt = '', width = 280 } = Astro.props;
+---
+<figure class="post-image">
+  <img src={src} alt={alt} width={width} style={`max-width:100%;height:auto;display:block;border-radius:6px;`} />
+  {alt ? <figcaption style="font-size:0.9rem;color:var(--color-tertiary);margin-top:8px">{alt}</figcaption> : null}
+</figure>

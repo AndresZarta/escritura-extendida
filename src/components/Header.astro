@@ -1,0 +1,165 @@
+---
+const { title = "Site" } = Astro.props;
+import { SITE } from "../config";
+---
+
+<div class="header-container">
+  <header class="site-header">
+    <div class="header-contents">
+      <!-- Site Title Group -->
+      <div class="header-start">
+        <div class="site-branding">
+          <a href="/" class="site-title">{SITE.title}</a>
+        </div>
+      </div>
+
+      <!-- Navigation Group -->
+      <div class="header-end">
+        <nav class="site-navigation">
+          <ul class="nav-menu">
+            <li><a href="/">./inicio</a></li>
+            <li><a href="/blog/init_escritura_expandida">./init_escritura_expandida</a></li>
+            <li><a href="/blog">./blog</a></li>
+            <li><a href="/about">./sobre_mi</a></li>
+          </ul>
+        </nav>
+      </div>
+    </div>
+
+    <!-- Site Tagline -->
+    <p class="site-tagline">{SITE.tagline}</p>
+  </header>
+</div>
+
+<style>
+  .header-container {
+    width: 100%;
+    padding: var(--space-30) var(--space-50);
+    margin: 0;
+  }
+
+  .site-header {
+    max-width: var(--wide-width);
+    margin: 0 auto;
+    padding: 0;
+    border-bottom: none;
+  }
+
+  .header-contents {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: nowrap;
+    margin: 0;
+    padding: 0;
+  }
+
+  .header-start,
+  .header-end {
+    display: flex;
+    align-items: center;
+    gap: var(--space-30);
+  }
+
+  .site-branding {
+    display: flex;
+    align-items: center;
+  }
+
+  .site-title {
+    font-size: var(--font-size-large);
+    font-weight: 300;
+    color: var(--color-primary);
+    text-decoration: none;
+    margin: 0;
+  }
+
+  .site-title:hover {
+    background-color: var(--color-accent-2);
+    color: var(--color-primary);
+  }
+
+  .site-navigation {
+    display: flex;
+  }
+
+  .nav-menu {
+    display: flex;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    gap: var(--space-30);
+    flex-wrap: nowrap;
+  }
+
+  .nav-menu li {
+    margin: 0;
+  }
+
+  .nav-menu a {
+    color: var(--color-secondary);
+    text-decoration: none;
+    font-size: var(--font-size-medium);
+    font-weight: 300;
+    padding: 4px 8px;
+    display: block;
+    transition: all 0.2s ease;
+  }
+
+  .nav-menu a:hover {
+    background-color: var(--color-accent-3);
+    color: var(--color-secondary);
+  }
+
+  .site-tagline {
+    display: inline-block;
+    margin: var(--space-20) 0 0 0;
+    overflow: hidden;
+    white-space: nowrap;
+    width: auto;
+    max-width: 0;
+    font-size: var(--font-size-small);
+    color: var(--color-secondary);
+    font-weight: 300;
+    border-right: 2px solid var(--color-secondary);
+    animation:
+      typewriter 4s steps(80, end) 1s forwards,
+      removeCursor 0s linear 3.5s forwards;
+  }
+
+  @keyframes typewriter {
+    from { max-width: 0; }
+    to   { max-width: 100%; }
+  }
+
+  @keyframes removeCursor {
+    to { border-right: none; }
+  }
+
+
+  /* Respect reduced motion preferences */
+  @media (prefers-reduced-motion: reduce) {
+    .site-tagline {
+      animation: none;
+      border-right: none;
+      width: 100%;
+    }
+  }
+
+  @media (max-width: 640px) {
+    .header-container {
+      padding: var(--space-30);
+    }
+
+    .header-contents {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: var(--space-30);
+    }
+
+    .nav-menu {
+      flex-direction: column;
+      gap: var(--space-20);
+    }
+  }
+</style>

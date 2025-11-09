@@ -1,0 +1,40 @@
+---
+// Small reusable component to render a word/phrase with a tricolor effect.
+// Props:
+// - text: string (required) - the text to render
+// - mode: 'gradient' | 'spans' (default: 'gradient')
+// - segments: string[] (optional) - if provided and mode==='spans', uses these segments
+// - className: string (optional) - extra class names
+const { text = '', mode = 'gradient', segments = [], className = '' } = Astro.props;
+
+/**
+ * Split a string into n segments (approx. equal length).
+ */
+function splitIntoSegments(s: string, n = 3) {
+  if (!s) return Array(n).fill('');
+  const len = s.length;
+  const base = Math.floor(len / n);
+  const rem = len % n;
+  const out: string[] = [];
+  let i = 0;
+  for (let part = 0; part < n; part++) {
+    const take = base + (part < rem ? 1 : 0);
+    out.push(s.slice(i, i + take));
+    i += take;
+  }
+  return out;
+}
+
+const segs = (segments && segments.length === 3) ? segments : splitIntoSegments(String(text), 3);
+---
+
+{/** Render */}
+{mode === 'spans' ? (
+  <span class={`tri-span-hover ${className}`} aria-label={text}>
+    <span class="tri-1">{segs[0]}</span>
+    <span class="tri-2">{segs[1]}</span>
+    <span class="tri-3">{segs[2]}</span>
+  </span>
+) : (
+  <span class={`tri-gradient-hover ${className}`}>{text}</span>
+)}

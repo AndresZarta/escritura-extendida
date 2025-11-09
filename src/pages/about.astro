@@ -1,0 +1,29 @@
+---
+import Base from "../layouts/Base.astro";
+import Sidebar from "../components/Sidebar.astro";
+import * as aboutModule from '../content/about.md';
+
+const Content = aboutModule.Content;
+const pageTitle = aboutModule.frontmatter?.title || "Sobre mí";
+const pageDescription = aboutModule.frontmatter?.description || "Perfil profesional";
+---
+<Base title={pageTitle} description={pageDescription}>
+  <!-- Spacer -->
+  <div class="spacer-large" aria-hidden="true"></div>
+
+  <!-- About Page with Columns -->
+  <div class="container">
+    <div class="columns">
+      <article class="col col-main">
+        <h1 class="page-title">{pageTitle}</h1>
+        <div class="page-body">
+          <Content />
+        </div>
+      </article>
+
+      <div class="col col-side">
+        <Sidebar />
+      </div>
+    </div>
+  </div>
+</Base>

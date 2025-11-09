@@ -1,0 +1,89 @@
+---
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+import Sidebar from '../../components/Sidebar.astro';
+
+export async function getStaticPaths() {
+  const blogEntries = await getCollection('blog');
+  return blogEntries.map(entry => ({
+    params: { slug: entry.slug },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<'blog'>;
+}
+
+const { entry } = Astro.props;
+const { Content } = await entry.render();
+
+// Compute previous / next entries for navigation
+const allEntries = await getCollection('blog');
+// Sort by pubDate descending (newest first)
+allEntries.sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate));
+const currentIndex = allEntries.findIndex(e => e.slug === entry.slug);
+const previous = currentIndex >= 0 && currentIndex + 1 < allEntries.length ? allEntries[currentIndex + 1] : null;
+const next = currentIndex > 0 ? allEntries[currentIndex - 1] : null;
+---
+
+<Base title={entry.data.title} description={entry.data.description}>
+  <!-- Spacer -->
+  <div class="spacer-large" aria-hidden="true"></div>
+
+  <!-- Blog Post -->
+  <div class="page-container">
+    <article class="page-content">
+      <h1 class="page-title blog-title-with-exec">{entry.data.title}</h1>
+      
+      <time class="page-date" datetime={entry.data.pubDate.toISOString()}>
+        {entry.data.pubDate.toLocaleDateString('es-ES', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric'
+        })}
+      </time>
+
+      <div class="page-body">
+        <Content />
+      </div>
+    
+      <!-- Prev / Next navigation -->
+      <nav class="post-nav" aria-label="Navegación de entradas">
+        {previous ? (
+          <a class="prev-post" href={`/blog/${previous.slug}/`} rel="prev">
+            ← ./anterior
+          </a>
+        ) : <span />}
+
+        {next ? (
+          <a class="next-post" href={`/blog/${next.slug}/`} rel="next">
+            ./siguiente →
+          </a>
+        ) : <span />}
+      </nav>
+    </article>
+  </div>
+</Base>
+
+<style>
+  /* Only blog-specific styling: the hash mark */
+  .blog-title-with-exec {
+    position: relative;
+    padding-left: 0px;
+  }
+  
+  .blog-title-with-exec::before {
+    content: './';
+    margin-left: -28px;
+    color: var(--color-accent-4);
+    position: absolute;
+    left: 0;
+    font-weight: normal;
+  }
+
+  .blog-title-with-exec:hover::before {
+    color: var(--color-primary);
+  }
+</style>
