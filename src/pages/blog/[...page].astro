@@ -4,6 +4,7 @@ import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import type { GetStaticPaths, Page } from 'astro';
 import { withBase } from "../../config";
+import { Image } from "astro:assets";
 
 export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
   const allPosts = await getCollection('blog', ({ data }) => {
@@ -42,11 +43,11 @@ const { page } = Astro.props;
           <article class="post-item">
             {post.data.image && (
               <a href={withBase(`/blog/${post.slug}/`)} class="post-thumbnail">
-                <img 
+                <Image 
                   src={post.data.image} 
                   alt={post.data.title}
-                  width="50"
-                  height="50"
+                  width={50}
+                  height={50}
                   loading="lazy"
                   decoding="async"
                 />
