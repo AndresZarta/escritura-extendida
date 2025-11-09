@@ -1,30 +1,29 @@
 ---
 import SocialLinks from "./SocialLinks.astro";
+import profileImg from "../assets/profile/profile.jpg";
 
 const {
   handle = ".andres_zarta",
   tagline = "[programador, artista, ingeniero]",
-  imgSrc = "/profile.jpg",
+  imgSrc = profileImg,
   links = [
     { href: "https://bsky.app/profile/nicozarta.bsky.social", label: "Bluesky" },
     { href: "https://github.com/AndresZarta", label: "GitHub" },
-  ]
+  ],
 } = Astro.props;
 ---
 <aside class="sidebar">
   <p class="handle">{handle}</p>
-  {imgSrc ? (
-    <div class="avatar">
-      <img
-        src={imgSrc}
-        alt={handle || "Profile"}
-        width="320"
-        height="320"
-        decoding="async"
-        loading="lazy"
-      />
-    </div>
-  ) : null}
+  <div class="avatar">
+    <img
+      src={imgSrc.src}
+      alt={handle || "Profile"}
+      width="320"
+      height="320"
+      decoding="async"
+      loading="lazy"
+    />
+  </div>
   <p class="tagline">{tagline}</p>
   <SocialLinks links={links} />
 </aside>

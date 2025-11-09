@@ -6,7 +6,7 @@ import mdx from '@astrojs/mdx';
 // https://astro.build/config
 export default defineConfig({
   site: 'https://AndresZarta.github.io',
-  base: '/escritura-extendida',
+  base: '/escritura-expandida',
   integrations: [mdx()],
   markdown: {
     // Example: switch highlight type or theme
@@ -17,7 +17,7 @@ export default defineConfig({
     shikiConfig: {
       // Use a different Shiki theme for code highlighting. Change this to any Shiki theme
       // you prefer (e.g. 'github-dark', 'nord', 'one-dark-pro', 'material-oceanic').
-      theme: 'nord',
+      theme: 'github-dark',
       // maybe languages list, etc
     },
   },

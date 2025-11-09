@@ -3,6 +3,7 @@ import Base from "../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import type { GetStaticPaths, Page } from 'astro';
+import { withBase } from "../../config";
 
 export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
   const allPosts = await getCollection('blog', ({ data }) => {
@@ -40,7 +41,7 @@ const { page } = Astro.props;
         {page.data.map((post: CollectionEntry<'blog'>) => (
           <article class="post-item">
             {post.data.image && (
-              <a href={`/escritura-extendida/blog/${post.slug}/`} class="post-thumbnail">
+              <a href={withBase(`/blog/${post.slug}/`)} class="post-thumbnail">
                 <img 
                   src={post.data.image} 
                   alt={post.data.title}
@@ -54,7 +55,7 @@ const { page } = Astro.props;
             
             <div class="post-header">
               <h3 class="post-item-title">
-                <a href={`/escritura-extendida/blog/${post.slug}/`}>{post.data.title}</a>
+                <a href={withBase(`/blog/${post.slug}/`)}>{post.data.title}</a>
               </h3>
               <time class="post-date" datetime={post.data.pubDate.toISOString()}>
                 {post.data.pubDate.toLocaleDateString('es-ES', {
@@ -80,7 +81,7 @@ const { page } = Astro.props;
           <div class="pagination-pages">
             {Array.from({ length: page.lastPage }).map((_, i) => {
               const p = i + 1;
-              const url = p === 1 ? '/blog' : `/blog/${p}`;
+              const url = p === 1 ? withBase('/blog') : withBase(`/blog/${p}`);
               return page.currentPage === p ? (
                 <span class="pagination-current">{p}</span>
               ) : (
