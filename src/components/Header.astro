@@ -1,5 +1,5 @@
 ---
-import { SITE, withBase } from "../config";
+import { SITE } from "../config";
 ---
 
 <div class="header-container">
@@ -8,7 +8,7 @@ import { SITE, withBase } from "../config";
       <!-- Site Title Group -->
       <div class="header-start">
         <div class="site-branding">
-          <a href={withBase('/')} class="site-title">{SITE.title}</a>
+          <a href="/" class="site-title">{SITE.title}</a>
         </div>
       </div>
 
@@ -16,10 +16,10 @@ import { SITE, withBase } from "../config";
       <div class="header-end">
         <nav class="site-navigation">
           <ul class="nav-menu">
-            <li><a href={withBase('/')}>./inicio</a></li>
-            <li><a href={withBase('/blog/init_escritura_extendida')}>./init_escritura_extendida</a></li>
-            <li><a href={withBase('/blog')}>./blog</a></li>
-            <li><a href={withBase('/about')}>./sobre_mi</a></li>
+            <li><a href="/">./inicio</a></li>
+            <li><a href="/blog/init_escritura_extendida">./init_escritura_extendida</a></li>
+            <li><a href="/blog">./blog</a></li>
+            <li><a href="/about">./sobre_mi</a></li>
           </ul>
         </nav>
       </div>

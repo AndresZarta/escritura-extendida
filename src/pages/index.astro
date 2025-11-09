@@ -1,7 +1,6 @@
 ---
 import Base from "../layouts/Base.astro";
 import { getCollection } from "astro:content";
-import { withBase } from "../config";
 import { Image } from "astro:assets";
 
 // Get all blog posts from the content collection
@@ -33,7 +32,7 @@ const posts = allPosts
         {posts.map((post) => (
           <article class="post-item">
             {post.data.image && (
-              <a href={withBase(`/blog/${post.slug}/`)} class="post-thumbnail">
+              <a href={`/blog/${post.slug}/`} class="post-thumbnail">
                 <Image 
                   src={post.data.image} 
                   alt={post.data.title}
@@ -47,7 +46,7 @@ const posts = allPosts
             
             <div class="post-header">
               <h3 class="post-item-title">
-                <a href={withBase(`/blog/${post.slug}/`)}>{post.data.title}</a>
+                <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
               </h3>
               <time class="post-date" datetime={post.data.pubDate.toISOString()}>
                 {post.data.pubDate.toLocaleDateString('es-ES', {
