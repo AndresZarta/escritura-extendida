@@ -456,7 +456,7 @@ hr {
 
 /* Spacers */
 .spacer-large {
-  height: 100px;
+  height: 25px;
 }
 
 /* Shared Content Page Styles */
@@ -595,6 +595,8 @@ hr {
 
 /* Posts Container */
 .posts-container {
+  display: flex;
+  gap: var(--space-60);
   width: 100%;
   max-width: 1000px;
   margin: 0 auto;
@@ -634,7 +636,8 @@ hr {
 
 .posts-wrapper {
   display: grid;
-  grid-template-columns: 340px 1fr;
+  /* Left column reserved for intro/sidebar, right column for posts list */
+  grid-template-columns: minmax(220px, 340px) 1fr;
   gap: var(--space-60);
   align-items: start;
 }
@@ -642,12 +645,123 @@ hr {
 /* Posts Sidebar (Left Column - Sticky Heading) */
 .posts-sidebar {
   position: sticky;
-  top: 0;
+  top: var(--space-60);
   padding: var(--space-50) 0 var(--space-70);
+  align-self: start; /* ensure it aligns with the top of the posts list */
 }
 
 .posts-sidebar-content {
   max-width: 340px;
+}
+
+.posts-sidebar-content {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-30);
+}
+
+/* Index page intro aside and latest posts list */
+.intro-aside {
+  max-width: var(--content-width);
+  margin: 0 auto;
+  font-size: var(--font-size-medium);
+  color: var(--color-secondary);
+  font-weight: 300;
+  line-height: 1.6;
+}
+
+.intro-aside h1 {
+  font-size: var(--font-size-xxl);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin-bottom: var(--space-30);
+}
+
+.intro-aside h2 {
+  font-size: var(--font-size-large);
+  font-weight: 700;
+  color: var(--color-primary);
+  margin: var(--space-70) 0 var(--space-30);
+}
+
+.latest-posts {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-60);
+}
+
+.latest-posts li {
+  margin: 0;
+  padding: 0;
+}
+
+.latest-posts article {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-30);
+}
+
+.latest-posts header {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.latest-posts h3 {
+  font-size: var(--font-size-medium);
+  font-weight: 700;
+  margin: 0;
+  color: var(--color-secondary);
+}
+
+.latest-posts h3 a {
+  color: var(--color-secondary);
+  text-decoration: none;
+  transition: color 0.2s ease, background-color 0.2s ease;
+}
+
+.latest-posts h3 a:hover {
+  color: var(--color-primary);
+  background-color: var(--color-accent-2);
+}
+
+.latest-posts time {
+  font-size: var(--font-size-small);
+  color: var(--color-tertiary);
+  font-weight: 300;
+}
+
+.latest-posts blockquote {
+  border-left: none;
+  padding-left: 0;
+  margin: 0;
+  font-size: var(--font-size-medium);
+  font-style: normal;
+  color: var(--color-secondary);
+}
+
+.all-posts-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: var(--space-60);
+  padding: 8px 16px;
+  font-size: var(--font-size-medium);
+  font-weight: 500;
+  color: var(--color-secondary);
+  background-color: transparent;
+  border: 1px solid var(--color-secondary);
+  border-radius: 4px;
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.all-posts-link:hover {
+  color: var(--color-base);
+  background-color: var(--color-primary);
 }
 
 .posts-heading {

@@ -1,5 +1,5 @@
 ---
-title: "./sobre_mi"
+title: "./sobre_mí"
 description: "Perfil profesional"
 ---
 Soy un científico informático e ingeniero de software colombiano, egresado de la [Escuela de Ingeniería Tandon](https://engineering.nyu.edu/student/andres-zarta) de la Universidad de Nueva York.

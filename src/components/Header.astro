@@ -22,7 +22,7 @@ import { SITE } from "../config";
             <li><a href="/">./inicio</a></li>
             <li><a href="/blog/init_escritura_extendida">./init_escritura_extendida</a></li>
             <li><a href="/blog">./blog</a></li>
-            <li><a href="/about">./sobre_mi</a></li>
+            <li><a href="/about">./sobre_mí</a></li>
           </ul>
         </nav>
       </div>
@@ -130,7 +130,7 @@ import { SITE } from "../config";
     border-right: 2px solid var(--color-secondary);
     animation:
       typewriter 4s steps(80, end) 1s forwards,
-      removeCursor 0s linear 3.5s forwards;
+      removeCursor 0s linear 5s forwards;
   }
 
   @keyframes typewriter {
@@ -161,6 +161,13 @@ import { SITE } from "../config";
     flex-direction: column;
     align-items: flex-start;
     gap: var(--space-30);
+  }
+
+  .site-navigation {
+    display: grid;
+    flex-direction: row;
+
+    margin-left: -10px;
   }
 
   /* Ensure the branding bundle stays left-aligned and can wrap internally */

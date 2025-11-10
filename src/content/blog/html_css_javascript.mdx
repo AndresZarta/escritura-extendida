@@ -1,0 +1,127 @@
+---
+title: "html_css_"
+description: "Repaso rápido sobre HTML, CSS y  como pilares de la web moderna."
+pubDate: 2025-11-11
+draft: false
+---
+
+El texto en la web no existe por sí solo: necesita un soporte que lo interprete y lo haga visible. HTML surgió como el **lenguaje estructural** que permitió dar forma al contenido (párrafos, botones, enlaces, imágenes) de manera universal y accesible. Su simplicidad, semántica y adopción temprana lo convirtieron en el estándar de facto para organizar la información en Internet. Todo navegador sabe leer HTML, y esta compatibilidad total ha sido clave para su permanencia.
+
+Tomemos, a manera de ejemplo, este texto sencillo:
+
+<body-mock>
+  <div class="demo-isolated">
+      <p>Un texto</p>
+  </div>
+</body-mock>
+
+```html
+<!-- Pruebalo tu, copiando este código en cualquier editor de texto y guardandolo con formato .html -->
+<!-- Luego puedes abrirlo en tu navegador. Felicidades has creado tu primer archivo html. -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Ejemplo HTML</title>
+  </head>
+  <body>
+    <div>
+      <p>Un texto</p>
+    </div>
+  </body>
+</html>
+```
+
+Ignorando por un momento la meta-información centremonos en el bloque de texto principal, que crea un contenedor `<div>` y utiliza una declaración de estilo en línea para centrar el texto en la ventana del navegador.
+
+```html
+    <div>
+      <p>Un texto</p>
+    </div>
+```
+
+Si añadimos otro elemento, veremos que se estructuran, uno después del otro.
+<body-mock>
+  <div>
+    <p>Un texto</p>
+    <p>Otro texto</p>
+  </div>
+</body-mock>
+```html
+    <div>
+      <p>Un texto</p>
+      <p>Otro texto</p>
+    </div>
+```
+
+Podemos ir un paso más allá observando qué es lo que realmente está haciendo HTML aquí. Hasta ahora no hemos hablado de colores, tamaños, ni posiciones. Lo importante es la estructura.
+
+En HTML, cada pieza de contenido se encapsula en elementos: bloques marcados por etiquetas que indican qué tipo de cosa es ese contenido. Por ejemplo:
+- `<p>` indica que el contenido es un párrafo.
+- `<div>` indica un contenedor sin significado específico, útil para agrupar otros elementos.
+- `<h1>`, `<h2>`, `<h3>` representan títulos y subtítulos.
+- `<ul>` y `<li>` permiten listas.
+- `<a>` crea enlaces.
+
+Volvamos al ejemplo:
+```html
+<div>
+  <p>Un texto</p>
+  <p>Otro texto</p>
+</div>
+```
+
+Aquí, el \<div> cumple el papel de agrupador. Contiene dos elementos \<p>, y cada \<p> es reconocido por el navegador como una unidad independiente de texto con su propio inicio y fin.
+Si añadimos un título sobre estos párrafos:
+```html
+<div> 
+  <h1>Título principal</h1>
+  <p>Primer párrafo de la idea.</p>
+  <p>Segundo párrafo que continúa la misma idea.</p>
+</div>
+```
+El navegador ahora entiende:
+
+Hay una sección agrupada. Dentro de ella, existe un encabezado, que jerárquicamente es más importante. Luego vienen dos unidades de texto, una tras otra. Aún sin estilos, la estructura ya comunica algo:
+El título aparece como título, no como texto normal. Cada párrafo se separa del siguiente. Existe un orden de lectura claro.
+Podemos seguir sumando significado:
+<body-mock>
+  <div>
+    <h1 style="all: unset; display:block; font-family: var(--font-family); font-size: var(--font-size-xxl); font-weight:700; line-height:1.05; color: var(--color-primary); margin:0 0 var(--space-30);">Título principal</h1>
+    <h2 style="all: unset; display:block; font-family: var(--font-family); font-size: var(--font-size-xl); font-weight:700; line-height:1.1; color: var(--color-primary); margin:0 0 var(--space-30);">Subsección del tema</h2>
+    <p style="all: unset; display:block; font-family: var(--font-family); font-size: var(--font-size-medium); font-weight:300; color: var(--color-secondary); margin:0 0 var(--space-30);">Un desarrollo de la idea.</p>
+    <ul>
+      <li>Punto 1</li>
+      <li>Punto 2</li>
+      <li>Punto 3</li>
+    </ul>
+  </div>
+</body-mock>
+```html
+<div>
+  <h1>Título principal</h1>
+  <h2>Subsección del tema</h2>
+  <p>Un desarrollo de la idea.</p>
+  <ul>
+    <li>Punto 1</li>
+    <li>Punto 2</li>
+    <li>Punto 3</li>
+  </ul>
+</div>
+```
+
+Sin tocar estilos, HTML ya crea:
+Una jerarquía.
+Una composición lógica.
+Una forma de lectura.
+Esto es lo esencial: HTML no decide cómo se ve algo, decide qué es.
+La apariencia vendrá después (cuando hablemos de CSS).
+Primero, HTML establece la gramática del contenido —qué es un párrafo, qué es un título, qué pertenece junto— y solo después se decide cómo ese contenido debe aparecer visualmente.
+
+
+CSS define la apariencia del contenido, el modo en que la estructura adquiere forma visible. Nació para separar la presentación de la lógica y del texto, permitiendo controlar colores, tipografías y disposiciones sin alterar el documento base. Su modelo en cascada, basado en herencia y prioridad, ofrece un equilibrio entre simplicidad declarativa y expresividad visual. Con el tiempo, sus ampliaciones como flexbox, grid, variables y animaciones lo consolidaron como un lenguaje de diseño en sí mismo, capaz de transformar la experiencia estética de la web sin recurrir a programación imperativa (como lo es ).
+
+, en cambio, introdujo la dimensión dinámica: la posibilidad de que el texto y los elementos visuales respondan a la interacción del usuario o a la lógica de un programa. Donde HTML define la estructura del contenido,  define su comportamiento a través del tiempo. Su integración nativa en todos los navegadores y su evolución hacia entornos potentes (Node.js, React) lo han convertido en el lenguaje que gobierna la interactividad de la web moderna.
+
+La longevidad de este paradigma, que ha durado más de tres décadas, proviene de un equilibrio entre estabilidad y expansión. HTML, CSS y  mantienen compatibilidad hacia atrás, garantizando que incluso el código de los primeros años de la web siga funcionando, mientras incorporan nuevas capacidades de forma progresiva. Ningún competidor ha igualado esa combinación de ubicuidad, apertura y resiliencia técnica: los navegadores están diseñados en torno a ellos, y el ecosistema entero, desde los servidores a los frameworks, se articula sobre su gramática compartida.
+
