@@ -275,6 +275,25 @@ figcaption {
   color: var(--color-tertiary);
 }
 
+
+.figure-blog-small {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.figure-blog-small img {
+  display: block;
+  width: 30%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.figure-blog-small figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-tertiary);
+}
+
 /* Site Header */
 .site-header {
   padding: var(--space-50) var(--space-60);
