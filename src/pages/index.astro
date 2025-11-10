@@ -2,6 +2,7 @@
 import Base from "../layouts/Base.astro";
 import { getCollection } from "astro:content";
 import { Image } from "astro:assets";
+import { formatDateET } from '../utils/formatDateET';
 
 // Get all blog posts from the content collection
 const allPosts = await getCollection('blog', ({ data }) => {
@@ -49,11 +50,7 @@ const posts = allPosts
                 <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
               </h3>
               <time class="post-date" datetime={post.data.pubDate.toISOString()}>
-                {post.data.pubDate.toLocaleDateString('es-ES', {
-                  year: 'numeric',
-                  month: 'long',
-                  day: 'numeric'
-                })}
+                {formatDateET(post.data.pubDate)}
               </time>
             </div>
 

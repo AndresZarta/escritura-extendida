@@ -94,6 +94,16 @@ body {
   background-color: var(--color-base);
 }
 
+body-mock {
+  margin: 0;
+  font-family: Verdana;
+  font-size: var(--font-size-large);
+  font-weight: 300;
+  line-height: 1.6;
+  color: var(--color-secondary);
+  background-color: var(--color-base);
+}
+
 /* Typography */
 h1, h2, h3 {
   font-size: var(--font-size-large);
@@ -819,7 +829,7 @@ hr {
   }
 
   body {
-    font-size: var(--font-size-medium);
+    font-size: var(--font-size-small);
   }
 
   .site-header,
