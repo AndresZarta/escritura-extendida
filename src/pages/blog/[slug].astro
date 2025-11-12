@@ -4,9 +4,9 @@ import type { CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
 import { formatDateET } from '../../utils/formatDateET';
 
-export async function getStaticPaths(): Promise<
-  { params: { slug: string }; props: { entry: CollectionEntry<'blog'> } }[]
-> {
+type StaticPath = { params: { slug: string }; props: { entry: CollectionEntry<'blog'> } };
+
+export async function getStaticPaths(): Promise<StaticPath[]> {
   const blogEntries = await getCollection('blog');
   return blogEntries.map(entry => ({
     params: { slug: entry.slug },
