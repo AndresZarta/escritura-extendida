@@ -1,4 +1,4 @@
-export function formatDateET(date: Date | string) {
+export function formatDateET(date: Date | string): string {
   // Ensure we have a Date object
   const d = typeof date === 'string' ? new Date(date) : date;
 

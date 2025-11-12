@@ -28,7 +28,13 @@ export default [
   {
     rules: {
       'no-console': 'warn',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
+      // Require explicit return types on exported functions/handlers so CI fails
+      // when a module boundary lacks type annotations. This enforces clearer API
+      // contracts and complements the TypeScript compiler checks.
+      '@typescript-eslint/explicit-module-boundary-types': 'error',
+      // Optionally require explicit return types for non-exported functions as well.
+      // Enable if you want stricter checking across the codebase.
+      // '@typescript-eslint/explicit-function-return-type': ['error', { allowExpressions: true }],
       '@typescript-eslint/no-unused-vars': ['warn', { 
         argsIgnorePattern: '^_',
         varsIgnorePattern: '^_' 
