@@ -1,61 +1,45 @@
+// eslint.config.js (flat)
 import eslint from '@eslint/js';
 import tseslint from 'typescript-eslint';
 import eslintPluginAstro from 'eslint-plugin-astro';
 
 export default [
-  // Ignore patterns (replaces .eslintignore)
-  {
-    ignores: [
-      'node_modules/',
-      '.astro/',
-      'dist/',
-      'public/',
-      '.cache/',
-      '*.log'
-    ]
-  },
+  { ignores: ['node_modules/','.astro/','dist/','public/','.cache/','*.log'] },
 
-  // Base ESLint recommended rules
   eslint.configs.recommended,
-
-  // TypeScript rules for .ts/.tsx files
-  ...tseslint.configs.recommended,
-
-  // Astro plugin recommended config
+  ...tseslint.configs.recommended,                // or .recommendedTypeChecked (see below)
   ...eslintPluginAstro.configs.recommended,
 
-  // Custom rules
   {
     rules: {
       'no-console': 'warn',
-      '@typescript-eslint/explicit-module-boundary-types': 'off',
-      '@typescript-eslint/no-unused-vars': ['warn', { 
-        argsIgnorePattern: '^_',
-        varsIgnorePattern: '^_' 
-      }]
-    }
+      '@typescript-eslint/explicit-module-boundary-types': 'error',
+      '@typescript-eslint/no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],
+    },
   },
 
-  // TypeScript-specific overrides
+  // TypeScript files
   {
     files: ['**/*.ts', '**/*.tsx'],
     languageOptions: {
       parser: tseslint.parser,
       parserOptions: {
-        project: './tsconfig.json'
-      }
-    }
+        project: './tsconfig.json',               // OK to keep for type-aware rules
+        tsconfigRootDir: import.meta.dirname,
+      },
+    },
   },
 
-  // Astro files
+  // Astro files — DO NOT pass a TS "project" here
   {
     files: ['**/*.astro'],
     languageOptions: {
       parser: eslintPluginAstro.parser,
       parserOptions: {
         parser: tseslint.parser,
-        project: './tsconfig.json'
-      }
-    }
-  }
+        extraFileExtensions: ['.astro'],          // key fix
+        // no "project" here
+      },
+    },
+  },
 ];
