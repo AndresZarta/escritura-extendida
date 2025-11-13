@@ -5,6 +5,11 @@ on:
     types: [opened, synchronize, reopened, edited]
     branches: [main]
 
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
 jobs:
   check-version:
     name: Verificar incremento de versión
