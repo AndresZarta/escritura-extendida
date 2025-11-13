@@ -36,7 +36,7 @@ jobs:
           BASE_VERSION=$(node -p "require('./site-version.json').version")
           echo "version=$BASE_VERSION" >> $GITHUB_OUTPUT
           echo "📦 Versión en base: $BASE_VERSION"
-          git checkout ${{ github.head_ref }} -- site-version.json
+          git checkout HEAD -- site-version.json
 
       - name: Check PR body for version requirement
         id: check_pr_body
