@@ -1,36 +1,52 @@
 ## Descripción
-<!-- Describe brevemente los cambios que introduces en este PR -->
+
+<!-- Describe brevemente los cambios. Ejemplos:
+- "Nuevo post sobre [tema]"
+- "Corrige typo en el artículo X"
+- "Mejora el diseño del header"
+- "Actualiza configuración de CI"
+-->
 
 ## Tipo de cambio
+
 <!-- Marca con una 'x' el tipo de cambio que aplica -->
 
-- [ ] 🐛 Bug fix (cambio que corrige un problema)
-- [ ] ✨ Nueva funcionalidad (cambio que añade funcionalidad)
-- [ ] 💥 Breaking change (cambio que rompe compatibilidad)
-- [ ] 📝 Documentación
-- [ ] 🎨 Estilos / UI
-- [ ] ♻️ Refactorización
-- [ ] ⚡️ Mejora de rendimiento
-- [ ] ✅ Tests
+- [ ] ✍️ Nuevo contenido (post, artículo, página)
+- [ ] 🐛 Corrección (typo, bug, error en contenido)
+- [ ] 🎨 Diseño/UI (estilos, layout, componentes visuales)
+- [ ] ✨ Nueva funcionalidad del sitio (componente, feature)
+- [ ] � Documentación (README, guías, comentarios)
+- [ ] � Configuración (CI/CD, workflows, dependencias)
+- [ ] ♻️ Refactorización (mejora de código sin cambios visibles)
+- [ ] ⚡️ Rendimiento (optimización, SEO)
 
 ## Bump de versión requerido
-<!-- ⚠️ IMPORTANTE: Debes seleccionar UNA opción y actualizar site-version.json antes del merge -->
-<!-- La versión actual está en: site-version.json -->
 
-- [ ] **PATCH** - Bug fixes, cambios menores (0.0.x)
-- [ ] **MINOR** - Nueva funcionalidad compatible (0.x.0)
-- [ ] **MAJOR** - Cambios que rompen compatibilidad (x.0.0)
-- [ ] **NO REQUIERE** - Cambios que no afectan la versión del sitio (ej: README, CI config)
+<!-- ⚠️ IMPORTANTE: Debes seleccionar UNA opción -->
+<!-- Versión actual del sitio: consulta site-version.json -->
+
+Este blog sigue [versionado semántico](https://semver.org/lang/es/). Selecciona el tipo de bump:
+
+- [ ] **PATCH** (0.0.x) - Correcciones de typos, bugs menores, ajustes de estilo
+- [ ] **MINOR** (0.x.0) - Nuevo post/artículo, nueva funcionalidad del sitio
+- [ ] **MAJOR** (x.0.0) - Rediseño completo, cambios estructurales importantes
+- [ ] **NO REQUIERE** - Cambios internos que no afectan el sitio publicado (CI, README, tests, docs)
 
 ## Checklist
+
 <!-- Marca con 'x' cuando hayas completado cada item -->
 
-- [ ] He actualizado `site-version.json` con la nueva versión (si aplica)
-- [ ] He probado los cambios localmente
-- [ ] He añadido/actualizado tests si aplica
-- [ ] He actualizado la documentación si aplica
+- [ ] He actualizado `site-version.json` con la nueva versión (si requiere bump)
+- [ ] El sitio se ve correctamente en `npm run dev`
+- [ ] He revisado que no haya enlaces rotos o imágenes faltantes
 - [ ] El código pasa lint y type-check (`npm run lint && npm run check:types`)
 - [ ] Los tests pasan (`npm test`)
 
-## Notas adicionales
-<!-- Cualquier información adicional que sea relevante para la revision -->
+## Contexto adicional
+
+<!-- Aquí puedes añadir:
+- Screenshots del cambio visual
+- Motivación detrás del post o feature
+- Enlaces a referencias o inspiración
+- Cualquier consideración especial para el review
+-->
