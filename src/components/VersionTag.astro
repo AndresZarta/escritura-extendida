@@ -1,0 +1,18 @@
+---
+// VersionTag.astro 
+// Componente Astro para mostrar la versión del sitio con enlace al commit correspondiente
+import v from '../../site-version.json';
+import { commitUrl } from '../utils/commit';
+// Usar GITHUB_SHA del entorno (establecido en CI) cuando esté disponible
+const sha = import.meta.env.GITHUB_SHA ?? undefined;
+const url = commitUrl(sha);
+---
+<a
+  href={url}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={sha ? `View commit ${sha}` : `View repository`}
+  style="opacity:.6;font-size:.95rem;margin-left:.1rem;white-space:nowrap;text-decoration:none;color:inherit;"
+>
+  v{v.version}
+</a>

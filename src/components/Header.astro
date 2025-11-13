@@ -1,15 +1,21 @@
 ---
 import { SITE } from "../config";
+import VersionTag from "./VersionTag.astro";
 ---
 
 <div class="header-container">
   <header class="site-header">
     <div class="header-contents">
-      <!-- Site Title + Tagline bundle (leftmost) -->
+			<!-- Titulo del sitio con link a la pagina principal -->
       <div class="header-start">
         <div class="branding-bundle">
-          <div class="site-branding">
-            <a href="/" class="site-title">{SITE.title}</a>
+          <div class="site-branding" style="position:relative;display:inline-flex;align-items:flex-end;">
+            <a href="/" class="site-title" style="font-size:2rem;text-decoration:none;line-height:1;">
+              {SITE.title}
+            </a>
+            <span style="position:relative;bottom:-0.2em;margin-left:0.25rem;opacity:.6;font-size:.75rem;">
+              <VersionTag />
+            </span>
           </div>
           <p class="site-tagline">{SITE.tagline}</p>
         </div>
