@@ -1,0 +1,84 @@
+---
+title: "version_semantica"
+pubDate: 2025-11-13
+description: "Implementando versionado semántico para escritura::extendida"
+image: ""
+draft: false
+---
+Se me ocurrió la idea de versionar semánticamente **escritura::extendida** como primer mini-proyecto técnico.
+
+Creo que será un proyecto pequeño y rápido de ejecutar, que me permitirá empezar a construir el lenguaje que quiero que el lector/usuario empiece a desarrollar, pues transmite un valor estético importante; el hecho de que este es un sitio web que evoluciona, como el software, a través del tiempo, y cuya transformación puede ser estudiada como texto. 
+
+Si tú eres un programador, podrás ver la evolución de este sitio  comparando sus diferentes **commits** y seguir un registro transparente del proceso creativo y técnico. Podrás inspeccionar cómo una idea conceptual se traduce en cambios concretos de código, cómo los componentes se refinan con cada versión y cómo la arquitectura del sitio se adapta según evolucionan sus ideas.
+
+Si tú eres un lector no programador, y te entra la curiosidad, puedes tratar de entender el código no como una barrera, sino una invitación. Cada fragmento técnico tiene una función expresiva: así como la tipografía o la sintaxis estructuran el sentido de un texto, el código estructura su **comportamiento**. 
+
+La idea es que puedas recorrer el proyecto y seguir tu curiosidad. Si algo despierta tu interés: un concepto programático, una estructura o una línea de código, hay varias formas de profundizar:
+
+1. Explorar el archivo o componente que te llamó la atención y buscar si existe un post en **escritura::extendida** asociado que lo analice en detalle.  
+2. Hacer preguntas directas a herramientas de inteligencia artificial para aclarar conceptos, sintaxis o decisiones arquitectónicas.  
+3. Consultar documentación técnica (**MDN**, **Astro**, **TypeScript**, **GitHub**, etc.) para profundizar en cualquier término, patrón o estructura que genere curiosidad.
+
+Lo importante no es entenderlo todo, sino dejarte guiar por la curiosidad: explorar cómo el lenguaje del código construye nuevas formas de leer.
+
+Por último, este mini-proyecto, nos permite mostrar cómo trabajamos con **Astro**, el cual es el **framework** base de este sitio, y cómo lo utilizamos para implementar un cambio en la interfaz que depende directamente de la versión actual del proyecto.
+
+```javascript
+// commit: Registro de cambios en el código.
+// framework: Base estructural para desarrollar software de forma repetible, coherente y eficiente.
+```
+
+## .**versionado_semantico**
+El concepto de **versionado semántico** fue propuesto en 2010 por Tom Preston-Werner, cofundador de **GitHub**, y es utilizado en el mundo del software para comunicar con claridad el estado y los cambios de un proyecto: qué ha evolucionado, qué permanece estable y qué se ha transformado.
+
+Su estructura adopta la forma de una secuencia de números —**x.y.z**—, donde cada componente señala un tipo de transformación:
+
+- **Cambio mayor (x)**: cuando se rompe compatibilidad con versiones anteriores.
+- **Cambio menor (y)**: cuando se agregan funciones sin romper lo existente.
+- **Parche (z)**: cuando solo se corrigen errores o detalles mínimos.
+
+Por ejemplo:
+
+- **Vue.js** 2 → 3 (2020) — **cambio mayor** que reescribió el núcleo del **framework**, introdujo la _Composition API_, mejoró el rendimiento y rompió compatibilidad con parte del ecosistema anterior.
+- **Python** 3.10 → 3.11 (2022) — versión menor que introdujo un intérprete mucho más rápido, mejor trazado de errores con precisión en columnas y optimizaciones internas que reducen la sobrecarga en funciones y bucles.
+- **macOS** 10.15.6 → 10.15.7 Supplemental Update (2020) — parche que corrigió fallos de energía, errores gráficos y vulnerabilidades de seguridad, estabilizando el rendimiento general de Catalina sin alterar su interfaz.
+
+El primer paso es decidir cómo definir nuestras propias reglas de **versionado**, adaptando la lógica del software a un proceso creativo y textual. En **escritura::extendida**, cada número no solo reflejará cambios en el código del sitio, sino también en el pensamiento que lo sostiene, en la manera en que la obra se presenta y se deja leer.
+
+### .**cambio_mayor.y.z**:
+
+Representa una mutación estructural o conceptual del proyecto. Ocurre cuando se replantea un aspecto clave de la arquitectura del sitio, la disposición del texto en la pantalla o el modo en que el lector interactúa con él. Un **cambio mayor** altera las condiciones de lectura: puede implicar una nueva manifestación estética, una nueva relación entre contenido y código o incluso una revisión del manifiesto que guía el proyecto. 
+
+Cada versión mayor marca un nuevo ciclo vital dentro del mismo continuo de **escritura::extendida**. Dada la dimensión humanística de este proyecto, que permite obviar de cierta forma el requisito de que los **cambios mayores** impliquen una ruptura técnica con las versiones anteriores, podemos pensar en los **cambios mayores** no como incompatibilidades, sino como una reconfiguración en el sentido. En lugar de invalidar lo anterior, de cierta forma lo absorbe: cada ciclo mayor conserva las huellas de su forma previa. Así, cuando **escritura::extendida** avanza de una versión a otra, deja atrás, como manifiesto, los giros conceptuales de su forma.
+
+Dicho esto, es posible, aunque por el momento poco probable, que el sitio requiera alguna clase de reescritura de su infraestructura o un cambio de marco tecnológico que haga imposible mantener continuidad con versiones previas. En ese caso, el salto correspondería a una situación puramente material. Aun así, incluso una transformación de esa magnitud formaría parte del mismo continuo, pues **escritura::extendida** entiende la tecnología como un medio de pensamiento.
+
+> **Nota divertida**: mientras escribo esto, ya anticipo el primer gran salto de versión de **escritura::extendida**.
+
+### .**x.cambiomenor.z**:
+Marca un gesto de adición. Cada nueva entrada al proyecto, sea un nuevo post, nota, un módulo interactivo o un nuevo elemento o patrón visual, prolonga el territorio del proyecto sin alterar su fundamento. Son las versiones menores las que abren nuevos caminos, directos o laterales, que exploran nuevas interfaces, tonos o texturas dentro del mismo horizonte conceptual. 
+
+Este, por ejemplo, es un primer cambio menor: el mismo hecho de que ahora manejaremos **versionado semántico** para describir el sitio. 
+
+### .**x.y.parche**:
+Representa adiciones de mantenimiento y cuidado silencioso. Los **parches** son los mínimos ajustes: líneas de CSS corregidas, una tilde que faltó añadir, un enlace que dejó de funcionar, y que no buscan transformar, sino preservar la funcionalidad. En el contexto de **escritura::extendida**, cada **parche** recuerda que la escritura también es mantenimiento.
+
+### .**commits_en_github**
+La mejor forma de versionar este blog es conectar esta semántica directamente con el sistema de control de versiones que ya lo sustenta como sitio web: [su repositorio en **GitHub**](https://github.com/AndresZarta/escritura-extendida). En **GitHub** cada **commit** lleva el registro material del proceso de escritura y desarrollo en prosa y código. El repositorio es tanto una infraestructura técnica que sostiene el sitio como el archivo vivo del pensamiento del proyecto. La historia del repositorio se convierte en una suerte de arqueología digital donde los cambios se pueden leer tanto en su dimensión técnica como estética.
+
+Cada nueva versión coincidirá con un cambio en la rama **main** en **GitHub**, indicando que el código, tanto en funcionalidad como en contenido, ha sido actualizado.
+
+Cualquier lector/usuario podrá consultar el historial de versiones directamente en **GitHub**, donde el sistema documenta los cambios del proyecto. Allí es posible revisar el código fuente, explorar los **commits** asociados a cada actualización y comparar las distintas etapas de desarrollo.
+
+## Referencias
+- **Versionado semántico (2010)** — Propuesta original de Tom Preston-Werner que define las reglas y convenciones del **versionado semántico** en software.  
+  Fuente: [semver.org](https://semver.org/lang/es/)
+- **Vue.js** 2 → 3 (2020) — La guía oficial de migración documenta los cambios incompatibles y la introducción de la Composition API, además de mejoras de rendimiento.  
+  Fuente: [v3-migration.vuejs.org](https://v3-migration.vuejs.org/breaking-changes/?utm_source=chatgpt.com)
+
+- **Python** 3.10 → 3.11 (2022) — Las notas oficiales de la versión detallan un incremento de velocidad entre 10 % y 60 %, mejor trazado de errores y optimizaciones internas.  
+  Fuente: [docs.python.org](https://docs.python.org/3/whatsnew/3.11.html?utm_source=chatgpt.com)
+
+- **macOS** 10.15.6 → 10.15.7 Supplemental Update (2020) — Página de soporte de Apple que describe mejoras de seguridad, estabilidad y corrección de errores en Catalina.  
+  Fuente: [support.apple.com](https://support.apple.com/en-us/103058)
+
