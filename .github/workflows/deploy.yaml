@@ -2,11 +2,16 @@ name: Deploy to GitHub Pages
 
 on:
   # Trigger the workflow every time you push to the `main` branch
-  # Using a different branch name? Replace `main` with your branch’s name
+  # Using a different branch name? Replace `main` with your branch's name
   push:
     branches: [ main ]
   # Allows you to run this workflow manually from the Actions tab on GitHub.
   workflow_dispatch:
+  # Also trigger after CI completes successfully
+  workflow_run:
+    workflows: ["CI"]
+    types: [completed]
+    branches: [ main ]
 
 # Allow this job to clone the repo and create a page deployment
 permissions:
@@ -15,20 +20,62 @@ permissions:
   id-token: write
 
 jobs:
+  verify-version:
+    name: Verificar versión antes de deploy
+    runs-on: ubuntu-latest
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    outputs:
+      version: ${{ steps.get_version.outputs.version }}
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: 2
+
+      - name: Get current version
+        id: get_version
+        run: |
+          VERSION=$(node -p "require('./site-version.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Versión actual: $VERSION"
+
+      - name: Get previous version
+        id: prev_version
+        run: |
+          git checkout HEAD~1 -- site-version.json 2>/dev/null || echo '{"version":"0.0.0"}' > site-version.json
+          PREV_VERSION=$(node -p "require('./site-version.json').version")
+          echo "version=$PREV_VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Versión anterior: $PREV_VERSION"
+          git checkout HEAD -- site-version.json
+
+      - name: Verify version was bumped
+        run: |
+          CURRENT="${{ steps.get_version.outputs.version }}"
+          PREVIOUS="${{ steps.prev_version.outputs.version }}"
+          
+          if [ "$CURRENT" = "$PREVIOUS" ]; then
+            echo "❌ DEPLOY BLOQUEADO: La versión no ha cambiado desde el último deploy"
+            echo "   Versión anterior: $PREVIOUS"
+            echo "   Versión actual:   $CURRENT"
+            echo ""
+            echo "⚠️  Esto indica que se hizo merge sin incrementar la versión."
+            echo "   El deploy ha sido bloqueado para prevenir releases sin versionado."
+            exit 1
+          fi
+          
+          echo "✅ Versión incrementada: $PREVIOUS → $CURRENT"
+
   build:
+    needs: verify-version
     runs-on: ubuntu-latest
     steps:
       - name: Checkout your repository using git
         uses: actions/checkout@v5
       - name: Install, build, and upload your site
         uses: withastro/action@v5
-        # with:
-          # path: . # The root location of your Astro project inside the repository. (optional)
-          # node-version: 24 # The specific version of Node that should be used to build your site. Defaults to 22. (optional)
-          # package-manager: pnpm@latest # The Node package manager that should be used to install dependencies and build your site. Automatically detected based on your lockfile. (optional)
-          # build-cmd: pnpm run build # The command to run to build your site. Runs the package build script/task by default. (optional)
-        # env:
-          # PUBLIC_POKEAPI: 'https://pokeapi.co/api/v2' # Use single quotation marks for the variable value. (optional)
+        env:
+          GITHUB_SHA: ${{ github.sha }}
 
   deploy:
     needs: build
@@ -40,3 +87,8 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
+      
+      - name: Announce deployment
+        run: |
+          echo "🚀 Deploy exitoso de versión ${{ needs.verify-version.outputs.version }}"
+          echo "📍 URL: ${{ steps.deployment.outputs.page_url }}"

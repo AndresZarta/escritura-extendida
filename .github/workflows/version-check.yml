@@ -1,0 +1,110 @@
+name: Version Bump Check
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+    branches: [main]
+
+jobs:
+  check-version:
+    name: Verificar incremento de versión
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get current version from PR
+        id: pr_version
+        run: |
+          VERSION=$(node -p "require('./site-version.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Versión en PR: $VERSION"
+
+      - name: Get base branch version
+        id: base_version
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          git checkout origin/${{ github.base_ref }} -- site-version.json
+          BASE_VERSION=$(node -p "require('./site-version.json').version")
+          echo "version=$BASE_VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Versión en base: $BASE_VERSION"
+          git checkout ${{ github.head_ref }} -- site-version.json
+
+      - name: Check PR body for version requirement
+        id: check_pr_body
+        run: |
+          PR_BODY='${{ github.event.pull_request.body }}'
+          
+          # Check if "NO REQUIERE" is checked
+          if echo "$PR_BODY" | grep -q '\[x\].*NO REQUIERE'; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "✅ PR marcado como 'NO REQUIERE' bump de versión"
+            exit 0
+          fi
+          
+          # Check if any version bump option is selected
+          if echo "$PR_BODY" | grep -q '\[x\].*\(PATCH\|MINOR\|MAJOR\)'; then
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "✅ PR requiere bump de versión"
+          else
+            echo "skip=error" >> $GITHUB_OUTPUT
+            echo "❌ No se seleccionó ninguna opción de versión en el PR template"
+            exit 1
+          fi
+
+      - name: Compare versions
+        if: steps.check_pr_body.outputs.skip == 'false'
+        run: |
+          PR_VERSION="${{ steps.pr_version.outputs.version }}"
+          BASE_VERSION="${{ steps.base_version.outputs.version }}"
+          
+          if [ "$PR_VERSION" = "$BASE_VERSION" ]; then
+            echo "❌ ERROR: La versión no ha sido incrementada"
+            echo "   Base: $BASE_VERSION"
+            echo "   PR:   $PR_VERSION"
+            echo ""
+            echo "⚠️  Debes actualizar site-version.json con una nueva versión"
+            echo "   según el tipo de cambio seleccionado en el PR template."
+            exit 1
+          else
+            echo "✅ Versión incrementada correctamente"
+            echo "   $BASE_VERSION → $PR_VERSION"
+          fi
+
+      - name: Validate semver format
+        run: |
+          VERSION="${{ steps.pr_version.outputs.version }}"
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "❌ ERROR: Formato de versión inválido: $VERSION"
+            echo "   Debe seguir semver: MAJOR.MINOR.PATCH (ej: 1.2.3)"
+            exit 1
+          fi
+          echo "✅ Formato de versión válido: $VERSION"
+
+      - name: Comment on PR
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `## ❌ Error: Verificación de versión fallida
+            
+            Este PR requiere que se incremente la versión en \`site-version.json\`.
+            
+            **Pasos para resolver:**
+            1. Actualiza \`site-version.json\` con la nueva versión según el tipo de cambio
+            2. Asegúrate de marcar la opción correcta en el PR template (PATCH/MINOR/MAJOR)
+            3. Si este cambio NO requiere bump de versión (ej: cambios en CI, README), marca la opción "NO REQUIERE"
+            
+            **Versión actual:** \`${{ steps.base_version.outputs.version }}\`
+            **Versión en PR:** \`${{ steps.pr_version.outputs.version }}\`
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
