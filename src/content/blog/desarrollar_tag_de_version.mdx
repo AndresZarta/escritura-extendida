@@ -1,0 +1,377 @@
+---
+title: "desarrollar_tag_de_version"
+pubDate: 2025-11-14
+description: ""
+image: ""
+draft: false
+---
+import { Image } from 'astro:assets';
+import titulo_sin_version from '../../assets/images/desarrollar_tag_de_version/titulo_sin_version.png';
+import titulo_con_version from '../../assets/images/desarrollar_tag_de_version/titulo_con_version.png';
+import pr_warning from '../../assets/images/desarrollar_tag_de_version/pr_warning.png';
+import compilado_falla from '../../assets/images/desarrollar_tag_de_version/compilado_falla.png';
+import compilado_exitoso from '../../assets/images/desarrollar_tag_de_version/compilado_exitoso.png';
+
+En la [entrada anterior](/blog/version_semantica) planteé la adición de **versionado semántico** a **escritura::extendida**.
+
+Es hora de hacer frente a esta idea e implementarla en código.
+
+El punto de partida fue definir un nuevo archivo autónomo en el repositorio, `site-version.json`, destinado exclusivamente a registrar la versión actual del sitio.
+
+```javascript
+// site-version.json
+{ "version": "0.0.0" }
+```
+
+Parte de la razón por la que preferí mantenerlo separado de otros registros de versión, como `package.json`, que define las dependencias del entorno de código, fue destacar su función híbrida: indicar tanto la versión de la arquitectura como la del pensamiento que la sostiene.
+
+La idea es usar el valor del objeto para alimentar un componente visible, ubicado al lado del título de la página, que antes del cambio se ve así:
+
+<figure class="figure-blog-medium">
+    <Image
+      src={titulo_sin_version}
+      alt="Captura de pantalla del encabezado del sitio escritura::extendida, mostrando el título sin versión."
+    />
+</figure>
+
+```html
+<!-- Titulo del sitio con link a la pagina principal -->
+  <div class="header-start">
+    <div class="branding-bundle">
+      <div class="site-branding">
+        <a href="/" class="site-title">{SITE.title}</a>
+      </div>
+    </div>
+  </div>
+```
+
+Además de ser un elemento visible, la idea es que este nuevo componente pueda redirigir al usuario al commit específico en GitHub donde se encuentra la versión del sitio en código.
+
+Por lo tanto, necesitamos un nuevo componente de Astro que obtenga el valor de `site-version.json` y así pueda poblar el código HTML que se renderiza en pantalla.
+
+```astro
+---
+// VersionTag.astro 
+// Componente Astro para mostrar la versión del sitio con enlace al commit correspondiente
+import v from '../../site-version.json';
+import { commitUrl } from '../utils/commit';
+// Usar GITHUB_SHA del entorno (establecido en CI) cuando esté disponible
+const sha = import.meta.env.GITHUB_SHA ?? undefined;
+const url = commitUrl(sha);
+---
+<a
+  href={url}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={sha ? `View commit ${sha}` : `View repository`}
+  style="opacity:.6;font-size:.95rem;margin-left:.1rem;white-space:nowrap;text-decoration:none;color:inherit;"
+>
+  v{v.version}
+</a>
+```
+
+Hagamos un análisis paso a paso de lo que estamos leyendo:
+
+#### **1.**
+```javascript 
+import v from '../../site-version.json';
+```  
+Importa el archivo `site-version.json`, desde el lugar en el que se ubica en nuestro repositorio, y que contiene la versión actual del sitio. Esa información se utilizará más adelante para mostrar el número de versión en la interfaz.  
+
+#### **2.**
+```javascript 
+import { commitUrl } from '../utils/commit'; 
+```
+Importa una función auxiliar llamada `commitUrl`, definida en la carpeta `utils`, que genera la URL completa hacia un commit específico en GitHub.  
+
+#### **3.**
+```javascript 
+`// Usa GITHUB_SHA desde el entorno (definido en la integración continua) cuando esté disponible`  
+const sha = import.meta.env.GITHUB_SHA ?? undefined;
+```
+Intentaremos tomar el identificador (`SHA`) del commit actual desde las variables de entorno proporcionadas por el sistema de integración continua que construye este sitio y lo publica en Github Pages, y lo guardaremos (si existe) en la constante `sha`. Si no está disponible, sera una variable indefinida.
+#### **4.**  
+```javascript 
+const url = commitUrl(sha);
+```
+
+Construye la URL del enlace utilizando la función `commitUrl`.
+
+Luego miraremos en más detalle esta función que escribimos en Typescript.
+
+
+#### **5.**  
+```html
+<a
+  href={url}
+  target="_blank"
+  rel="noopener noreferrer"
+  aria-label={sha ? `View commit ${sha}` : `View repository`}
+  style="opacity:.6;font-size:.85rem;margin-left:.5rem;white-space:nowrap;text-decoration:none;color:inherit;"
+>
+  v{v.version}
+</a>
+```
+
+Abre una etiqueta de enlace (`<a>`), que en HTML sirve para dirigir al usuario hacia otra página o recurso.
+
+`href={url}` define el destino del enlace. Aquí url es una variable que contiene una dirección dinámica.
+
+`target="_blank"` indica que el enlace debe abrirse en una nueva pestaña del navegador, sin interrumpir la sesión actual.
+
+`rel="noopener noreferrer"` agrega medidas de seguridad y privacidad: evita que la página abierta pueda acceder al contexto de la original y que se envíe información del referido.
+
+`aria-label...` proporciona un texto accesible para lectores de pantalla. Si existe un identificador de commit (sha`), el mensaje dice “View commit [sha]”; si no, “View repository”.
+
+`style="opacity:.6;font-size:.95rem;margin-left:.1rem;white-space:nowrap;text-decoration:none;color:inherit;"` define el estilo de este componente en línea:
+
+- `opacity:.6` reduce la opacidad del texto(tono más tenue).
+- `font-size:.85rem` hace el texto ligeramente más pequeño.
+- `margin-left:.5rem` añade un margen a la izquierda.
+- `white-space:nowrap` evita que se parta en varias líneas.
+- `text-decoration:none` elimina el subrayado típico del enlace.
+- `color:inherit` mantiene el color del texto del componente padre.
+
+Con esto, tenemos ya un componente visible que registra la version tal y como aparece en nuestro predefinido objeto de version en `site-version.json`. 
+
+Hace falta ahora importarlo en nuestro componente de encabezado de la pagina:
+
+
+<figure class="figure-blog-medium">
+    <Image
+      src={titulo_con_version}
+      alt="Captura de pantalla del encabezado del sitio escritura::extendida, mostrando el título con versión."
+    />
+</figure>
+
+```astro
+---
+import { SITE } from "../config";
+import VersionTag from "./VersionTag.astro";
+---
+
+<div class="header-container">
+  ...
+    <div class="header-contents">
+    <!-- Titulo del sitio con link a la pagina principal -->
+      <div class="header-start">
+        <div class="branding-bundle">
+          <div class="site-branding" style="position:relative;display:inline-flex;align-items:flex-end;">
+            <a href="/" class="site-title" style="font-size:2rem;text-decoration:none;line-height:1;">
+              {SITE.title}
+            </a>
+            <span style="position:relative;bottom:-0.2em;margin-left:0.25rem;opacity:.6;font-size:.75rem;">
+              <VersionTag /> <!-- Aqui el VersionTag -->
+            </span>
+          </div>
+          <p class="site-tagline">{SITE.tagline}</p>
+        </div>
+      </div>
+```
+
+
+
+### .la_funcion_commitUrl
+Ahora veamos la función commitUrl, que se encarga de construir la URL del enlace.
+
+Al hacer clic en el nuevo componente de texto que muestra la versión, este actuará como enlace para redirigir a uno de estos dos destinos:
+- La URL del commit específico de la versión, o
+- La URL del repositorio en general.
+
+La posibilidad de redirigir hacia el repositorio existe en caso de que la variable de entorno `GITHUB_SHA` no estuviese disponible en el momento de compilar la página. En términos prácticos, esto no debería ocurrir mientras sigamos publicando el sitio en GitHub Pages, pero resulta útil mantener esa condición como respaldo. Esto garantiza que el componente siga funcionando incluso fuera del entorno de integración continua, por ejemplo, durante una compilación local o en un despliegue manual.
+
+```typescript 
+// Importa la URL canónica del repositorio desde la configuración del sitio
+import { REPO_URL } from '../config';
+
+/**
+ * Devuelve la URL del commit cuando se proporciona un SHA; de lo contrario,
+ * devuelve la URL del repositorio.
+ */
+export function commitUrl(sha?: string): string {
+  return sha ? `${REPO_URL}/commit/${sha}` : REPO_URL;
+}
+```
+
+Finalmente, añadimos un par de tests sencillos, que correrán en cada compilación, para verificar que esta función sigue operando correctamente.
+
+```typescript
+import { describe, it, expect } from 'vitest';
+import { commitUrl } from '../commit';
+import { REPO_URL } from '../../config';
+
+describe('commitUrl', () => {
+  it('retorna la URL del repositorio cuando no se proporciona sha', () => {
+    expect(commitUrl()).toBe(REPO_URL);
+  });
+
+  it('retorna la URL del commit cuando se proporciona sha', () => {
+    const sha = 'abc1234';
+    expect(commitUrl(sha)).toBe(`${REPO_URL}/commit/${sha}`);
+  });
+});
+```
+
+### .infraestructura_de_versionado_automatico
+Ahora bien, algo que no queremos es tener que preocuparnos constantemente por qué ocurre si olvidamos actualizar la versión cuando hacemos cambios en el sitio.
+
+En mi clase de ingeniería de software, aprendí que cuando este tipo de responsabilidades recaen únicamente en la memoria de quien modifica el repositorio, el código inevitablemente se desincroniza: el proyecto continua evoluciónando, pero el número de versión permanece congelado en un punto del pasado.
+
+El resultado es que se crea una ficción, algo incómoda, y poco transparente: pues el sitio afirma ser una cosa _(e.g. v0.1.0)_, pero en realidad es otra.
+
+En lugar de confiar en el recuerdo humano, “no olvides subir la versión antes de hacer merge”, construimos un sistema de integración que revise cada pull request y verifique que `site-version.json` ha cambiado cuando corresponde.
+
+Para ello, añadimos una tarea automatizada de GitHub Actions que se ejecuta en cada PR dirigido a `main`.
+
+```yaml
+name: Chequeo de version
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, edited]
+    branches: [main]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  check-version:
+    name: Verificar incremento de versión
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout PR branch
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get current version from PR
+        id: pr_version
+        run: |
+          VERSION=$(node -p "require('./site-version.json').version")
+          echo "version=$VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Versión en PR: $VERSION"
+
+      - name: Get base branch version
+        id: base_version
+        run: |
+          git fetch origin ${{ github.base_ref }}
+          git checkout origin/${{ github.base_ref }} -- site-version.json
+          BASE_VERSION=$(node -p "require('./site-version.json').version")
+          echo "version=$BASE_VERSION" >> $GITHUB_OUTPUT
+          echo "📦 Versión en base: $BASE_VERSION"
+          git checkout HEAD -- site-version.json
+
+      - name: Check PR body for version requirement
+        id: check_pr_body
+        run: |
+          PR_BODY='${{ github.event.pull_request.body }}'
+          
+          # Check if "NO REQUIERE" is checked
+          if echo "$PR_BODY" | grep -q '\[x\].*NO REQUIERE'; then
+            echo "skip=true" >> $GITHUB_OUTPUT
+            echo "✅ PR marcado como 'NO REQUIERE' bump de versión"
+            exit 0
+          fi
+          
+          # Check if any version bump option is selected
+          if echo "$PR_BODY" | grep -q '\[x\].*\(PATCH\|MINOR\|MAJOR\)'; then
+            echo "skip=false" >> $GITHUB_OUTPUT
+            echo "✅ PR requiere bump de versión"
+          else
+            echo "skip=error" >> $GITHUB_OUTPUT
+            echo "❌ No se seleccionó ninguna opción de versión en el PR template"
+            exit 1
+          fi
+
+      - name: Compare versions
+        if: steps.check_pr_body.outputs.skip == 'false'
+        run: |
+          PR_VERSION="${{ steps.pr_version.outputs.version }}"
+          BASE_VERSION="${{ steps.base_version.outputs.version }}"
+          
+          if [ "$PR_VERSION" = "$BASE_VERSION" ]; then
+            echo "❌ ERROR: La versión no ha sido incrementada"
+            echo "   Base: $BASE_VERSION"
+            echo "   PR:   $PR_VERSION"
+            echo ""
+            echo "⚠️  Debes actualizar site-version.json con una nueva versión"
+            echo "   según el tipo de cambio seleccionado en el PR template."
+            exit 1
+          else
+            echo "✅ Versión incrementada correctamente"
+            echo "   $BASE_VERSION → $PR_VERSION"
+          fi
+
+      - name: Validate semver format
+        run: |
+          VERSION="${{ steps.pr_version.outputs.version }}"
+          if ! echo "$VERSION" | grep -qE '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "❌ ERROR: Formato de versión inválido: $VERSION"
+            echo "   Debe seguir semver: MAJOR.MINOR.PATCH (ej: 1.2.3)"
+            exit 1
+          fi
+          echo "✅ Formato de versión válido: $VERSION"
+
+      - name: Comment on PR
+        if: failure()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const comment = `## ❌ Error: Verificación de versión fallida
+            
+            Este PR requiere que se incremente la versión en \`site-version.json\`.
+            
+            **Pasos para resolver:**
+            1. Actualiza \`site-version.json\` con la nueva versión según el tipo de cambio
+            2. Asegúrate de marcar la opción correcta en el PR template (PATCH/MINOR/MAJOR)
+            3. Si este cambio NO requiere bump de versión (ej: cambios en CI, README), marca la opción "NO REQUIERE"
+            
+            **Versión actual:** \`${{ steps.base_version.outputs.version }}\`
+            **Versión en PR:** \`${{ steps.pr_version.outputs.version }}\`
+            `;
+            
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
+```
+
+Su tarea es sencilla: leer el archivo `site-version.json` en la rama del pull request, compararlo con el de la versión en `main` y verificar que el número haya sido incrementado cuando el propio PR declara que introduce cambios en el sitio. En mi caso, esa declaración se hace desde el template de PR, donde marco si el cambio implica un incremento de PATCH, MENOR o MAYOR, o si explícitamente “no requiere incremento. Si marco que no requiere incremento, el workflow se limita a pasar sin más; si marco cualquiera de las otras opciones y la versión no ha cambiado, la verificación falla.
+
+
+<figure class="figure-blog-large">
+    <Image
+      src={pr_warning}
+      alt="Captura de pantalla de un pull request en GitHub mostrando una advertencia de que la verificación de versión ha fallado."
+    />
+</figure>
+
+De esta forma, ningún cambio llega a `main` sin haber pasado por tres filtros: el código debe compilar, los tests deben aprobar (incluyendo los tests de commitUrl), y el archivo `site-version.json` debe reflejar que algo ha cambiado en el cuerpo vivo del sitio. El resultado es que el pequeño texto “v0.0.0” al lado del título deja de ser una cifra arbitraria y se convierte en un índice fiable de la historia interna del repositorio.
+
+<figure class="figure-blog-large">
+    <Image
+      src={compilado_falla}
+      alt="Captura de pantalla de un error de compilación en GitHub Actions debido a una falla en la verificación de versión."
+    />
+</figure>
+
+Ahora, si el PR cumple con todos los requisitos, el check pasa exitosamente y el cambio puede ser fusionado en `main`.
+
+<figure class="figure-blog-large">
+    <Image
+      src={compilado_exitoso}
+      alt="Captura de pantalla de una compilación exitosa en GitHub Actions después de pasar la verificación de versión."
+    />
+</figure>
+
+### .conclusiones
+Con este sistema en marcha, he logrado automatizar la gestión del versionado semántico en **escritura::extendida**.
+
+En otras palabras, el versionado semántico deja de ser una promesa conceptual y se materializa como práctica cotidiana: cada vez que escribo, programo o reestructuro algo en el sitio, debo decidir qué tipo de cambio estoy realizando y asignarle una nueva versión. 
+
+El sistema automatizado sirve para recordármelo; el número visible en la interfaz, para contárselo al lector.
