@@ -213,19 +213,38 @@ button:hover,
   color: var(--color-base);
 }
 
-/* Code blocks */
-code,
-pre {
+/* =============================================================================
+   CODE STYLING
+   ============================================================================= */
+
+/* 1. BASE INLINE CODE STYLING
+   Applied to all inline code (e.g., `code` in markdown)
+   Gets light gray background to distinguish from regular text */
+code {
   font-family: var(--font-family);
   font-size: var(--font-size-small);
-  padding: 2px 6px;
-  border-radius: 3px;
+  background-color: #f5f5f5;
+  padding: 1px 6px;
+  border-radius: 5px;
 }
 
+/* 2. CODE BLOCK CONTAINER (pre)
+   Applied to fenced code blocks (e.g., ```js...```)
+   Gets border and padding to create a distinct block */
 pre {
   border: 2px solid var(--color-accent-4);
   padding: var(--space-50);
   overflow-x: auto;
+  background-color: #f5f5f5;
+  border-radius: 4px;
+}
+
+/* 3. CODE INSIDE PRE BLOCKS
+   Removes the inline code styling when code is inside a pre block
+   This prevents double backgrounds and padding */
+pre code {
+  background-color: transparent;
+  padding: 0;
 }
 
 /* Quotes */
@@ -293,6 +312,47 @@ figcaption {
   font-size: 0.875rem;
   color: var(--color-tertiary);
 }
+
+/* Medium version of figure-blog */
+.figure-blog-medium {
+  text-align: center;
+  margin: 2rem 0;
+}
+
+.figure-blog-medium img {
+  display: block;
+  width: 50%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.figure-blog-medium figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-tertiary);
+}
+
+/* Large version of figure-blog */
+.figure-blog-large {
+  text-align: center;
+  margin: 0rem 0;
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.figure-blog-large img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.figure-blog-large figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-tertiary);
+}
+
 
 /* Site Header */
 .site-header {
@@ -556,23 +616,30 @@ hr {
   font-style: italic;
 }
 
+/* CODE STYLING FOR MDX/MARKDOWN CONTENT
+   These rules override the base code styles specifically for .page-body
+   (where MDX blog posts are rendered). They exist separately because:
+   - Astro's MDX processing uses :global() to scope styles
+   - We need to target both scoped and unscoped code elements
+   - Adds vertical margins specific to blog post content flow */
+
 .page-body :global(code),
 .page-body code {
   font-family: var(--font-family);
   font-size: var(--font-size-small);
-  background-color: var(--color-accent-2);
+  background-color: #f5f5f5;
   padding: 2px 6px;
   border-radius: 3px;
 }
 
 .page-body :global(pre),
 .page-body pre {
-  background-color: var(--color-accent-2);
+  background-color: #f5f5f5;
   border: 2px solid var(--color-accent-4);
   padding: var(--space-50);
   overflow-x: auto;
   border-radius: 4px;
-  margin: var(--space-60) 0;
+  margin: var(--space-60) 0; /* Vertical spacing for blog content */
 }
 
 .page-body :global(pre code),

@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { formatCoercedDateAsCalendar } from '../../utils/formatDateET';
+import { formatCoercedDateAsCalendar, isSameCalendarDay } from '../../utils/formatDateET';
 
 type StaticPath = { params: { slug: string }; props: { entry: CollectionEntry<'blog'> } };
 
@@ -20,6 +20,13 @@ interface Props {
 
 const { entry } = Astro.props;
 const { Content } = await entry.render();
+
+// Extraer fechas para uso seguro en JSX
+const pubDate = entry.data.pubDate;
+const upDate = entry.data.upDate;
+
+// Determinar si mostrar fecha de actualización
+const hasUpdate = upDate && !isSameCalendarDay(pubDate, upDate);
 
 // Compute previous / next entries for navigation
 const allEntries = await getCollection('blog');
@@ -39,9 +46,17 @@ const next = currentIndex > 0 ? allEntries[currentIndex - 1] : null;
     <article class="page-content">
       <h1 class="page-title blog-title-with-exec">{entry.data.title}</h1>
       
-      <time class="page-date" datetime={entry.data.pubDate.toISOString()}>
-        {formatCoercedDateAsCalendar(entry.data.pubDate)}
-      </time>
+      <div class="post-dates">
+        <time class="page-date" datetime={pubDate.toISOString()}>
+          Publicado: {formatCoercedDateAsCalendar(pubDate)}
+        </time>
+        
+        {hasUpdate && upDate && (
+          <time class="page-date page-date-updated" datetime={upDate.toISOString()}>
+            Actualizado: {formatCoercedDateAsCalendar(upDate)}
+          </time>
+        )}
+      </div>
 
       <div class="page-body">
         <Content />
@@ -83,5 +98,16 @@ const next = currentIndex > 0 ? allEntries[currentIndex - 1] : null;
 
   .blog-title-with-exec:hover::before {
     color: var(--color-primary);
+  }
+  
+  .post-dates {
+    display: flex;
+    flex-direction: row;
+    gap: 30px;
+    margin-bottom: var(--space-60);
+  }
+  
+  .page-date-updated {
+    color: var(--color-tertiary);
   }
 </style>
