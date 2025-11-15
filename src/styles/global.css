@@ -335,9 +335,9 @@ figcaption {
 /* Large version of figure-blog */
 .figure-blog-large {
   text-align: center;
-  margin: 2rem 0;
-  margin-left: -12.5%;
-  margin-right: -12.5%;
+  margin: 0rem 0;
+  margin-left: 0;
+  margin-right: 0;
 }
 
 .figure-blog-large img {
