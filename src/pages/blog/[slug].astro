@@ -21,8 +21,12 @@ interface Props {
 const { entry } = Astro.props;
 const { Content } = await entry.render();
 
+// Extraer fechas para uso seguro en JSX
+const pubDate = entry.data.pubDate;
+const upDate = entry.data.upDate;
+
 // Determinar si mostrar fecha de actualización
-const hasUpdate = entry.data.upDate && !isSameCalendarDay(entry.data.pubDate, entry.data.upDate);
+const hasUpdate = upDate && !isSameCalendarDay(pubDate, upDate);
 
 // Compute previous / next entries for navigation
 const allEntries = await getCollection('blog');
@@ -43,13 +47,13 @@ const next = currentIndex > 0 ? allEntries[currentIndex - 1] : null;
       <h1 class="page-title blog-title-with-exec">{entry.data.title}</h1>
       
       <div class="post-dates">
-        <time class="page-date" datetime={entry.data.pubDate.toISOString()}>
-          Publicado: {formatCoercedDateAsCalendar(entry.data.pubDate)}
+        <time class="page-date" datetime={pubDate.toISOString()}>
+          Publicado: {formatCoercedDateAsCalendar(pubDate)}
         </time>
         
-        {hasUpdate && (
-          <time class="page-date page-date-updated" datetime={entry.data.upDate!.toISOString()}>
-            Actualizado: {formatCoercedDateAsCalendar(entry.data.upDate!)}
+        {hasUpdate && upDate && (
+          <time class="page-date page-date-updated" datetime={upDate.toISOString()}>
+            Actualizado: {formatCoercedDateAsCalendar(upDate)}
           </time>
         )}
       </div>
