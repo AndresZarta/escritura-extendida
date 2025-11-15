@@ -1,7 +1,7 @@
 ---
 import Base from "../layouts/Base.astro";
 import { getCollection } from "astro:content";
-import { formatDateET } from '../utils/formatDateET';
+import { formatCoercedDateAsCalendar } from '../utils/formatDateET';
 
 // Get all blog posts from the content collection
 const allPosts = await getCollection('blog', ({ data }) => {
@@ -33,7 +33,7 @@ const posts = allPosts
                   <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
                 </h3>
                 <time datetime={post.data.pubDate.toISOString()}>
-                  {formatDateET(post.data.pubDate)}
+                  {formatCoercedDateAsCalendar(post.data.pubDate)}
                 </time>
               </header>
               <blockquote>

@@ -3,7 +3,7 @@ import Base from "../../layouts/Base.astro";
 import { getCollection } from "astro:content";
 import type { CollectionEntry } from "astro:content";
 import type { GetStaticPaths, Page } from 'astro';
-import { formatDateET } from '../../utils/formatDateET';
+import { formatCoercedDateAsCalendar } from '../../utils/formatDateET';
 
 export const getStaticPaths: GetStaticPaths = async ({ paginate }) => {
   const allPosts = await getCollection('blog', ({ data }) => {
@@ -40,7 +40,7 @@ const { page } = Astro.props;
                   <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
                 </h3>
                 <time datetime={post.data.pubDate.toISOString()}>
-                  {formatDateET(post.data.pubDate)}
+                  {formatCoercedDateAsCalendar(post.data.pubDate)}
                 </time>
               </header>
               <blockquote>
