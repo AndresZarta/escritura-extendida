@@ -2,7 +2,7 @@
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import Base from '../../layouts/Base.astro';
-import { formatDateET } from '../../utils/formatDateET';
+import { formatCoercedDateAsCalendar } from '../../utils/formatDateET';
 
 type StaticPath = { params: { slug: string }; props: { entry: CollectionEntry<'blog'> } };
 
@@ -40,7 +40,7 @@ const next = currentIndex > 0 ? allEntries[currentIndex - 1] : null;
       <h1 class="page-title blog-title-with-exec">{entry.data.title}</h1>
       
       <time class="page-date" datetime={entry.data.pubDate.toISOString()}>
-        {formatDateET(entry.data.pubDate)}
+        {formatCoercedDateAsCalendar(entry.data.pubDate)}
       </time>
 
       <div class="page-body">
