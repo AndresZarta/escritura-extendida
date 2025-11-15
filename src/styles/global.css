@@ -336,11 +336,13 @@ figcaption {
 .figure-blog-large {
   text-align: center;
   margin: 2rem 0;
+  margin-left: -12.5%;
+  margin-right: -12.5%;
 }
 
 .figure-blog-large img {
   display: block;
-  width: 125%;
+  width: 100%;
   height: auto;
   margin: 0 auto;
 }
