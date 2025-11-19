@@ -1,0 +1,102 @@
+---
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+type StaticPath = {
+  params: { slug: string };
+  props: { entry: CollectionEntry<'notes'> };
+};
+
+export async function getStaticPaths(): Promise<StaticPath[]> {
+  const notesEntries = await getCollection('notes', ({ data }) => {
+    return data.draft !== true;
+  });
+  
+  return notesEntries.map(entry => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+interface Props {
+  entry: CollectionEntry<'notes'>;
+}
+
+const { entry } = Astro.props;
+const Content = entry.rendered?.html || '';
+
+---
+
+<Base title={entry.data.title} description={entry.data.description}>
+  <!-- Spacer -->
+  <div class="spacer-large" aria-hidden="true"></div>
+
+  <!-- Note -->
+  <div class="page-container">
+    <article class="page-content note-article">
+      <h1 class="page-title note-title-with-exec">{entry.data.title}</h1>
+
+      <div class="page-body" set:html={Content}></div>
+         
+    </article>
+  </div>
+</Base>
+
+<style>
+  /* Note-specific styling - unfinished, sketch-like aesthetic */
+  .note-title-with-exec {
+    position: relative;
+    padding-left: 0px;
+    font-weight: 400;
+    opacity: 0.9;
+    font-style: normal;
+  }
+  
+  .note-title-with-exec::before {
+    content: '.';
+    margin-left: -10px;
+    color: var(--color-primary);
+    position: absolute;
+    left: 0;
+    font-weight: normal;
+    opacity: 1.0;
+  }
+
+  .note-title-with-exec:hover::before {
+    content: '.';
+    margin-left: -10px;
+    color: var(--color-primary);
+    opacity: 1;
+  }
+
+  /* Add visual distinction to note content - raised paper effect */
+  .note-article .page-body {
+    border-left: 2px solid var(--color-accent-2);
+    padding: 2rem 1.5rem;
+    margin-left: -8px;
+    position: relative;
+    background-color: rgba(255, 255, 255, 0.03);
+    box-shadow: 
+      0 1px 3px rgba(0, 0, 0, 0.12),
+      0 1px 2px rgba(0, 0, 0, 0.08);
+    border-radius: 10px;
+  }
+
+  /* Dotted background - separate from text opacity */
+  .note-article .page-body::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-image: radial-gradient(circle, var(--color-accent-2) 1.5px, transparent 1.5px);
+    background-size: 20px 20px;
+    background-position: 1.5rem 0;
+    opacity: 0.25;
+    pointer-events: none;
+    z-index: -1;
+    border-radius: 2px;
+  }
+</style>

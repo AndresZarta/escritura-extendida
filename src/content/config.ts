@@ -1,4 +1,5 @@
 import { defineCollection, z } from 'astro:content';
+import { ObsidianDocumentSchema, ObsidianMdLoader } from "astro-loader-obsidian";
 
 const blogCollection = defineCollection({
   type: 'content',
@@ -12,6 +13,27 @@ const blogCollection = defineCollection({
   }),
 });
 
+const notesCollection = defineCollection({
+  loader: ObsidianMdLoader({
+    base: 'src/content/notes',
+    url: 'notes',
+  }),
+  schema: ({ image }) => ObsidianDocumentSchema.extend({
+    title: z.string(),
+    description: z.string().default(""),
+    tags: z.array(z.string()).default([]),
+    pubDate: z.coerce.date(),
+    upDate: z.coerce.date().optional(),
+    image: z.string().default(""),
+    draft: z.boolean().default(false),
+    modified: z.coerce.date().optional(),
+  }),
+});
+
 export const collections = {
   'blog': blogCollection,
+  'notes': notesCollection,
 };
+
+
+
