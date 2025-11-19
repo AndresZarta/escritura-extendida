@@ -1,10 +1,11 @@
 ---
 import Header from "../components/Header.astro";
 import Footer from "../components/Footer.astro";
-const { title = "Site" } = Astro.props;
+const { title = "Site", pageType = "default", postIndex } = Astro.props;
 import "../styles/global.css";
+import "../styles/transitions.css";
 ---
-<html lang="es">
+<html lang="es" data-page-type={pageType} data-post-index={postIndex}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -17,6 +18,11 @@ import "../styles/global.css";
     
     <meta name="generator" content={Astro.generator} />
     <title>{title}</title>
+    <meta name="view-transition" content="same-origin" />
+    <script>
+      import { initTransitions } from '../utils/transitions';
+      initTransitions();
+    </script>
   </head>
   <body>
     <Header title={title} />

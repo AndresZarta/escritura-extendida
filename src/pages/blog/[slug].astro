@@ -35,9 +35,12 @@ allEntries.sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate))
 const currentIndex = allEntries.findIndex(e => e.slug === entry.slug);
 const previous = currentIndex >= 0 && currentIndex + 1 < allEntries.length ? allEntries[currentIndex + 1] : null;
 const next = currentIndex > 0 ? allEntries[currentIndex - 1] : null;
+
+// Store post index for directional transitions
+const postIndex = currentIndex;
 ---
 
-<Base title={entry.data.title} description={entry.data.description}>
+<Base title={entry.data.title} description={entry.data.description} pageType="post" postIndex={postIndex}>
   <!-- Spacer -->
   <div class="spacer-large" aria-hidden="true"></div>
 

@@ -7,7 +7,7 @@ const Content = aboutModule.Content;
 const pageTitle = aboutModule.frontmatter?.title || "Sobre mí";
 const pageDescription = aboutModule.frontmatter?.description || "Perfil profesional";
 ---
-<Base title={pageTitle} description={pageDescription}>
+<Base title={pageTitle} description={pageDescription} pageType="about">
   <!-- Spacer -->
   <div class="spacer-large" aria-hidden="true"></div>
 

@@ -1,0 +1,60 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const notesEntries = await getCollection('notes', ({ data }) => {
+  return data.draft !== true;
+});
+
+// Sort by pubDate descending
+const sortedNotes = notesEntries.sort((a, b) => 
+  b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
+);
+---
+
+<Base title=".notas" description="A collection of notes" pageType="noteIndex">
+  <div class="spacer-large" aria-hidden="true"></div>
+  
+  <div class="page-container">
+    <div class="page-content">
+      <h1 class="page-title">./notas</h1>
+      
+      <ul class="notes-list">
+        {sortedNotes.map((note) => (
+          <li>
+            <a href={`/notes/${note.id}`}><span class="note-marker">.</span>{note.data.title}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .notes-list {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0;
+  }
+  
+  .notes-list li {
+    margin-bottom: 1rem;
+  }
+  
+  .notes-list a {
+    text-decoration: none;
+    color: var(--color-text);
+    opacity: 0.9;
+  }
+  
+  .notes-list a:hover {
+    color: var(--color-accent-2);
+    opacity: 1;
+  }
+  
+  .note-marker {
+    color: var(--color-accent-2);
+    margin-right: 0.5rem;
+    font-style: normal;
+  }
+</style>
