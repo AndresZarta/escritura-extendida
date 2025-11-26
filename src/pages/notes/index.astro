@@ -6,10 +6,11 @@ const notesEntries = await getCollection('notes', ({ data }) => {
   return data.draft !== true;
 });
 
-// Sort by pubDate descending
-const sortedNotes = notesEntries.sort((a, b) => 
-  b.data.pubDate.valueOf() - a.data.pubDate.valueOf()
-);
+// Randomize order of notes on each request
+const shuffledNotes = notesEntries
+  .map((note) => ({ note, sortKey: Math.random() }))
+  .sort((a, b) => a.sortKey - b.sortKey)
+  .map(({ note }) => note);
 ---
 
 <Base title=".notas" description="A collection of notes">
@@ -20,7 +21,7 @@ const sortedNotes = notesEntries.sort((a, b) =>
       <h1 class="page-title">./notas</h1>
       
       <ul class="notes-list">
-        {sortedNotes.map((note) => (
+        {shuffledNotes.map((note) => (
           <li>
             <a href={`/notes/${note.id}`}><span class="note-marker">.</span>{note.data.title}</a>
           </li>
@@ -48,12 +49,12 @@ const sortedNotes = notesEntries.sort((a, b) =>
   }
   
   .notes-list a:hover {
-    color: var(--color-accent-2);
+    color: var(--color-primary);
     opacity: 1;
   }
   
   .note-marker {
-    color: var(--color-accent-2);
+    color: var(--color-primary);
     margin-right: 0.5rem;
     font-style: normal;
   }
