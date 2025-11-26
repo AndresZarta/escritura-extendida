@@ -11,7 +11,7 @@ modified: 2025-11-25T22:42:26-05:00
 
 [Andries van Dam](https://en.wikipedia.org/wiki/Andries_van_Dam), pionero en los sistemas de hipertexto (HES y FRESS en la Brown University), entendió la navegación como un desplazamiento real dentro de un espacio informativo dinámico. Introdujo la metáfora de “**perderse en el hiperes­pacio**” para describir la desorientación del usuario en redes de documentos extensas. 
 
-Desde su keynote de 1987 señaló que "cuanto más rico es el hipertexto, mayor es el problema de navegación": los enlaces sin estructura se convierten, dijo, en un `GOTO` que genera "[espagueti](/notes/codigo_espagueti)".
+Desde su keynote de 1987 señaló que "cuanto más rico es el hipertexto, mayor es el problema de navegación": los enlaces sin estructura se convierten, dijo, en un `GOTO` que genera "[[codigo_espagueti|espagueti]]".
 
 Para contrarrestar esto desarrolló herramientas de orientación como mapas gráficos, índices y líneas de tiempo que permitieran “viajar en el tiempo” dentro del sistema, junto con trayectos guiados en demostraciones que evitaban la deriva libre del usuario. Así, van Dam articuló la necesidad de que el **flujo** de navegación tenga rutas reconocibles, señalización explícita y estructura, transformando la metáfora espacial en una preocupación de diseño concreta.
 

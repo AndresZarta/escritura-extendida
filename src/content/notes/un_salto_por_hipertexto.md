@@ -9,7 +9,7 @@ draft: true
 modified: 2025-11-25T23:01:29-05:00
 ---
 
-Si llegaste aquí es porque vienes del ensayo sobre el hipertexto y sentiste el impulso de saber más sobre como los primeros desarrolladores del hipertexto imaginaban metaforicamente su movimiento. [Aqui](/notes/discurso_hipertexto_metaforas) encontraras mis notas al respecto. 
+Si llegaste aquí es porque vienes del ensayo sobre el hipertexto y sentiste el impulso de saber más sobre como los primeros desarrolladores del hipertexto imaginaban metaforicamente su movimiento. [[discurso_hipertexto_metaforas|Aqui]] encontraras mis notas al respecto. 
 
 Esta informacion bien podría facilmente haber permanecido dentro del ensayo principal y haberse limitado a enumerar las distintas metáforas espaciales con las que estos autores describían sus prototipos. 
 
