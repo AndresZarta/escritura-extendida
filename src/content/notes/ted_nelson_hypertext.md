@@ -27,7 +27,7 @@ Sugiriendo que el usuario se desliza o navega por datos en vez de leerlos pasiva
 
 Otra metáfora clave es la de **“intertwingularity”**, término que acuñó para afirmar que _“todo está profundamente entrelazado”_, y que las estructuras jerárquicas o secuenciales son artificiales frente a la complejidad real del conocimiento.
 
-Estas intuiciones no quedaron solo en metáforas: Nelson intentó darles una forma técnica y concreta en su proyecto **[Xanadu](projecto_xanadu)**, un sistema de hipertexto global que buscaba materializar precisamente este “universo de documentos”.
+Estas intuiciones no quedaron solo en metáforas: Nelson intentó darles una forma técnica y concreta en su proyecto **[Xanadu](/notes/projecto_xanadu)**, un sistema de hipertexto global que buscaba materializar precisamente este "universo de documentos".
 
 ### Referencias
 
