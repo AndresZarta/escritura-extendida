@@ -18,7 +18,7 @@ const notesCollection = defineCollection({
     base: 'src/content/notes',
     url: 'notes',
   }),
-  schema: ({ image }) => ObsidianDocumentSchema.extend({
+  schema: () => ObsidianDocumentSchema.extend({
     title: z.string(),
     description: z.string().default(""),
     tags: z.array(z.string()).default([]),
