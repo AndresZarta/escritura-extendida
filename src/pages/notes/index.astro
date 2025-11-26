@@ -1,0 +1,61 @@
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const notesEntries = await getCollection('notes', ({ data }) => {
+  return data.draft !== true;
+});
+
+// Randomize order of notes on each request
+const shuffledNotes = notesEntries
+  .map((note) => ({ note, sortKey: Math.random() }))
+  .sort((a, b) => a.sortKey - b.sortKey)
+  .map(({ note }) => note);
+---
+
+<Base title=".notas" description="A collection of notes">
+  <div class="spacer-large" aria-hidden="true"></div>
+  
+  <div class="page-container">
+    <div class="page-content">
+      <h1 class="page-title">./notas</h1>
+      
+      <ul class="notes-list">
+        {shuffledNotes.map((note) => (
+          <li>
+            <a href={`/notes/${note.id}`}><span class="note-marker">.</span>{note.data.title}</a>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </div>
+</Base>
+
+<style>
+  .notes-list {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0;
+  }
+  
+  .notes-list li {
+    margin-bottom: 1rem;
+  }
+  
+  .notes-list a {
+    text-decoration: none;
+    color: var(--color-text);
+    opacity: 0.9;
+  }
+  
+  .notes-list a:hover {
+    color: var(--color-primary);
+    opacity: 1;
+  }
+  
+  .note-marker {
+    color: var(--color-primary);
+    margin-right: 0.5rem;
+    font-style: normal;
+  }
+</style>
