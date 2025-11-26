@@ -17,7 +17,7 @@ Durante la presentación, Engelbart mostró cómo un usuario podía editar texto
 
 El impacto de la demo fue profundo. Muchos de los conceptos presentados inspiraron directamente los desarrollos posteriores del Xerox PARC y, a través de ellos, la informática personal moderna. La interfaz gráfica, la edición visual, los sistemas de ventanas y el trabajo en red tienen raíces claras en esta demostración.
 
-Más allá de sus logros técnicos, The Mother of All Demos articuló una filosofía: **las herramientas digitales deben expandir la capacidad humana para pensar, crear y trabajar conjuntamente**. Engelbart no buscaba facilitar tareas aisladas, sino transformar la manera en que las personas enfrentan la complejidad colectiva. Su visión del “espacio de información” [como un territorio navegable](douglas_engelbart_navegacion) sigue siendo una influencia decisiva en el diseño de software contemporáneo.
+Más allá de sus logros técnicos, The Mother of All Demos articuló una filosofía: **las herramientas digitales deben expandir la capacidad humana para pensar, crear y trabajar conjuntamente**. Engelbart no buscaba facilitar tareas aisladas, sino transformar la manera en que las personas enfrentan la complejidad colectiva. Su visión del "espacio de información" [como un territorio navegable](/notes/douglas_engelbart_navegacion) sigue siendo una influencia decisiva en el diseño de software contemporáneo.
 
 ### Referencias
 

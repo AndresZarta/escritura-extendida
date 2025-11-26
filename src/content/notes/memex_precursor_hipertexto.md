@@ -9,7 +9,7 @@ draft: false
 modified: 2025-11-25T22:13:53-05:00
 ---
 
-El Memex imaginado por [Bush](vannevar_bush_sendero) proponía un dispositivo de escritorio donde cada lector podía trazar senderos personales entre documentos. 
+El Memex imaginado por [Bush](/notes/vannevar_bush_sendero) proponía un dispositivo de escritorio donde cada lector podía trazar senderos personales entre documentos. 
 
 Se trata de un mueble voluminoso de apariencia cercana a un escritorio-máquina: una estructura robusta, con una gran superficie frontal que integra pantallas translúcidas para la proyección de microfilmes, un par de controles deslizables a cada costado para navegar el material, y una serie de teclas y botones mecánicos que permiten marcar, combinar y enlazar documentos. 
 

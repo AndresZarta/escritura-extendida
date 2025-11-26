@@ -44,4 +44,4 @@ Imagina este fragmento de programa en BASIC donde se usa `GOTO` indiscriminada
 
 Este código funciona, pero su flujo de ejecución está lleno de saltos que hacen difícil seguir «dónde estoy» y «cómo llegué aquí». 
 
-Este desorden refleja lo que [Andries van Dam](van_dam_navegacion) advertía: “cuanto más rico es el hipertexto, mayor es el problema de navegación”, y al compararlo con un `GOTO` que genera “espagueti”, subraya cómo los vínculos sin estructura pueden desembocar en una experiencia de **desorientación** similar.
+Este desorden refleja lo que [Andries van Dam](/notes/van_dam_navegacion) advertía: "cuanto más rico es el hipertexto, mayor es el problema de navegación", y al compararlo con un `GOTO` que genera "espagueti", subraya cómo los vínculos sin estructura pueden desembocar en una experiencia de **desorientación** similar.
