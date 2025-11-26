@@ -1,6 +1,6 @@
 ---
 title: memex_precursor_hipertexto
-description:
+description: "Descripción del Memex de Vannevar Bush como precursor mecánico del hipertexto y sus senderos de lectura."
 tags: []
 pubDate: 2025-11-25
 upDate:

@@ -1,6 +1,6 @@
 ---
 title: mother_of_all_demos
-description: ""
+description: "Resumen de la Mother of All Demos de Douglas Engelbart y su visión del espacio de información."
 tags: []
 pubDate: 2025-11-25
 upDate:

@@ -1,6 +1,6 @@
 ---
 title: ted_nelson_hypertext
-description:
+description: "Notas sobre Ted Nelson, la invención del hipertexto y sus metáforas de surf y docuverse."
 tags: []
 pubDate: 2025-11-18
 upDate:

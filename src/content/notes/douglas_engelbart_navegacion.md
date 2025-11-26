@@ -1,6 +1,6 @@
 ---
 title: douglas_engelbart_navegacion
-description: ""
+description: "Cómo Douglas Engelbart imaginó y demostró la navegación de la información como vuelo en un espacio de información."
 tags: []
 pubDate: 2025-11-25
 upDate:

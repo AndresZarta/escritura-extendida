@@ -1,6 +1,6 @@
 ---
 title: discurso_hipertexto_metaforas
-description: ""
+description: "Notas sobre las metáforas de movimiento y viaje que han acompañado el discurso del hipertexto."
 tags: []
 pubDate: 2025-11-25
 upDate:

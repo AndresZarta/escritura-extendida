@@ -1,6 +1,6 @@
 ---
 title: un_salto_por_hipertexto
-description: ""
+description: "Explicación de la decisión estructural de separar las notas sobre metáforas de hipertexto del ensayo principal."
 tags: []
 pubDate: 2025-11-25
 upDate:

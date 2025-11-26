@@ -1,6 +1,6 @@
 ---
 title: indices_alfabeticos
-description: ""
+description: "Reflexión sobre no usar índices alfabéticos y dejar que las notas se enlacen entre sí de forma fluida."
 tags: []
 pubDate: 2025-11-25
 upDate:

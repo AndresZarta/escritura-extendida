@@ -1,6 +1,6 @@
 ---
 title: van_dam_navegacion
-description: ""
+description: "Cómo Andries van Dam aborda la navegación en hipertexto, el problema de perderse y las herramientas para orientarse."
 tags: []
 pubDate: 2025-11-25
 upDate:

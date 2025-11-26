@@ -1,6 +1,6 @@
 ---
 title: vannevar_bush_sendero
-description:
+description: "Lectura del ensayo de Vannevar Bush y su metáfora de los senderos como modelo de pensamiento y navegación."
 tags: []
 pubDate: 2025-11-25
 upDate:

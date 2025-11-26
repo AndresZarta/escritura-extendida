@@ -1,6 +1,6 @@
 ---
 title: projecto_xanadu
-description:
+description: "Introducción al Proyecto Xanadu de Ted Nelson y sus ideas de hipertexto global."
 tags: []
 pubDate: 2025-11-25
 upDate:

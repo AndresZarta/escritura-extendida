@@ -1,6 +1,6 @@
 ---
 title: codigo_espagueti
-description: ""
+description: "Una comparación entre el código espagueti con GOTO y la desorientación en sistemas de hipertexto ricos en enlaces."
 tags: []
 pubDate: 2025-11-25
 upDate:
