@@ -25,3 +25,7 @@ pnpm-debug.log*
 
 # development scripts
 bump-version.sh
+
+# obsidian vault files to ignore
+.obsidian/
+_templates
