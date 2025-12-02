@@ -251,7 +251,7 @@ pre code {
 blockquote {
   border-left: 4px solid var(--color-primary);
   padding-left: var(--space-50);
-  font-size: var(--font-size-large);
+  font-size: var(--font-size-small);
   font-style: normal;
   margin: var(--space-60) 0;
 }
