@@ -13,7 +13,7 @@ const shuffledNotes = notesEntries
   .map(({ note }) => note);
 ---
 
-<Base title=".notas" description="A collection of notes">
+<Base title=".notas" description="A collection of notes" pageType="noteIndex">
   <div class="spacer-large" aria-hidden="true"></div>
   
   <div class="page-container">
@@ -33,6 +33,7 @@ const shuffledNotes = notesEntries
 
 <style>
   .notes-list {
+    font-size: small;
     list-style: none;
     padding: 0;
     margin: 2rem 0;
