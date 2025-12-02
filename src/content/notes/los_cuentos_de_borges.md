@@ -33,3 +33,14 @@ Esta colección funciona como un mapa de lectura para entender cómo la obra de 
     - Describe la experiencia humana frente a la infinitud temporal; la narrativa circula, se repite, se superpone. La identidad se vuelve múltiple y discontinua.
 - **“Funes el memorioso” (1942)**
     - Hombre incapaz de olvidar nada. El exceso de información destruye la capacidad de abstracción; es, en pleno, un comentario sobre la saturación informacional.
+    
+### Referencias
+    - Borges, J. L. "La biblioteca de Babel" (1941). [Wikipedia](https://es.wikipedia.org/wiki/La_biblioteca_de_Babel)
+    - Borges, J. L. "El jardín de senderos que se bifurcan" (1941). [Wikipedia](https://es.wikipedia.org/wiki/El_jard%C3%ADn_de_senderos_que_se_bifurcan)
+    - Borges, J. L. "El Aleph" (1945). [Wikipedia](https://es.wikipedia.org/wiki/El_Aleph_(cuento))
+    - Borges, J. L. "La muerte y la brújula" (1942). [Wikipedia](https://es.wikipedia.org/wiki/La_muerte_y_la_br%C3%BAjula)
+    - Borges, J. L. "El sur" (1953). [Wikipedia](https://es.wikipedia.org/wiki/El_sur_(cuento))
+    - Borges, J. L. "La lotería en Babilonia" (1941). [Wikipedia](https://es.wikipedia.org/wiki/La_loter%C3%ADa_en_Babilonia)
+    - Borges, J. L. "Pierre Menard, autor del Quijote" (1939). [Wikipedia](https://es.wikipedia.org/wiki/Pierre_Menard,_autor_del_Quijote)
+    - Borges, J. L. "El inmortal" (1947). [Wikipedia](https://es.wikipedia.org/wiki/El_inmortal_(cuento))
+    - Borges, J. L. "Funes el memorioso" (1942). [Wikipedia](https://es.wikipedia.org/wiki/Funes_el_memorioso)

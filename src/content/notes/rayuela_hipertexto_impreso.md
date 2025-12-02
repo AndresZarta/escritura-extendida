@@ -22,3 +22,6 @@ modified: 2025-12-01T23:40:38-05:00
 La [Rayuela](https://es.wikipedia.org/wiki/Rayuela_(novela)) de Julio Cortazar propone múltiples órdenes de lectura y convierte la novela en un precursor del hipertexto, en este caso con las limitantes del papel impreso solo propone dos ordenes pero aun así anticipa la posibilidad de una lectura a través de rutas infinitamente ramificadas. 
 
 Adicionalmente, la secuencia final, 131 - 58 - 131, prefigura en bucle infinito, propio de la no-linealidad.
+
+### Referencias
+- Cortázar, J. (1963). "Rayuela". Ed. original en español. [Wikipedia](https://es.wikipedia.org/wiki/Rayuela_(novela))
