@@ -1078,3 +1078,119 @@ hr {
     font-size: var(--font-size-small);
   }
 }
+
+/* Demo CSS styles for html.mdx */
+.demo-css p {
+  font-size: 24px;
+  color: #3366ff;
+  margin: 100px 0;
+  text-align: center;
+  font-family: sans-serif;
+}
+
+.demo-css-2 h1 {
+  font-size: 40px;
+  font-weight: 700;
+  margin-bottom: 10px;
+  font-family: sans-serif;
+  color: #222;
+}
+
+.demo-css-2 p {
+  font-size: 18px;
+  line-height: 1.6;
+  color: #444;
+  font-family: sans-serif;
+}
+
+.demo-css-2 ul {
+  padding-left: 80px;
+  font-family: sans-serif;
+}
+
+.demo-css-2 li {
+  margin-bottom: 5px;
+}
+
+.demo-isolated {
+  margin: 50px 0;
+  font-family: sans-serif;
+  color: #333;
+}
+
+.demo-isolated h1,
+.demo-isolated h2,
+.demo-isolated h3,
+.demo-isolated h4,
+.demo-isolated h5,
+.demo-isolated h6 {
+  color: #222;
+}
+
+.demo-isolated button {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.demo-isolated button:hover {
+  background-color: #e0e0e0;
+  border-color: #ccc;
+  transform: scale(1.05);
+}
+
+.demo-js,
+.demo-js-lista {
+  margin: 50px 0;
+  font-family: sans-serif;
+  color: #333;
+}
+
+.demo-js h1,
+.demo-js h2,
+.demo-js h3,
+.demo-js h4,
+.demo-js h5,
+.demo-js h6,
+.demo-js-lista h1,
+.demo-js-lista h2,
+.demo-js-lista h3,
+.demo-js-lista h4,
+.demo-js-lista h5,
+.demo-js-lista h6 {
+  color: #222;
+}
+
+.demo-js button,
+.demo-js-lista button {
+  background-color: #f0f0f0;
+  color: #333;
+  border: 2px solid #ddd;
+  border-radius: 50%;
+  width: 100px;
+  height: 100px;
+  font-size: 16px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.demo-js button:hover,
+.demo-js-lista button:hover {
+  background-color: #e0e0e0;
+  border-color: #ccc;
+  transform: scale(1.05);
+}
