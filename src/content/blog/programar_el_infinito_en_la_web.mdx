@@ -1,0 +1,431 @@
+---
+title: "programar_el_infinito_en_la_web"
+description: "Exploración de HTML, CSS y JavaScript como extensiones de la escritura tradicional en la web."
+pubDate: 2025-12-09
+draft: false
+---
+import { Image } from 'astro:assets';
+import scheherazade from '../../assets/images/programar_el_infinito_en_la_web/scheherazade.jpg';
+
+El texto en la web no existe por sí solo: necesita un soporte que lo interprete y lo haga visible. 
+
+HTML, CSS y JavaScript suelen presentarse como “tecnologías de la web”, útiles para construir sitios, aplicaciones o productos. En este ensayo quiero proponer algo ligeramente distinto: entenderlos como una **extensión de la escritura tradicional**. 
+
+Programar para la web no solo añade eficiencia o automatización; abre nuevas posibilidades literarias, semánticas y formales. Nos permite pensar la escritura como **estructura**, **superficie** y **comportamiento**, y explorar significados que solo pueden existir cuando el texto se vuelve, literalmente, ejecutable.
+
+## html_estructura_y_capas_de_significado
+
+HTML surgió como el lenguaje estructural que permitió dar forma a toda clase de contenido audiovisual que pudiera ser mostrado por un navegador (párrafos, botones, enlaces, imágenes, medios) y de manera universal y accesible. Su simplicidad, semántica y adopción temprana lo convirtieron en el estándar de facto para organizar la información en Internet. 
+
+Todo navegador sabe leer HTML, y [esta compatibilidad total ha sido clave para su permanencia](https://resilientwebdesign.com). 
+
+Pero lo interesante, desde la escritura, es que HTML introduce una forma específica de **pensar la organización de un texto**: no solo como una secuencia lineal de frases, sino como un conjunto de bloques, relaciones, niveles y recorridos posibles. La estructura semántica del documento permite concebir diferentes capas de significado y leer el texto como si fuera un sistema, no solo una línea continua.
+
+Tomemos, a manera de ejemplo, este fragmento sencillo:
+
+<body-mock>
+  <div class="demo-isolated">
+      <p>Este es un texto</p>
+  </div>
+</body-mock>
+
+```html
+<!-- Pruebalo tu, copiando este código en cualquier editor de texto y guardandolo con formato .html -->
+<!-- Luego puedes abrirlo en tu navegador. -->
+<!-- Felicidades has creado tu primer archivo html. -->
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Ejemplo HTML</title>
+  </head>
+  <body>
+    <div>
+      <p>Este es un texto</p>
+    </div>
+  </body>
+</html>
+```
+
+Ignorando por un momento los metadatos del documento —es decir, los elementos declarativos ubicados en el `<head>`—, centrémonos en la estructura del cuerpo, donde un contenedor `<div>` aloja y organiza un único elemento `<p>`.
+
+```html
+<div>
+  <p>Este es un texto</p>
+</div>
+```
+
+Si añadimos otro elemento, veremos que se estructuran, uno después del otro, como secuencia:
+
+<body-mock>
+  <div class="demo-isolated">
+      <p>Este es un texto</p>
+      <p>Este es otro texto</p>
+  </div>
+</body-mock>
+```html
+<div>
+  <p>Este es un texto</p>
+  <p>Este es otro texto</p>
+</div>
+```
+
+Quiero la llamar atención al hecho de que hasta ahora no hemos hablado de colores, tamaños ni posiciones en la pantalla. 
+
+Lo importante en este momento es enfocarnos en la estructura del texto: HTML define qué es cada cosa antes de decidir cómo debe mostrarse. 
+
+Esto es central no solo para la construcción técnica de la web, sino para el modo en que pensar en las posibilidades de una escritura que se sostiene sobre relaciones, niveles, agrupaciones y jerarquías que permiten una relación con un texto al que podamos añadirle comportamiento. La semántica del documento es el sustrato que vuelve posible esa navegación conceptual.
+
+En HTML, cada pieza de contenido se encapsula en elementos que indican su función:
+
+- `<p>` marca un párrafo.
+- `<div>` agrupa contenido sin un significado específico, pero que luego permite darle estilo o comportamiento conjunto.
+- `<h1>`, `<h2>`, `<h3>` estructuran lo que ya es concebido como títulos y subtítulos.
+- `<ul>` y `<li>` organizan listas.
+- `<a>` permite enlaces.
+
+Y aquí surge el detalle saliente sobre esto tipo de escritura digital: la proximidad entre elementos establece **relación**; la repetición de las mismas etiquetas crea **continuidad**; la agrupación forma una **unidad conceptual**.
+
+Continuemos la progresión añadiendo significados explícitos: encabezados y listas.
+
+<div class="demo-isolated">
+  <h1>Título principal</h1>
+  <h2>Subsección del tema</h2>
+  <p>Un desarrollo de la idea.</p>
+  <ul>
+    <li>Punto 1</li>
+    <li>Punto 2</li>
+    <li>Punto 3</li>
+  </ul>
+</div>
+
+
+```html
+<div>
+  <h1>Título principal</h1>
+  <h2>Subsección del tema</h2>
+  <p>Un desarrollo de la idea.</p>
+  <ul>
+    <li>Punto 1</li>
+    <li>Punto 2</li>
+    <li>Punto 3</li>
+  </ul>
+</div>
+```
+
+Podemos asi establecer una nueva jerarquía en el texto: sección, subsección, puntos derivados.
+
+La estructura empieza a comportarse como un mapa conceptual.
+
+Hasta aquí todo sigue siendo texto estático, pero a partir de esta base podemos introducir interactividad nativa, también solo con HTML.
+
+<div class="demo-isolated">
+  <h1 id="inicio">Título del documento</h1>
+
+  <p>Este párrafo introduce la idea. Puedes <a href="#nota">saltar a la nota</a> cuando quieras.</p>
+
+  <p id="nota"><strong>Nota:</strong> este fragmento amplía la explicación.</p>
+
+  <p><a href="#inicio">Volver al inicio</a></p>
+</div>
+
+```html
+<h1 id="inicio">Título del documento</h1>
+
+<p>Este párrafo introduce la idea. Puedes <a href="#nota">saltar a la nota</a> cuando quieras.</p>
+
+<p id="nota"><strong>Nota:</strong> este fragmento amplía la explicación.</p>
+
+<p><a href="#inicio">Volver al inicio</a></p>
+```
+
+Esta pequeña interacción funciona porque HTML permite asignar identificadores (`id`) a cualquier elemento, creando así destinos específicos dentro del propio documento. 
+
+Cuando un enlace `<a>` apunta a uno de esos identificadores —por ejemplo, `href="#nota"`— el navegador interpreta esa referencia como una instrucción de desplazamiento interno y mueve la vista hacia ese punto. No hay lógica programada: es el navegador quien resuelve el salto gracias a la semántica del `id`. Además, elementos como `<strong>` permiten destacar parte del contenido sin alterar su función estructural, reforzando la comprensión del lector sin añadir estilo externo. En conjunto, estos mecanismos —identificadores, enlaces internos, etiquetas semánticas— constituyen una forma de interactividad nativa: el documento se vuelve navegable, permite recorridos alternativos y organiza pequeñas tensiones entre foco y desplazamiento, todo dentro del propio lenguaje HTML.
+
+Esto ya es un paso hacia una escritura más dinámica, pues a traves del hipervínculo interno el lector puede elegir su ruta de lectura, saltando entre secciones según su interés.
+
+Un ejemplo más avanzado de interactividad nativa en HTML es el uso del elemento `<details>`, que permite crear secciones desplegables sin necesidad de JavaScript.
+
+<div class="demo-isolated">
+  <details>
+    <summary>Ver explicación extendida</summary>
+    <p>Este texto se despliega y se oculta sin necesidad de JavaScript.</p>
+  </details>
+</div>
+
+```html
+<details>
+  <summary>Ver explicación extendida</summary>
+  <p>Este texto se despliega y se oculta sin necesidad de JavaScript.</p>
+</details>
+```
+El elemento `<details>` crea un contenedor que puede expandirse o contraerse cuando el usuario hace clic en el resumen (`<summary>`).
+
+Esto introduce la idea de capas que se revelan o se ocultan. Pensado más alla de ser solo una posible “comodidad de interfaz”:** puede ser una decisión de escritura**. ¿Qué se muestra de inmediato? ¿Qué queda plegado? ¿En qué momento el lector decide desplegarlo? La programación, en este caso, se vuelve una forma de edición del ritmo y de construcción de sentido.
+
+Ahora bien, toda esta estructura semántica; párrafos, encabezados, listas, enlaces, secciones desplegables, existe en un plano lógico, pero todavía carece de forma visual definida. El navegador aplica estilos por defecto (tamaños de fuente genéricos, márgenes básicos, colores neutros), pero estos no constituyen un diseño intencional. 
+
+Aquí es donde aparece CSS: el lenguaje que transforma la gramática estructural del HTML en una superficie aun más estética y expresiva.
+
+## css_dar_forma_a_la_estructura
+
+Si HTML define qué es cada pieza del contenido, CSS determina cómo se ve. 
+
+Es el lenguaje que controla la apariencia: colores, tamaños, proporciones, alineaciones, márgenes, tipografías, animaciones. Su misión original fue separar la estructura (HTML) de la presentación, permitiendo que un mismo documento adoptara múltiples formas visuales sin reescribir el contenido, ni modificar su semántica.
+
+Tomemos nuevamente un bloque sencillo de HTML:
+
+<body-mock>
+  <div class="demo-isolated">
+      <p>Este es un texto</p>
+  </div>
+</body-mock>
+
+Por sí solo, el navegador lo mostrará utilizando sus estilos por defecto. Pero si añadimos un archivo CSS asociado, podemos transformar completamente su apariencia sin modificar la estructura.
+```css
+.demo-css p {
+  font-size: 24px;        /* Tamaño del texto */
+  color: #3366ff;         /* Color azul */
+  margin: 100px 0;         /* Espacio arriba y abajo */
+  text-align: center;     /* Alineación centrada */
+  font-family: sans-serif; /* Tipografía sin remates */
+}
+```
+
+Si lo combinamos:
+
+<body-mock>
+  <div class="demo-css">
+    <p>Este es un texto</p>
+  </div>
+</body-mock>
+
+```html
+<div class="demo-css"> <!-- La clase conecta el HTML con las reglas CSS -->
+  <p>Este es un texto</p>
+</div>
+```
+
+Aquí aparece lo fundamental:
+- HTML sigue siendo el "esqueleto" y la estructura del contenido.
+- CSS actúa como la "piel" y el "gesto": modifica la presentación sin tocar la estructura.
+- La misma marca `<p>` puede verse completamente distinta con solo cambiar reglas de estilo.
+
+Podemos sumar complejidad visual igual que antes sumamos complejidad estructural:
+
+```css
+h1 {
+  font-size: 40px;        /* Tamaño grande para el título */
+  font-weight: 700;       /* Grosor de la fuente (negrita) */
+  margin-bottom: 10px;    /* Espacio debajo del título */
+}
+
+p {
+  font-size: 18px;        /* Tamaño del párrafo */
+  line-height: 1.6;       /* Espaciado entre líneas */
+  color: #444;            /* Color gris oscuro */
+}
+
+ul {
+  padding-left: 80px;     /* Indentación de la lista */
+}
+
+li {
+  margin-bottom: 5px;     /* Espacio entre elementos */
+}
+```
+
+<body-mock>
+  <div class="demo-css-2">
+    <h1>Título principal</h1>
+    <p>Texto introductorio.</p>
+    <ul>
+      <li>Punto 1 estilizado</li>
+      <li>Punto 2 estilizado</li>
+      <li>Punto 3 estilizado</li>
+    </ul>
+  </div>
+</body-mock>
+
+```html
+<div>
+  <h1>Título principal</h1>
+  <p>Texto introductorio.</p>
+  <ul>
+    <li>Punto 1 estilizado</li>
+    <li>Punto 2 estilizado</li>
+    <li>Punto 3 estilizado</li>
+  </ul>
+</div>
+```
+CSS convierte una jerarquía abstracta en una superficie legible y expresiva. Desde la perspectiva literaria, esto equivale a decisiones de **maquetación**, **ritmo**, **énfasis** y **tono visual** que en el libro impreso dependerían del diseño editorial, pero que en la web el propio texto puede “llevar consigo” como parte de su definición.
+
+La estructura no cambia. Pero ciertamente, la lectura se ve transformada por el estilo del texto: El título se diferencia visualmente, los párrafos adquieren aire, los elementos de lista se ordenan con ritmo. CSS convierte una jerarquía abstracta en una superficie legible y estética.
+
+## javascript_comportamiento_en_el_tiempo
+
+Si HTML define la gramática,
+y CSS define la apariencia.
+JavaScript introduce algo nuevo: el cambio en el tiempo.
+
+Con JavaScript, la página deja de ser un documento estático y se convierte en un entorno capaz de reaccionar: **cambiar contenido**, **responder a clics**, **mover elementos**, **comunicarse con servidores**, **validar formularios**, **cargar datos nuevos sin refrescar la página**. 
+
+Es el lenguaje de la interactividad.
+
+Tomemos otra vez el ejemplo mínimo, esta vez seguido de un botón:
+
+<div class="demo-isolated">
+  <p id="mensaje">Un texto</p>
+  <button id="cambiar">Cambiar texto</button>
+</div>
+
+```html
+<p id="mensaje">Un texto</p>
+<button id="cambiar">Cambiar texto</button>
+```
+
+Sin JavaScript, el texto siempre permanecerá igual, pues HTML y CSS no pueden alterar su contenido dinámicamente.
+
+Con JavaScript, podemos hacerlo responder a una acción del usuario:
+
+```javascript
+const boton = document.getElementById('cambiar');    // Selecciona el botón
+const mensaje = document.getElementById('mensaje');  // Selecciona el párrafo
+let cambiado = false;                                 // Estado del texto
+
+boton.addEventListener('click', () => {              // Escucha el clic
+  if (cambiado) {
+    mensaje.textContent = 'Un texto';                // Texto original
+  } else {
+    mensaje.textContent = 'El texto ha cambiado';    // Texto cambiado
+  }
+  cambiado = !cambiado;                              // Alterna el estado
+});
+```
+
+<body-mock>
+  <div class="demo-js">
+    <p id="mensaje-js">Un texto</p>
+    <button id="btn-js">Cambiar texto</button>
+  </div>
+  <script>
+    {`const botonJS = document.getElementById('btn-js');
+    const mensajeJS = document.getElementById('mensaje-js');
+    let cambiadoJS = false;
+    botonJS.addEventListener('click', () => {
+      if (cambiadoJS) {
+        mensajeJS.textContent = 'Un texto';
+      } else {
+        mensajeJS.textContent = 'El texto ha cambiado';
+      }
+      cambiadoJS = !cambiadoJS;
+    });`}
+  </script>
+</body-mock>
+
+Código combinado:
+
+```html
+<div class="demo-js">
+  <p id="mensaje">Un texto</p>
+  <button id="cambiar">Cambiar texto</button>
+</div>
+```
+
+```javascript
+const boton = document.getElementById('cambiar');
+const mensaje = document.getElementById('mensaje');
+let cambiado = false;
+
+boton.addEventListener('click', () => {
+  if (cambiado) {
+    mensaje.textContent = 'Un texto';
+  } else {
+    mensaje.textContent = 'El texto ha cambiado';
+  }
+  cambiado = !cambiado;
+});
+```
+
+Lo importante aquí no es el cambio de texto, sino la aparición de una relación condicional entre elementos: "si ocurre esto, entonces haz aquello". 
+
+HTML y CSS no pueden expresar esa lógica; JavaScript sí.
+
+Podemos aumentar la complejidad igual que antes:
+
+```javascript
+const lista = document.getElementById('lista');      // Selecciona la lista
+const agregar = document.getElementById('agregar');  // Selecciona el botón
+
+agregar.addEventListener('click', () => {            // Escucha el clic
+  const nuevo = document.createElement('li');        // Crea un nuevo elemento
+  nuevo.textContent = 'Nuevo punto añadido dinámicamente';
+  lista.appendChild(nuevo);                          // Lo añade a la lista
+});
+```
+
+```html
+<ul id="lista">
+  <li>Punto inicial</li>
+</ul>
+<button id="agregar">Agregar punto</button>
+```
+<body-mock>
+  <div class="demo-js-lista">
+    <ul id="lista-js">
+      <li>Punto inicial</li>
+    </ul>
+    <button id="agregar-js">Agregar punto</button>
+  </div>
+  <script>
+    {`const listaJS = document.getElementById('lista-js');
+    const agregarJS = document.getElementById('agregar-js');
+    agregarJS.addEventListener('click', () => {
+      const nuevo = document.createElement('li');
+      nuevo.textContent = 'Nuevo punto añadido dinámicamente';
+      listaJS.appendChild(nuevo);
+    });`}
+  </script>
+</body-mock>
+
+De esta manera, podemos lograr que, con pequeños gestos, el texto adquiera propiedades propias de sistemas más complejos y realidades más que pueden romper con la linealidad tradicional de la escritura:
+- **Memoria** (cada clic tiene el potencial de añadir, remover o alterar en el texto mismo)
+- **Agencia** (la acción del usuario modifica el estado)
+- **Comportamiento** (hay un flujo temporal de eventos)
+
+JavaScript convierte la página en un sistema donde el contenido puede mutar y responder a la lectura.
+
+## un_infinito_de_posibilidades_literarias
+
+<figure class="figure-blog-small">
+  <a href="https://commons.wikimedia.org/wiki/File:Scheherazade_01.jpg" target="_blank" rel="noopener noreferrer">
+    <Image
+      src={scheherazade}
+      alt="Scheherazade Went on with Her Story"
+    />
+  </a>
+  <figcaption>Virginia Frances Sterrett. "Scheherazade Went on with Her Story". </figcaption>
+  <figcaption>Wikimedia Commons.</figcaption>
+</figure>
+
+Los ejemplos utilizados a lo largo de este ensayo fueron escogidos por su extrema sencillez: fragmentos mínimos, casi desnudos, que permiten a cualquier lector —incluso sin experiencia en programación— comprender cómo un documento HTML comienza a adquirir forma, cómo CSS lo transforma en una superficie legible y cómo JavaScript introduce en él un eje temporal y dinámico. 
+
+Esta austeridad ha sido intencional. Al trabajar con ejemplos pequeños, he querido hacer más evidente el gesto preciso de cada tecnología: **cómo las etiquetas organizan**, **cómo las reglas de estilo alteran la percepción**, **cómo los eventos modifican el estado**. Cada uno de estos movimientos, cuando se entienden en su escala más reducida, revelan la lógica expresiva sencilla que subyace a la escritura digital.
+
+Sin embargo, es importante en este punto señalar que estos ejemplos solo rozan la superficie de lo que puede lograrse con HTML, CSS y JavaScript. Sobre estas tres bases se ha construido **un ecosistema de herramientas y frameworks** —[React](https://react.dev), [Vue](https://vuejs.org), [Svelte](https://svelte.dev), [Astro](https://astro.build), [Next.js](https://nextjs.org), [Remix](https://remix.run), entre muchos otros— que no solo optimizan la dinámica técnica de construir para la web, sino que abren nuevas dimensiones narrativas imposibles en el documento fisico. 
+
+Estos entornos permiten que una obra pueda recordar decisiones del lector y modificar su curso; que un texto pueda reconstruirse cada vez, generando versiones alternativas según rutas previas; que distintas capas de significado aparezcan o desaparezcan en función del tiempo, del estado del sistema o de la interacción acumulada. 
+
+Frameworks modernos facilitan arquitecturas donde el texto se comporta como un organismo: puede reaccionar a eventos, mantenerse sincronizado con datos externos, transformarse según condiciones de contexto, o integrarse con modelos computacionales e inteligencia artificial para producir variaciones infinitas. 
+
+En este universo expandido, la narrativa deja de limitarse a la linealidad del documento y se convierte en un sistema vivo, capaz de ramificarse, adaptarse, auto­organizarse y proponer recorridos únicos para cada lector. Escribir en la web contemporánea, entonces, no es solo elegir palabras: es diseñar la lógica, la estructura y el flujo que harán posible una experiencia narrativa que emerge tanto del código como del texto.
+
+Precisamente por esta abundancia, la práctica de la escritura digital implica tomar decisiones con intención y cuidado. No se trata de utilizar todos los recursos disponibles, sino de **seleccionar lo mínimo necesario** para expresar idea narrativas contemporáneas con claridad, peso y consistencia. 
+
+Así como en la escritura tradicional el escritor escribe y rescribe una frase para eliminar lo superfluo y afinar su tono, en la escritura programada también se esculpe en el plano técnico: se eligen solo aquellas estructuras, estilos y comportamientos que sostienen la forma de pensamiento concreta y específica que queremos presentar. 
+
+El reto —y la oportunidad— reside en desarrollar la habilidad de encontrar ese equilibrio: usar la técnica no como exhibición de complejidad, sino como un modo de hacer visible, habitable y comprensible el sistema conceptual que queremos compartir con el lector.
+
+### Referencias
+Keith, J. (n.d.). *Resilient Web Design*. [https://resilientwebdesign.com](https://resilientwebdesign.com)
