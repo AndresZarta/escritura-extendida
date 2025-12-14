@@ -1,0 +1,107 @@
+---
+/**
+ * EstructurasReconfiguran.astro
+ * Componente que reordena físicamente las palabras dentro de un párrafo usando animación FLIP
+ */
+
+export interface Props {
+  variantes: string[];
+  intervaloMs?: number;
+  indiceInicial?: number;
+  ariaLabel?: string;
+}
+
+const {
+  variantes,
+  intervaloMs = 3600,
+  indiceInicial = 0,
+  ariaLabel = "estructuras que se reconfiguran",
+} = Astro.props;
+
+const tieneVariasOpciones = variantes && variantes.length >= 2;
+---
+
+{variantes && variantes.length === 1 ? (
+  <p class="er" aria-label={ariaLabel}>
+    {variantes[0]}
+  </p>
+) : tieneVariasOpciones && (
+  <p
+    class="er"
+    aria-label={ariaLabel}
+    data-er-root
+    data-variantes={JSON.stringify(variantes)}
+    data-intervalo-ms={intervaloMs}
+    data-indice-inicial={indiceInicial}
+  >
+    <span class="er__flow" data-er-flow></span>
+  </p>
+)}
+
+<style>
+  .er {
+    margin: var(--space-50) 0;
+  }
+
+  /* Inline flex para que `order` cambie el layout real dentro del mismo párrafo */
+  .er__flow {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+  }
+
+  .er__tok {
+    display: inline-block;
+    will-change: transform, opacity;
+    white-space: pre; /* necesario para que los espacios sean visibles */
+  }
+
+  /* tokens "vacíos" (cuando una variante tiene menos caracteres) */
+  .er__tok.is-empty {
+    opacity: 0;
+    pointer-events: none;
+  }
+</style>
+
+{tieneVariasOpciones && (
+  <script>
+    import { ReconfiguradorDeTexto } from '../utils/reconfiguradorDeTexto';
+
+    const initAll = () => {
+      const roots = document.querySelectorAll('[data-er-root]');
+      const reconfiguradores: ReconfiguradorDeTexto[] = [];
+      
+      roots.forEach((raiz) => {
+        if (!(raiz instanceof HTMLElement)) return;
+        const variantes = JSON.parse(raiz.dataset.variantes || '[]');
+        const intervaloMs = parseInt(raiz.dataset.intervaloMs || '2600', 10);
+        const indiceInicial = parseInt(raiz.dataset.indiceInicial || '0', 10);
+
+        if (variantes.length < 2) return;
+
+        const flujo = raiz.querySelector('[data-er-flow]');
+        if (!flujo || !(flujo instanceof HTMLElement)) return;
+
+        // Crear instancia y arrancar
+        const reconfigurrador = new ReconfiguradorDeTexto(flujo, {
+          variantes,
+          intervaloMs,
+          indiceInicial,
+        });
+        reconfigurrador.iniciar();
+        reconfiguradores.push(reconfigurrador);
+      });
+
+      // Limpiar al salir
+      window.addEventListener('beforeunload', () => {
+        reconfiguradores.forEach((r) => r.detener());
+      });
+    };
+
+    if (document.readyState === 'loading') {
+      document.addEventListener('DOMContentLoaded', initAll);
+    } else {
+      initAll();
+    }
+  </script>
+)}
