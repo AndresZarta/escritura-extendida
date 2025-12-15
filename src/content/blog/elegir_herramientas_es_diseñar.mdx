@@ -1,6 +1,6 @@
 ---
-title: "eligir_herramientas_es_diseñar"
-pubDate: 2025-12-13
+title: "la_primera_iteracion_del_proyecto"
+pubDate: 2025-12-15
 description: "En esta entrada y la siguiente quiero contarles cómo, tras una primera iteración fallida, mucha investigación y una serie de experimentos, terminé por abandonar WordPress y adoptar Astro para hacer realidad este sitio. "
 image: ""
 draft: false
@@ -15,13 +15,15 @@ import bloque_html_wordpress from '../../assets/images/elegir_herramientas_es_di
 
 Saber escoger la herramienta correcta para lograr un resultado concreto es una de las habilidades más importantes que debe desarrollar un ingeniero de software.
 
-Este principio de desarrollo, tan básico como profundo en sus consecuencias, fue el que comenzó a orientar mi manera de pensar durante los últimos dos semestres de mi maestría, justo cuando empezaba a conceptualizar **escritura::extendida**.
+Este principio de desarrollo, tan básico como profundo en sus consecuencias, fue el que comenzó a perfilar mi manera de pensar durante los últimos dos semestres de mi maestría, justo cuando empezaba a conceptualizar **escritura::extendida**.
 
-En esta entrada y la siguiente quiero contarles cómo, tras una primera iteración fallida, mucha investigación y una serie de experimentos, terminé por abandonar WordPress y adoptar Astro para hacer realidad este sitio. 
+En esta entrada y la siguiente quiero contarles cómo, tras una primera iteración fallida, mucha investigación y una serie de experimentos, terminé por abandonar WordPress y adoptar [Astro](https://astro.build) para hacer realidad este sitio. 
 
 Hasta entonces, mi experiencia en diseño web había sido mínima y mediada casi por completo por herramientas visuales que no utilizaban código, como Squarespace, que años atrás había utilizado para construir mi portafolio artístico.
 
-En aquel momento, era suficiente tan solo seleccionar una plantilla prediseñada, ajustar unos cuantos bloques de contenido y dejar que la interfaz definiera por mí la estructura del sitio. Mi objetivo era simple: mostrar un reel videográfico y ejemplos de fotografía. Ese es precisamente el territorio donde brillan las plataformas de diseño sin código: **crean sitios predecibles**, generalistas y visualmente coherentes sin obligar al usuario a involucrarse con la arquitectura subyacente.
+En aquel momento, diseñar un sitio web era tan facil como seleccionar una plantilla prediseñada, ajustar unos cuantos bloques de contenido y dejar que la interfaz definiera por mí la estructura del sitio. Mi objetivo para ese sitio era simple: poder mostrar un reel videográfico y ejemplos de mi fotografía. 
+
+Ese es precisamente el territorio donde brillan las plataformas de diseño sin código; **crean sitios predecibles**, generalistas y visualmente coherentes sin obligar al usuario a involucrarse con la arquitectura subyacente.
 
 <figure class="figure-blog">
     <Image
@@ -31,7 +33,11 @@ En aquel momento, era suficiente tan solo seleccionar una plantilla prediseñada
     <figcaption>Interfaz de Squarespace, mostrando el editor visual de bloques.</figcaption>
 </figure>
 
-Pero cuando **escritura::extendida** empezó a tomar forma más real, entendí que ese tipo de herramientas no podría sostener el proyecto literario y experimental tal y como lo imaginaba. Yo no buscaba un sitio web clásico que simplemente mostrara bloques de texto; buscaba un sitio donde el texto mismo pudiera ser afectado por el código de diversas formas, quizás no previstas por los diseñadores de estas herramientas. 
+Pero cuando **escritura::extendida** empezó a tomar forma más real, entendí que ese tipo de herramientas no podría sostener el proyecto literario y experimental tal y como lo imaginaba. Yo no buscaba un sitio web clásico que simplemente mostrara bloques de texto. Más bien, buscaba un sitio donde el texto mismo pudiera ser afectado por el código de diversas formas, quizás no previstas por los diseñadores de estas herramientas. 
+
+Este tipo de experimentación no cabia en los moldes rígidos que ofrecen páginas de diseño web sin codigo como Squarespace o Wix. La propuesta de valor de estos sitios es **la reproducibilidad del caso común**; y lo que yo buscaba era precisamente lo contrario, un uso de caso **no común**.
+
+Fue luego durante mis clases de ingeniería de software, cuando empece a desarrollar aplicaciones con herramientas programaticas como Django, que descubrí el verdadero alcance creativo de [HTML, CSS y JavaScript](/blog/programar_el_infinito_en_la_web). Comprendí que la web puede no solamente ser un espacio donde se muestra contenido, sino un medio donde el contenido mismo puede comportarse como un sistema organico. Esa revelación marcó un límite claro entre lo que permiten las herramientas visuales y lo que exige un proyecto que trata el texto como materia estética.
 
 Un sitio en el que el texto mismo tuviese una **materialidad dinámica**:
 
@@ -41,7 +47,6 @@ Un sitio en el que el texto mismo tuviese una **materialidad dinámica**:
 
 <FuenteLiteraria><EstructurasReconfiguran 
     variantes={[
-    "Frases que cambian con el paso del tiempo y reensayan su forma.",
     "Textos que cambian de orden para explorar nuevas relaciones.",
     "Un párrafo que se mueve: ordena, desordena, vuelve a ordenar.",
     "Textos que ensayan variaciones, ajustes y desplazamientos.",
@@ -50,28 +55,27 @@ Un sitio en el que el texto mismo tuviese una **materialidad dinámica**:
     "Un párrafo que reensaya su forma: se desarma, se recompone, insiste.",
     "Frases que, al cambiar de orden, ensayan nuevas formas de decirse en el tiempo.",
     "Textos que se mueven y se reordenan para poner a prueba sus propias relaciones.",
-    "Textos que cambian con el tiempo, ajustando su disposición para producir sentido.",
+    "Frases que cambian con el paso del tiempo y reensayan su forma.",
+    "Pedazos que cambian con el tiempo, ajustando su disposición para producir sentido.",
 
     // variaciones de registro
     "Textos que mudan su orden y su traza, probando distintas figuras de lectura.",
-    "Textos sometidos a desplazamientos temporales y reconfiguraciones sucesivas.",
+    "Ideas sometidas a desplazamientos temporales y reconfiguraciones sucesivas.",
     "Un conjunto de frases en tránsito, que ordena y desordena su forma.",
     "Textos que exploran el cambio como método y el ajuste como escritura.",
     ]}
     intervaloMs={5000}
 /></FuenteLiteraria>
 
-Ese tipo de experimentación no cabia en el molde rígido que ofrecen páginas de diseño web sin codigo como Squarespace, Wix o WordPress. Su propuesta de valor es **la reproducibilidad del caso común**; y lo que yo buscaba era precisamente lo contrario, un uso de caso no común.
-
-Durante mis clases de ingeniería de software descubrí el verdadero alcance creativo de [HTML, CSS y JavaScript](/blog/programar_el_infinito_en_la_web). Comprendí que la web puede no solamente ser un espacio donde se muestra contenido, sino un medio donde el contenido mismo puede comportarse como un sistema vivo. Esa revelación marcó un límite claro entre lo que permiten las herramientas visuales y lo que exige un proyecto que trata el texto como materia estética.
-
-Sin embargo, a pesar de tener claro ese entendimiento, este no guió el que fue mi primer paso técnico para implementar el sitio. La primera iteración de **escritura::extendida**, de hecho, tomó un rumbo inesperado. Y fue un rumbo equivocado.
+Sin embargo, a pesar de haber empezado a desarrollar estas intuiciones, estas no guiaron el que fue el primer paso técnico para implementar el sitio. La primera iteración de **escritura::extendida**, de hecho, tomó un rumbo inesperado. Y fue un rumbo equivocado.
 
 ## wordpress
 
-Aunque sea difícil de creer, el primer borrador de este blog nació en WordPress. El atractivo inicial de la herramienta era evidente: como Content Management System ([CMS](/notes/cms)), Wordpress prometía abstraer todo lo relacionado con despliegue, infraestructura y mantenimiento. Podía centrarme en escribir, organizar y publicar, sin pensar en el servidor que había detrás. En esa etapa temprana, esa comodidad me resultó profundamente seductora y esa abstracción me pareció la forma ideal de "simplemente empezar a escribir" mientras dejaba que las ideas empezaran a tomar forma.
+Aunque sea difícil de creer, el primer borrador de este blog nació en [WordPress](https://es.wikipedia.org/wiki/WordPress). El atractivo inicial de la herramienta era evidente: como Content Management System ([CMS](/notes/cms)), Wordpress prometía abstraer todo lo relacionado con despliegue, infraestructura y mantenimiento. Podía centrarme en escribir, organizar y publicar, sin pensar en el servidor que había detrás. En esa etapa temprana, esa comodidad me resultó profundamente seductora y esa abstracción me pareció la forma ideal de "simplemente empezar a escribir" mientras dejaba que las ideas empezaran a tomar forma.
 
-Tras una breve lectura sobre las capacidades de los bloques HTML que WordPress incorpora, supuse que tendría suficiente control para empezar a experimentar con pequeñas transformaciones de texto que ya imaginaba como experimentos literarios. Pero muy pronto descubrí los límites de ese modelo. Como CMS, WordPress está diseñado para garantizar consistencia y estabilidad: sus bloques visuales operan dentro de un marco rígido que mantiene la integridad del sistema. Y aunque permite insertar fragmentos de HTML o JavaScript, no ofrece un acceso profundo a la estructura del documento ni al ciclo de renderizado que define cómo aparece realmente el contenido en el navegador.
+Tras una breve lectura sobre las capacidades de los bloques HTML que WordPress incorpora, supuse que tendría suficiente control para empezar a experimentar con pequeñas transformaciones de texto que ya imaginaba como experimentos literarios. Pero muy pronto descubrí los límites de ese modelo. 
+
+Como CMS, WordPress está diseñado para garantizar consistencia y estabilidad: sus bloques visuales operan dentro de un marco rígido que mantiene la integridad del sistema. Y aunque permite insertar fragmentos de HTML o JavaScript, no ofrece un acceso profundo a la estructura del documento ni al ciclo de renderizado que define cómo aparece realmente el contenido en el navegador.
 <figure class="figure-blog">
     <Image
       src={bloque_html_wordpress}
@@ -81,11 +85,11 @@ Tras una breve lectura sobre las capacidades de los bloques HTML que WordPress i
 </figure>
 Esto no es un defecto; es precisamente cómo funciona un CMS. Pero para mí, en ese momento, sí era una limitación.
 
-La limitación se volvió evidente apenas terminé el borrador de la primera publicación. Después de haber trabajado con frameworks más programáticos como Django, WordPress se sentía tedioso y demasiado incómodo para lo que yo buscaba. La plataforma seguía respondiendo a un paradigma orientado a la publicación convencional, no a la manipulación directa del texto como material estético, reactivo y maleable.
+La limitación se volvió evidente apenas terminé el borrador de la primera publicación. Tras haber trabajado con frameworks más programáticos y declarativos como Django, WordPress se sentía tedioso e innecesariamente incómodo para lo que yo buscaba: una experiencia fragmentada en paneles, menús y una sucesión constante de clics que interrumpían cualquier flujo experimental. Su editor por bloques, pensado para componer páginas de manera visual y predecible, dificultaba intervenir el texto con precisión; cada variación requería rodeos, configuraciones ocultas o soluciones ad hoc. La plataforma respondía, en última instancia, a un paradigma orientado a la publicación convencional, no a la manipulación directa del texto como material estético, reactivo y maleable.
 
-Fue en esa tensión donde surgió la pregunta que cambiaría el rumbo del proyecto:
+Fue dentro de esa tensión donde surgió la pregunta que cambiaría el rumbo del proyecto:
 
-> ¿Cuál es el motivo técnico que hace que WordPress no me permita hacer lo que quiero hacer?
+> ¿Cuál es el fundamento técnico que hace que WordPress dificulte hacer lo que quiero hacer?
 
 Parte de la respuesta estaba en la arquitectura misma del sitio que WordPress genera y hace visible al usuario. WordPress es, en esencia, un sistema que produce [sitios web dinámicos](/notes/sitios_web_dinamicos), lo cual implica que el contenido nunca existe como un documento HTML prerenderizado y estable. Para tratar de entender la diferencia, investigué mucho sobre las diferencias entre los [sitios de web estáticos](/notes/sitios_web_estaticos) y [sitios de web dinámicos](/notes/sitios_web_dinamicos).
 
@@ -139,11 +143,13 @@ Además de esto, la arquitectura de WordPress introducia una serie restricciones
 
 En otras palabras: el texto en WordPress no es un objeto transparente y manipulable, sino el resultado de un sistema pensado para publicar contenido convencional de forma robusta y consistente. Ese modelo es ideal para sitios con usuarios, comentarios o un flujo editorial complejo, pero se vuelve contraproducente cuando lo que se desea es intervenir el texto de manera directa, tratándolo como un material estético.
 
-Entendí entonces que **Wordpress claramente dificultaba este tipo de experimentación** no por una limitación superficial, sino por su propia filosofía arquitectónica: el contenido en Wordpress es gestionado y administrado, no interpretado como un espacio donde el código pueda actuar en el mismo plano que el contenido literario.
+## la_decisión_de_abandonar_wordpress
+
+Entendí entonces que Wordpress claramente dificultaba el tipo de experimentación que era fundamental para **escritura::extendida**. No era simplemente por una limitación superficial, sino por su propia filosofía arquitectónica: el contenido en Wordpress es gestionado y administrado, no interpretado como un espacio donde el código pueda actuar en el mismo plano que el contenido literario.
 
 Para muchos proyectos, WordPress sin duda es la herramienta ideal, pero para **escritura::extendida** claramente no lo era. 
 
 El sitio no necesitaba procesar usuarios ni enviar contenido personalizado: lo que necesitaba era una **superficie de experimentación directa**, donde el texto pudiera reaccionar al entorno sin pasar por un sistema cerrado. Comprender esta diferencia arquitectónica fue clave para tomar una decisión informada.
 
-Comprender esto fue lo que me permitió abandonar WordPress sin nostalgia y empezar a buscar una herramienta cuya filosofía coincidiera con la del proyecto. Esa búsqueda es el punto de partida de la siguiente entrada.
+Fue lo que me permitió abandonar WordPress sin nostalgia y empezar a buscar una herramienta cuya filosofía coincidiera con la del proyecto. Esa búsqueda es el punto de partida de la siguiente entrada.
 
