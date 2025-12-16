@@ -2,11 +2,11 @@
 title: cms
 description: ""
 tags: []
-pubDate: 2025-12-13
+pubDate: 2025-12-16
 upDate:
 image: ""
 draft: false
-modified: 2025-12-13T20:25:24-05:00
+modified: 2025-12-16T20:25:24-05:00
 ---
 
 Un **CMS (Content Management System)** es un software diseñado para **crear, organizar y publicar contenido web** sin que el autor tenga que interactuar directamente con la infraestructura técnica que lo sostiene. Su función principal es **gestionar contenido**, no interpretarlo como material expresivo.

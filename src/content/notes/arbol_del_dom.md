@@ -2,11 +2,11 @@
 title: arbol_del_dom
 description: ""
 tags: []
-pubDate: 2025-12-14
+pubDate: 2025-12-16
 upDate:
 image: ""
 draft: false
-modified: 2025-12-14T01:20:32-05:00
+modified: 2025-12-16T01:20:32-05:00
 ---
 
 El **árbol del DOM (Document Object Model)** es la representación estructural de un [documento HTML](/blog/programar_el_infinito_en_la_web) como una jerarquía de nodos. Cada elemento, atributo y fragmento de texto existe como un nodo relacionado por vínculos de **padre, hijo y hermano**, lo que permite que el documento sea recorrido, modificado y reordenado de manera programática.
