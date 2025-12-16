@@ -67,12 +67,22 @@ const tieneVariasOpciones = variantes && variantes.length >= 2;
   <script>
     import { ReconfiguradorDeTexto } from '../utils/reconfiguradorDeTexto';
 
+    let reconfiguradores: ReconfiguradorDeTexto[] = [];
+
+    const detenerTodo = () => {
+      reconfiguradores.forEach((r) => r.detener());
+      reconfiguradores = [];
+    };
+
     const initAll = () => {
+      // En navegaciones con bfcache / back-forward, el script no siempre se re-ejecuta.
+      // Por eso re-inicializamos de forma idempotente.
+      detenerTodo();
+
       const roots = document.querySelectorAll('[data-er-root]');
-      const reconfiguradores: ReconfiguradorDeTexto[] = [];
-      
       roots.forEach((raiz) => {
         if (!(raiz instanceof HTMLElement)) return;
+
         const variantes = JSON.parse(raiz.dataset.variantes || '[]');
         const intervaloMs = parseInt(raiz.dataset.intervaloMs || '2600', 10);
         const indiceInicial = parseInt(raiz.dataset.indiceInicial || '0', 10);
@@ -82,7 +92,6 @@ const tieneVariasOpciones = variantes && variantes.length >= 2;
         const flujo = raiz.querySelector('[data-er-flow]');
         if (!flujo || !(flujo instanceof HTMLElement)) return;
 
-        // Crear instancia y arrancar
         const reconfigurrador = new ReconfiguradorDeTexto(flujo, {
           variantes,
           intervaloMs,
@@ -91,17 +100,20 @@ const tieneVariasOpciones = variantes && variantes.length >= 2;
         reconfigurrador.iniciar();
         reconfiguradores.push(reconfigurrador);
       });
-
-      // Limpiar al salir
-      window.addEventListener('beforeunload', () => {
-        reconfiguradores.forEach((r) => r.detener());
-      });
     };
 
+    // Carga normal
     if (document.readyState === 'loading') {
-      document.addEventListener('DOMContentLoaded', initAll);
+      document.addEventListener('DOMContentLoaded', initAll, { once: true });
     } else {
       initAll();
     }
+
+    // bfcache: al volver con Back, la pagina puede restaurarse con el JS pausado.
+    window.addEventListener('pageshow', () => initAll());
+    window.addEventListener('pagehide', () => detenerTodo());
+
+    // Si usas navegacion tipo SPA (Astro view transitions), reinicializa al cambiar de pagina.
+    document.addEventListener('astro:page-load', () => initAll());
   </script>
 )}
