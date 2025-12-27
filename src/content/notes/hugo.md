@@ -1,7 +1,7 @@
 ---
 title: hugo
 description: "Generador estático en Go (2013): rapidez y estabilidad, interactividad como capa externa."
-tags: [web, sitios_web_estaticos]
+tags: []
 pubDate: 2025-12-27
 upDate:
 image: ""

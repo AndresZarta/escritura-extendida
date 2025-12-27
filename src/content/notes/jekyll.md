@@ -1,7 +1,7 @@
 ---
 title: jekyll
 description: "Generador estático clásico (2008): publicación simple, fricción para JS moderno."
-tags: [web, sitios_web_estaticos]
+tags: []
 pubDate: 2025-12-27
 upDate:
 image: ""

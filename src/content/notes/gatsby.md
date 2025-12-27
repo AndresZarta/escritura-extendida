@@ -1,8 +1,8 @@
 ---
 title: gatsby
 description: "SSG basado en React (2015): potente, pero con modelo de aplicación y JS global."
-tags: [web, sitios_web_estaticos]
-pubDate: 2025-12-14
+tags: []
+pubDate: 2025-12-27
 upDate:
 image: ""
 draft: false

@@ -1,8 +1,8 @@
 ---
 title: nextjs
-description: "Framework de React (2016): estándar para apps, sobredimensionado para texto."
-tags: [web, sitios_web_estaticos]
-pubDate: 2025-12-14
+description: "Framework (2016): estándar de apps React, pero sobredimensionado para sitios estáticos."
+tags: []
+pubDate: 2025-12-27
 upDate:
 image: ""
 draft: false

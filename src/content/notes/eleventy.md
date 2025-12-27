@@ -1,8 +1,8 @@
 ---
 title: eleventy
 description: "SSG en Node (2017): minimalista y flexible, pero te exige diseñar arquitectura."
-tags: [web, sitios_web_estaticos]
-pubDate: 2025-12-14
+tags: []
+pubDate: 2025-12-27
 upDate:
 image: ""
 draft: false

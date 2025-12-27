@@ -2,7 +2,7 @@
 title: sveltekit
 description: "Framework (2022): excelente DX, pero paradigma de app y framework único."
 tags: [web, sitios_web_estaticos]
-pubDate: 2025-12-14
+pubDate: 2025-12-27
 upDate:
 image: ""
 draft: false
