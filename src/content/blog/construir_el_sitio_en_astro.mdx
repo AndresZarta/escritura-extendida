@@ -1,0 +1,429 @@
+---
+title: "construir_el_sitio_en_astro"
+pubDate: 2025-12-27
+tags: []
+description: "Cómo migrar un sitio web a Astro permitió reconfigurar la relación entre contenido, forma y comportamiento en un proyecto literario digital."
+draft: false
+---
+
+import { Image, Picture } from 'astro:assets';
+import buzz from '../../assets/images/construir_el_sitio_en_astro/buzz.jpeg';
+import herramientas from '../../assets/images/construir_el_sitio_en_astro/herramientas.jpeg';
+
+En la [entrada anterior](/blog/aprender_de_la_primera_iteracion_fallida) conté cómo la primera versión de **escritura::extendida** nació en WordPress y por qué ese intento terminó revelando las limitaciones profundas de un [CMS](/notes/cms) cuando el objetivo es tratar el texto como un material estético. 
+
+El ecosistema en el que se inscribe hoy **escritura::extendida** no está organizado alrededor de una herramienta única, sino de una constelación de proyectos **open source** que dialogan entre sí:
+- **Astro** como framework de generación de sitios estáticos, orientado al contenido, responsable de generar [HTML, CSS y el JavaScript](/blog/programar_el_infinito_en_la_web) mínimo necesario;
+- **GitHub** como repositorio donde vive el código y donde se registra, con cada commit, la historia del proyecto;
+- **GitHub Pages** como servicio de hosting estático que publica el sitio a través de una [CDN](/notes/cdn) global.
+
+En esta entrada, quiero describir cómo este desplazamiento, de una plataforma cerrada a un ecosistema abierto, no fue solo una decisión técnica, sino una reconfiguración conceptual del proyecto: un cambio en la manera de pensar el sitio, su soporte y su relación de la forma y la lectura. 
+
+## un_cambio_conceptual_y_estético
+Cuando me decidí finalmente a migrar el sitio ya había definido la apariencia visual en Wordpress; minimalista, inspirada en la textura de los libros, y lamentaba la posibilidad de perder ese diseño al abandonarlo. Sin embargo, la necesidad de controlar cada aspecto del documento HTML era claramente un argumento más fuerte que el apego a una estética provisional.
+
+Migrar, significó abandonar la comodidad de una herramienta que prometía encargarse de todo y, en su lugar, asumir responsabilidad por la arquitectura del sitio. Replantear la relación entre el contenido y su medio y pensar la página no solo como un contenedor, sino como parte co-evolutiva de la obra. 
+
+Es precisamente por eso que quise que la estética del sitio empezara a adoptar un estilo deliberadamente híbrido. Por un lado, quise continuar remitiendo al formato de los libros pero también a los manuscritos no finalizados: fondo blanco, una tipografía que evocara a la máquina de escribir, con márgenes amplios que privilegiaran la lectura continua. Por otro lado, quería incorporar sin disimulo la estética de lo técnico: nombres en [snake_case](/notes/snake_case), utilizados como encabezados que parecen identificadores y una organización que recuerda a variables y estructuras de código. Era una coexistencia declarativa: el sitio se presenta a la vez como texto legible y como sistema, como objeto literario y como artefacto computacional.
+
+Ese tránsito marcó el inicio de una búsqueda más amplia: encontrar un sistema que me permitiera generar HTML manipulable, controlar el [DOM](/notes/arbol_del_dom), integrar experimentos interactivos, pero que  al mismo tiempo permitiera mantener un flujo de escritura fluido. 
+
+Esa búsqueda me llevó, paso a paso, a entender la necesidad de un ecosistema que jamás habría podido construir dentro de un CMS.
+
+## el_territorio_de_la_web_estatica
+Es útil detenerse un momento y aclarar qué significa, en términos generales, hacer un [sitio web estático](/notes/sitios_web_estaticos) y qué partes de la arquitectura web intervienen en ese proceso.
+
+Un sitio web estático no es, como a veces se piensa, un sitio “simple” o “limitado”. Es, más bien, un sitio cuyo resultado final consiste en archivos [HTML, CSS y JavaScript](/blog/programar_el_infinito_en_la_web) ya generados, listos para ser servidos directamente por un servidor o una [CDN](/notes/cdn), sin necesidad de bases de datos ni procesamiento en tiempo real. Cada página existe como un documento concreto, legible por cualquier navegador, lo que garantiza estabilidad, rendimiento y control sobre el resultado final.
+
+Para llegar a ese resultado intervienen varios componentes fundamentales:
+
+1. El contenido, que suele escribirse en formatos pensados para la autoría: **[Markdown](/notes/markdown)**, **[MDX](/notes/markdown_extendido)** o incluso archivos de texto plano (.**txt**) enriquecidos con metadatos. Estos formatos permiten separar claramente la escritura del diseño y facilitan un [flujo editorial continuo, versionable y portable](/notes/flujo_editorial_versionable_portable).
+
+2. El sistema de generación, es decir, la herramienta que toma ese contenido y lo transforma en documentos de HTML. Aquí es donde entran los **generadores de sitios estáticos**: su función principal es recorrer los textos, aplicar plantillas, resolver enlaces, inyectar estilos y producir un conjunto coherente de páginas. Cada generador propone una forma distinta de organizar esta relación entre contenido, estructura y presentación, y en esas diferencias es la que constituye gran parte de sus distintivos filosóficos.
+
+3. La capa de presentación: **CSS** para definir la apariencia visual y, cuando es necesario, **JavaScript** para introducir comportamientos interactivos. 
+
+4. Finalmente, está la infraestructura de publicación. Un sitio estático necesita un lugar donde vivir: un servidor o, más comúnmente hoy, una [CDN](/notes/cdn) que distribuya los archivos a nivel global. Servicios como **GitHub Pages**, **Netlify** o **Cloudflare Pages** cumplen esta función, sirviendo los documentos tal como fueron generados, sin intermediarios ni lógica oculta.
+
+Aquí vale apartar que una ventaja que tiene **GitHub Pages** sobre cualquiera de sus rivales es su simplicidad operativa. Es un servicio gratuito, rápido de configurar y suficiente para una amplia mayoría de sitios estáticos. No requiere planes de pago ni decisiones tempranas sobre escalado.
+
+Además, ofrece despliegues predecibles y estables: el sitio se sirve directamente desde una CDN global sin necesidad de configurar pipelines complejos. Para proyectos pequeños o medianos, personales, editoriales o experimentales, GitHub Pages reduce la fricción al mínimo y permite concentrarse en el contenido y la estructura del sitio, no en su infraestructura.
+
+Por estas razones, muchos proyectos optan por GitHub Pages por encima de alternativas como Netlify o Cloudflare Pages cuando no necesitan funciones avanzadas como edge functions, formularios integrados o lógica de servidor, y priorizan un flujo simple, gratuito y confiable. 
+
+Fue por esa razón que lo elegí para hospedar **escritura::extendida**.
+
+Con estos componentes: contenido, generador, presentación e infraestructura, se construye el territorio básico de la web estática. 
+
+A partir de ahí, cada herramienta toma decisiones distintas: qué prioriza, qué abstrae, qué deja en manos del autor. Entender esas decisiones es clave para comprender por qué ciertas herramientas se adaptan mejor que otras a proyectos específicos, y es precisamente ese mapa de alternativas el que fue necesario para mi recorrer antes de llegar a **Astro**.
+
+## explorando_generadores
+
+El primer descubrimiento fue que el mundo de los sitios estáticos no es unívoco. Existen múltiples herramientas diseñadas para distintos estilos de proyectos, y cada una lleva consigo una filosofía técnica particular.
+
+Antes de llegar a la que seria la herramienta definitiva, consideré varias opciones:
+
+<figure class="figure-blog">
+  <a href="https://www.metmuseum.org/hubs/open-access" target="_blank" rel="noopener noreferrer">
+    <Image
+      src={herramientas}
+      alt="Set of Sixty-Two Engraving Tools of Louis D. Nimschke (1832–1904). The Met Open Art."
+    />
+  </a>
+  <figcaption>
+    Louis Daniel Nimschke, <em>Set de sesenta y dos herramientas de grabado</em>, siglo XIX. The Met Open Art.
+  </figcaption>
+</figure>
+
+[Jekyll](/notes/jekyll) y [Hugo](/notes/hugo) representan la primera generación madura de generadores estáticos. Ambos asumen que el HTML generado es el producto final y que cualquier comportamiento adicional se añade de forma externa. Jekyll, en particular, carece de un pipeline moderno para JavaScript, lo que fragmenta el flujo de desarrollo cuando se requiere interactividad no trivial. Hugo, aunque extremadamente eficiente, desplaza la lógica de transformación fuera del ecosistema JavaScript y concibe la interactividad como una capa secundaria. En ambos casos, el texto está pensado para ser principalmente publicado, no manipulado.
+
+[Eleventy](/notes/eleventy) se acercaba más al objetivo al operar en [Node.js](/notes/nodejs). Sin embargo, su filosofía de mínima intervención traslada al desarrollador todas las decisiones arquitectónicas relevantes: composición de componentes, hidratación parcial y límites entre contenido y comportamiento. En una etapa exploratoria, ese costo de diseño temprano sería demasiado excesivo pues ralentizaría la iteración.
+
+En el extremo opuesto, [Gatsby](/notes/gatsby), [Next.js](/notes/nextjs) y [SvelteKit](/notes/sveltekit) resolvían la interactividad de forma contundente, pero lo hacían desde un paradigma de aplicación. En estos frameworks, incluso el contenido puramente textual se modela como vistas dentro de una [SPA](/notes/spa) o de una arquitectura híbrida. Esto introduce JavaScript global, complejidad operativa y un cambio en el modelo mental: el documento deja de ser la unidad primaria. Aunque técnicamente capaces, estos frameworks invertían las prioridades del proyecto.
+
+En conjunto, todos estos descartes revelaron un patrón claro: las herramientas orientadas a contenido trataban la interactividad como un añadido externo, mientras que las orientadas a interactividad trataban el contenido como un subproducto de una aplicación. Ninguna resolvía bien el punto intermedio.
+
+Esta tensión es la que conduce directamente a la elección de **Astro**.
+
+## construyendo_el_sitio_con_astro
+
+<figure class="figure-blog">
+  <img src={"/images/astro_video.gif"} alt="Interfaz CLI de Astro en acción, mostrando el proceso de construcción de un sitio estático nuevo."/>
+  <figcaption>
+    Interfaz CLI de Astro en acción, mostrando el proceso de construcción de un sitio estático nuevo.
+  </figcaption>
+</figure>
+
+La propuesta de **[Astro](/notes/astro)** es clara y directa: tratar cada página como un documento HTML estático, generado en build, pero permitir que ciertos fragmentos dentro de ese documento tengan comportamiento programático cuando sea necesario.
+
+Esto se llama el modelo de **islas de interactividad**: la página es, por defecto, HTML puro, pero ciertas “islas” pueden hidratarse con JavaScript cuando el usuario las necesita.
+
+La ventaja operativa es que el modelo mental es explícito: aquello que vive en el proceso de build o en el servidor (es decir, lo que se renderiza y genera como HTML final antes de llegar al navegador) y aquello que vive en el cliente (JavaScript que se ejecuta en el navegador) se decide por archivo y por componente.
+
+### 1_la_unidad_base_son_paginas_astro
+
+En Astro, una página suele ser un archivo `.astro` dentro de `src/pages`. 
+
+Cada archivo se convierte en una ruta:
+
+Por ejemplo, `src/pages/index.astro` genera el `/` raíz del sitio.
+
+Mientras que un `src/pages/blog/primer_post.astro` genera `/blog/primer_post/`.
+
+Asi es como se generan URLs que se leerían así:
+
+`www.nombre_de_la_pagina.com.com/` que lleva al indice.
+
+`www.nombre_de_la_pagina.com/blog/primer_post/` que lleva a un post específico.
+
+```astro
+---
+// Frontmatter: corre en build/servidor. Aquí importas componentes, lees contenido y preparas datos.
+import BaseLayout from "../layouts/BaseLayout.astro";
+import VersionTag from "../components/VersionTag.astro";
+
+const titulo = "escritura::extendida";
+const descripcion = "Un ensayo interdisciplinario sobre cómo pensar, escribir y programar una nueva literatura digital.";
+---
+
+<BaseLayout title={titulo} description={descripcion}>
+  <main>
+    <h1>{titulo}</h1>
+    <p>{descripcion}</p>
+    <VersionTag /> <!-- Componente que muestra la versión actual del sitio -->
+  </main>
+</BaseLayout>
+```
+
+Lo importante de notar aquí es la separación estructural de los archivos Astro: el bloque entre `---` es un entorno de ejecución de build/servidor ([Node](/notes/nodejs)). El resto es markup que termina convertido a HTML.
+
+¿Qué implica esto? Que antes de que la página se sirva al usuario, el servidor durante el proceso compilación ejecuta todo el código dentro del bloque `---`, importa datos, componentes y realiza cálculos necesarios. Solo después de este procesamiento se genera el HTML final que será enviado al navegador. Así, el usuario recibe una página ya renderizada, lista para ser leída, sin necesidad de esperar a que el navegador procese datos o arme la estructura principal.
+
+### 2_contenido_como_data_principal
+
+Cuando el sitio tiene un carácter editorial, como un blog, una página de documentación o cualquier otro sitio en el que el texto sea el foco principal, como lo es **escritura::extendida**, conviene tratar los archivos de contenido como **fuentes de datos** más que como “páginas sueltas”. Es decir, en lugar de que cada archivo se publique como una página estática independiente y sin relación con otros contenidos, Astro permite que todos estos archivos se organicen y consulten como una colección estructurada, lo que habilita funcionalidades como listados, filtrado, navegación y reutilización del contenido en diferentes partes del sitio.
+
+En este contexto, los formatos `.md` ([Markdown](/notes/markdown)) y `.mdx` ([Markdown extendido con componentes](/notes/markdown_extendido)) son especialmente útiles: permiten escribir el contenido de manera sencilla y flexible, y al mismo tiempo integrarlo en el sistema de colecciones de Astro para aprovechar todas estas funcionalidades.
+
+Astro ofrece **_Content Collections_** para esto: defines un esquema, validas el _frontmatter_ de los posts y luego puedes consultarlos como un conjunto de datos.
+
+Cada publicación en Astro (ya sea en formato `.md` o `.mdx`) comienza con un bloque especial llamado **frontmatter**. 
+
+Este bloque, delimitado por líneas de tres guiones `---`, contiene metadatos estructurados en formato YAML. Estos metadatos describen la publicación y permiten que Astro la procese como parte de una colección.
+
+Ejemplo de frontmatter típico en un post:
+
+```md
+---
+title: "borges_y_la_programacion"
+description: "Explorando la relación entre la obra de Borges y los conceptos fundamentales de la programación."
+pubDate: 2025-12-31
+draft: false
+tags:
+  - literatura
+  - código
+---
+
+Aquí comienza el contenido del post...
+```
+
+Astro utiliza estos metadatos para validar, filtrar y organizar las publicaciones. El esquema de la colección define qué campos son obligatorios y cómo deben ser interpretados.
+
+`src/content/config.ts`:
+
+```ts
+import { defineCollection, z } from "astro:content";
+
+// Define la colección 'blog' y su esquema de datos
+const blog = defineCollection({
+  schema: z.object({
+    // Título del post (obligatorio)
+    title: z.string(),
+    // Descripción breve (opcional)
+    description: z.string().optional(),
+    // Fecha de publicación (obligatorio, convertida a tipo fecha)
+    pubDate: z.coerce.date(),
+    // Indica si el post es borrador (por defecto: false)
+    draft: z.boolean().default(false),
+    // Lista de etiquetas (por defecto: array vacío)
+    tags: z.array(z.string()).default([]),
+  }),
+});
+
+// Exporta la colección para que Astro la utilice en el sitio
+export const collections = { blog };
+```
+
+Cuando Astro compila el sitio, recorre todos los archivos en el directorio de contenido que tengan el frontmatter correspondiente y los agrega automáticamente a la colección `blog`. Así, puedes consultar todos los posts desde el código, filtrarlos, ordenarlos y mostrarlos en páginas como el índice del blog.
+
+De esta forma puedes listar posts y construir páginas.
+
+`src/pages/blog/index.astro`:
+
+```astro
+---
+// Importa el layout base para la página y la función para obtener la colección de posts
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+// Obtiene todos los posts de la colección 'blog', filtra los que no son borrador y los ordena por fecha de publicación (más reciente primero)
+const posts = (await getCollection("blog"))
+  .filter((p) => !p.data.draft) // Solo muestra los posts publicados
+  .sort((a, b) => b.data.pubDate.valueOf() - a.data.pubDate.valueOf()); // Ordena por fecha descendente
+---
+
+// Renderiza la página usando el layout base
+<BaseLayout title="Blog">
+  <h1>Blog</h1>
+  <ul>
+    {/* Recorre la lista de posts y genera un enlace para cada uno, mostrando el título y la fecha */}
+    {posts.map((post) => (
+      <li key={post.slug}>
+        {/* Enlace al post individual usando el slug generado automáticamente */}
+        <a href={`/blog/${post.slug}/`}>{post.data.title}</a>
+        {/* Muestra la fecha de publicación en formato YYYY-MM-DD */}
+        <small>{post.data.pubDate.toISOString().slice(0, 10)}</small>
+      </li>
+    ))}
+  </ul>
+</BaseLayout>
+```
+
+Astro organiza estos archivos de texto como el contenido principal del sitio. Cada archivo, gracias a su frontmatter, se convierte en un nodo dentro de una colección estructurada, accesible desde el código y las plantillas. Esto permite que la escritura no dependa de una base de datos ni de un CMS tradicional, sino que el texto y sus metadatos sean el centro del sistema.
+
+### 3_paginas_contenido_rutas_dinamicas_getstaticpaths
+
+Para generar una página diferente por entrada, Astro usa un patrón de rutas dinámicas similar al de [Next.js.](/notes/nextjs)
+
+Definir una ruta dinámica implica crear un archivo cuyo nombre incluye corchetes, por ejemplo, `[...slug].astro`. Esto indica a Astro que esta página puede recibir diferentes valores para `slug`, y que debe generar una página distinta para cada uno.
+
+`src/pages/blog/[...slug].astro`:
+
+```astro
+---
+// Importa el layout base y la función para obtener la colección de posts
+import BaseLayout from "../../layouts/BaseLayout.astro";
+import { getCollection } from "astro:content";
+
+// Esta función especial le dice a Astro qué páginas debe generar en el build
+export async function getStaticPaths() {
+  // Obtiene todos los posts de la colección 'blog'
+  const posts = await getCollection("blog");
+  // Para cada post, define una ruta dinámica usando el slug
+  return posts.map((post) => ({
+    params: { slug: post.slug }, // El slug será parte de la URL
+    props: { post }, // Pasa el post como propiedad a la página
+  }));
+}
+
+// Recibe el post correspondiente a la ruta actual
+const { post } = Astro.props;
+// Obtiene el contenido renderizado del post (Markdown convertido a HTML)
+const { Content } = await post.render();
+---
+
+// Renderiza la página individual del post usando el layout base
+<BaseLayout title={post.data.title} description={post.data.description}>
+  <article>
+    <h1>{post.data.title}</h1>
+    {/* Inserta el contenido del post, que puede incluir Markdown y componentes */}
+    <Content />
+  </article>
+</BaseLayout>
+```
+
+Este patrón permite que Astro genere automáticamente una página distinta para cada post en la colección, usando el campo `slug` para construir la URL. El archivo `[...slug].astro` es una ruta dinámica: Astro recorre todos los posts, toma su slug y crea una página estática para cada uno. Así, el sistema no depende de una base de datos ni de lógica de servidor en tiempo real; todo se resuelve en el build y el resultado son archivos HTML listos para ser servidos.
+
+### 4_mdx_vs_astro_cuando_usar_cada_uno
+
+- **Markdown (`.md`)**: ideal para texto puro. Menos fricción editorial.
+- **MDX (`.mdx`)**: texto + posibilidad de insertar componentes dentro del flujo del párrafo.
+- **Astro (`.astro`)**: para páginas con composición más estructural, queries de contenido, layouts, o lógica de build más elaborada.
+
+MDX se vuelve el punto intermedio práctico: mantiene la ergonomía de la escritura, pero permite “romper” el texto con componentes cuando el texto necesita comportarse.
+
+
+```mdx
+---
+title: "un texto que se reconfigura"
+pubDate: 2025-12-14
+description: "MDX como punto intermedio: escribir como ensayo, intervenir como sistema."
+---
+
+import EstructurasReconfiguran from "../../components/EstructurasReconfiguran.astro";
+import HoverReveal from "../../components/HoverReveal.astro";
+import NotaLateral from "../../components/NotaLateral.astro";
+
+/*
+  La idea: el texto se escribe de forma continua,
+  pero en puntos específicos se insertan componentes.
+*/
+
+El texto se escribe como siempre: párrafos consecutivos, ritmo, continuidad.
+No hay que cambiar de herramienta ni de formato para empezar a trabajar.
+
+Cuando aparece la necesidad de que un fragmento se comporte de otra manera,
+el documento permite insertar un componente sin romper el flujo de escritura.
+
+<EstructurasReconfiguran
+  ariaLabel="párrafo reconfigurable"
+  variantes={[
+    "Frases que cambian con el paso del tiempo y reensayan su forma.",
+    "Un párrafo que se mueve: ordena, desordena, vuelve a ordenar.",
+    "El texto no es fijo y prueba distintas configuraciones.",
+  ]}
+  intervaloMs={2600}
+/>
+
+Lo importante es que no hay que convertir la página en una aplicación.
+El archivo sigue siendo Markdown y el texto sigue siendo el eje.
+El componente aparece solo donde hace falta.
+
+En otros casos, el comportamiento no es movimiento, sino revelación de información
+que conviene mantener en segundo plano.
+
+<HoverReveal
+  trigger="pasa el cursor por aquí"
+  reveal="y aparece una segunda frase que complementa la anterior."
+/>
+
+El documento continúa sin interrupciones.
+Los componentes no reemplazan el texto, lo acompañan.
+
+También es posible añadir notas laterales sin desviar la lectura principal,
+de forma similar a un margen o a una anotación.
+
+<NotaLateral title="nota al margen">
+  MDX permite tratar ciertos fragmentos como estructuras activas
+  sin abandonar el formato del ensayo.
+</NotaLateral>
+
+El objetivo no es llenar la página de componentes,
+sino poder introducir comportamiento puntual cuando el texto lo requiere,
+manteniendo el documento como unidad central.
+
+```
+
+MDX nos permite tratar bloques interactivo como si fuera parte del tejido del ensayo, post o cuento, sin convertir toda la página en una aplicación. 
+
+Esto para un escritor, es clave: no obliga a abandonar la manera tradicional de escribir ni a reemplazarla por una lógica de vistas, estados o flujos propios del desarrollo de software. El texto sigue siendo el punto de partida, el espacio donde se piensa y se ensaya la idea.
+
+Sin romper ese gesto, aparece un vocabulario adicional. No tanto gramatical en el sentido clásico, sino retórico y semántico: un conjunto de recursos que permiten que el texto no solo diga, sino que _haga_. Un párrafo puede variar, esconderse, reordenarse, reaccionar. Escribir ya no implica únicamente decidir qué palabras poner y en qué orden, sino también qué comportamientos admitir en ciertos puntos del discurso.
+
+Pensar en MDX es, entonces, pensar el texto junto a estructuras programáticas, no como un reemplazo, sino como una extensión natural. La escritura extendido se escribe con frases, si, pero también con componentes; con ritmo y con reglas; con sentido y con sistema. Esa convivencia, texto que se lee y texto que se ejecuta, es precisamente la manifestación práctica del título de este sitio: una escritura que se expande más allá de la página fija sin dejar de ser escritura.
+
+### 5_componentes_astro_ensamblaje_frameworks_donde_hacen_falta
+
+Un componente `.astro` es, por defecto, **_[ssr](/notes/ssr)_** y no envía JavaScript al cliente. Esto te deja componer UI y estilos con costo cero durante la navegación.
+
+```astro
+---
+export interface Props {
+  etiqueta: string;
+  valor: string;
+}
+const { etiqueta, valor } = Astro.props;
+---
+
+<div class="kv">
+  <span class="k">{etiqueta}</span>
+  <span class="v">{valor}</span>
+</div>
+
+<style>
+  .kv { display: flex; gap: 0.5rem; }
+  .k { opacity: 0.7; }
+</style>
+```
+
+Cuando una pieza necesita estado y eventos del lado del cliente, Astro permite **islas**: importas un componente de React/Svelte/Vue (o JS plano) y decides **cuándo** hidratarlo.
+
+
+```astro
+
+---
+import Contador from "../components/Contador.jsx"; // Componente React para un contador interactivo
+---
+<BaseLayout title="Página con Contador">
+  <h1>Bienvenido a la página con un contador interactivo</h1>
+  <Contador client:visible /> <!-- El contador se hidrata solo cuando es visible en el viewport -->
+</BaseLayout>
+```
+
+En este caso, el componente `Contador` es un componente de React que se importa y se utiliza dentro de la página Astro. La directiva `client:visible` indica que este componente solo debe hidratarse (es decir, cargar su JavaScript y volverse interactivo) cuando el usuario lo desplaza a la vista. Esto optimiza el rendimiento al evitar cargar JavaScript innecesario para componentes que el usuario aún no ha visto.
+
+Este control fino es el mecanismo técnico que evita el patrón “todo es una [SPA](/notes/spa)” y hace viable la interactividad localizada.
+
+### 6_que_habilita_esto_para_la_escritura
+
+La consecuencia práctica para nuestro proyecto, es que Astro permite construir un sitio donde cada página es un documento HTML autónomo, pero que ciertos fragmentos dentro de ese documento pueden tener comportamiento programático. Esto quiere decir que Astro no solo permite la publicacion de formatos tradicionales como blogs o ensayos, sino que habilita la creación de obras literarias que incorporan lógica y dinámica propias.
+
+Con el mismo pipeline podemos producir:
+- un blog (colección, index, tags, feeds),
+- un ensayo largo con secciones navegables,
+- una pieza con componentes computacionales incrustados,
+- y, crucialmente, un espacio para producir una **literatura independiente**: cuentos que dependen de componentes de animacion de texto, una novela corta enlazada por rutas, o una obra que utiliza el [DOM](/notes/arbol_del_dom) como material formal.
+
+Astro permite mantener el texto como documento (HTML final, auditable, legible), pero habilita que ciertos fragmentos tengan comportamiento controlado. Eso vuelve posible una escritura que no solo “se publica”, sino que **se implementa**: cada página puede ser un artefacto literario autónomo, con su propia lógica, sus reglas de navegación y su temporalidad, sin exigir que el sitio entero se degrade a una aplicación monolítica.
+
+### cuando_el_sitio_empezo_a_pensar_conmigo
+
+<figure class="figure-blog">
+  <a href="https://www.metmuseum.org/hubs/open-access" target="_blank" rel="noopener noreferrer">
+    <Image
+      src={buzz}
+      alt="Buzz Aldrin Walking on the Surface of the Moon Near a Leg of the Lunar Module, 1969. Neil Armstrong. The Met Open Art."
+    />
+  </a>
+  <figcaption>
+    Neil Armstrong, <em>Buzz Aldrin Walking on the Surface of the Moon Near a Leg of the Lunar Module</em>, 1969. The Met Open Art.
+  </figcaption>
+</figure>
+
+
+El paso a Astro fue el momento en que el proyecto dejó de sentirse como una promesa y empezó a comportarse como un trabajo en curso. Astro introdujo una estructura clara y esa estructura empezó a informar directamente las ideas del proyecto: pensar en páginas como documentos HTML finales, decidir explícitamente dónde hay comportamiento y dónde no, tratar el contenido como datos versionables. Todo eso fue moldeando cómo escribo y cómo experimento.
+
+Como programador, el cambio fue inmediato. El código dejó de ser un medio incómodo o accesorio y pasó a ser el espacio natural donde articular la escritura. Cada componente nuevo, cada experimento, cada iteración pequeña se integró a una lógica de trabajo clara: probar una hipótesis, implementarla, observar cómo afecta al texto, ajustar. Astro no solo soporta ese ciclo, sino que lo fomenta y lo hace fluido.
+
+En ese tránsito, el proyecto dejó de ser únicamente el origen de una idea para convertirse en una línea de producción de experimentación. Ya no se trataba de llegar a una versión definitiva del sitio, sino de construir una base que hiciera posible seguir escribiendo, probando y reformulando sin empezar de cero cada vez. **escritura::extendida** pasó así de ser un punto de partida a ser un proceso sostenido, y fue esa manera de trabajar la que terminó dándole sentido al proyecto en su conjunto.
+

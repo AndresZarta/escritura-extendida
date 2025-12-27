@@ -13,8 +13,8 @@
     "lint:fix": "eslint \"src/**/*.{ts,tsx,js,jsx,astro,md,mdx}\" --fix"
   },
   "dependencies": {
-    "@astrojs/mdx": "^4.3.10",
-    "astro": "^5.15.4",
+    "@astrojs/mdx": "^4.3.13",
+    "astro": "^5.16.6",
     "astro-loader-obsidian": "^0.10.0",
     "simplex-noise": "^4.0.3",
     "tsx": "^4.21.0"
