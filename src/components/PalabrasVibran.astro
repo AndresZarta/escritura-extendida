@@ -1,0 +1,31 @@
+---
+---
+
+<span class="palabras-vibran" data-vibrar>
+  <slot />
+</span>
+
+<style>
+  .palabras-vibran {
+    display: inline-block;
+    will-change: transform;
+  }
+</style>
+
+<script>
+  import { vibracionHibrida } from '../utils/aleatorizadores';
+  
+  const animarVibracion = (timestamp: number) => {
+    const tiempoSegundos = timestamp * 0.001;
+    
+    document.querySelectorAll('[data-vibrar]').forEach((elemento, i) => {
+      const offsetX = vibracionHibrida(tiempoSegundos, i);
+      const offsetY = vibracionHibrida(tiempoSegundos, i + 100) * 0.6;
+      (elemento as HTMLElement).style.transform = `translate(${offsetX}px, ${offsetY}px)`;
+    });
+    
+    requestAnimationFrame(animarVibracion);
+  };
+  
+  requestAnimationFrame(animarVibracion);
+</script>

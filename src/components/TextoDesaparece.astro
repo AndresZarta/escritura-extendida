@@ -1,0 +1,19 @@
+---
+---
+
+<p>
+  <span class="texto-desaparece">
+    <slot />
+  </span>
+</p>
+
+<style>
+  .texto-desaparece {
+    transition: opacity 1.5s ease-out;
+    cursor: default;
+  }
+  
+  .texto-desaparece:hover {
+    opacity: 0;
+  }
+</style>

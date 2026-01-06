@@ -20,7 +20,8 @@ Esa insistencia resulta interesante porque revela un límite imaginativo. Bush n
 Sin embargo, hay un momento en el que Bush sugiere algo distinto, algo que ya no pertenece a la metáfora de la ruta: la idea del “snap”, el **salto** instantáneo de una asociación a otra. 
 
 > _Con un elemento ya en su poder, salta de inmediato al siguiente que la asociación de ideas le sugiere, de acuerdo con alguna intrincada red de senderos alojada en las células del cerebro._
-> "As We May Think", Vannevar Bush
+>
+> _"As We May Think", Vannevar Bush_
 
 Allí se abre una grieta en su propio sistema metafórico. El pensamiento no se desplaza solo como un caminante; también salta, cambia de posición sin transición, se proyecta de un punto a otro sin recorrer el espacio intermedio. Ese gesto —breve, casi inadvertido en el ensayo— anticipa una forma distinta de **imaginar** la lectura: no como ruta extendida, sino como salto súbito entre estados.
 

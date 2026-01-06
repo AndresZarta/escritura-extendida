@@ -17,6 +17,7 @@ const notesCollection = defineCollection({
   loader: ObsidianMdLoader({
     base: 'src/content/notes',
     url: 'notes',
+    assetsPattern: '**/*.{svg,png,jpg,jpeg,avif,webp,gif,tiff,ico}',
   }),
   schema: () => ObsidianDocumentSchema.extend({
     title: z.string(),
