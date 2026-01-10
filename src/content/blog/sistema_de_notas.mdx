@@ -1,0 +1,245 @@
+---
+title: "sistema_de_notas"
+description: "Desarrollo del sistema de notas interconectadas en escritura::extendida."
+pubDate: 2026-01-10
+draft: false
+---
+import { Image } from 'astro:assets';
+import andy_note_site from '../../assets/images/sistema_de_notas/andy_notes_site.png';
+import obsidian from '../../assets/images/sistema_de_notas/obsidian.png';
+import emma_site from '../../assets/images/sistema_de_notas/emma_site.png';
+import koos_site from '../../assets/images/sistema_de_notas/koos_site.png';
+import notes_escritura from '../../assets/images/sistema_de_notas/notes_escritura.png';
+
+
+En una [entrada anterior](/blog/escribir_en_la_no-linealidad), mencioné como la version 1.0.0 del sitio buscaba constituirse al rededor del concepto central de la no-linealidad. Acompañando a esa entrada, se incluyeron también en el sitio una serie de notas suplementarias a las que esa entrada refería por medio de hipervínculos.
+
+Estas notas acompañantes de la entrada cumplen la importante labor de permitir una navegación a través del contenido de forma no-lineal y sujeta a la curiosidad del lector. Fue asi que en un mismo acto estaba describiendo la evolución conceptual del sitio, ahora capaz de permitir una navegación no-lineal a través del contenido, y actualizando el código para permitir la inclusión de este nuevo sistema de notas.
+
+En esta entrada voy a describir el desarrollo conceptual y técnico que significo configurar este nuevo sistema de notas que desde entonces utilizamos en **escritura::extendida**.
+
+## .antecedentes_e_inspiracion
+La idea de un sistema de notas interconectadas por hipertexto que sirvieran como material suplementaria para las entradas con mayor desarrollo, ha sido, desde el inicio, un aspecto integral del proyecto de **escritura::extendida**. 
+
+En el [post introductorio](/blog/init_escritura_extendida) al sitio, mencioné brevemente mi experiencia leyendo el trabajo de Andy Matuschak. 
+
+<figure class="figure-blog">
+  <a href="https://notes.andymatuschak.org/" target="_blank" rel="noopener noreferrer">
+    <Image
+      src={andy_note_site}
+      width={andy_note_site.width / 2}
+      densities={[1.5, 2]}
+      alt="Captura del sitio de notas interactivo de Andy Matuschak."
+    />
+  </a>
+  <figcaption>Captura del sitio de notas interactivo de Andy Matuschak.</figcaption>
+</figure>
+
+[Andy](https://github.com/andymatuschak) es un pensador brillante y poco convencional, cuyo trabajo gira en torno a una pregunta persistente: cómo diseñar prácticas y estructuras de conocimiento que piensen con nosotros en lugar de limitarse a almacenar información. En su propio sitio de notas describe su colección como un “entorno de pensamiento” compartido públicamente, escrito principalmente para su propio uso y evolucionado con el tiempo, más que como un archivo estático para otros lectores.  ￼
+
+Su enfoque, lejos de querer optimizar la productividad ni ofrecer un método definitivo, busca explorar formas de escritura y lectura que permitan que las ideas se desarrollen de manera acumulativa, asociativa y continua: en su esquema de “**evergreen notes**” ([notas perennes](/notes/notas_perennes)), la meta no es tomar mejores notas sino fomentar un mejor pensamiento, escribiendo notas que sean atómicas, orientadas a conceptos y densamente enlazadas entre sí.  ￼
+
+Al leer su sitio por primera vez, sentí que se trataba de algo muy diferente a consultar un archivo tradicional. Al leerlo, me encontré atravesando un espacio de pensamiento en expansión donde cada nota actuaba tanto como una pieza individual de pensamiento o como una conexión hacia otras ideas, y donde las asociaciones entre notas, y no los índices jerárquicos cerrados, gobernaban la navegación conceptual. 
+ 
+Fue gracias a la experiencia de leer el sitio de Andy Matuschak que llegué a interesarme por [sistemas de manejo de información](/notes/sistemas_de_manejo_de_informacion) y, poco después, a utilizar Obsidian como herramienta para guardar mis notas e interconectarlas. 
+
+## .obsidian
+[Obsidian](/notes/obsidian) es una aplicación de base de conocimiento personal que opera sobre archivos [markdown](/notes/markdown).
+
+<figure class="figure-blog">
+    <Image
+      src={obsidian}
+      width={obsidian.width / 2}
+      densities={[1.5, 2]}
+      alt="Captura de pantalla de la aplicación Obsidian"
+    />
+  <figcaption>Captura de pantalla de la aplicación Obsidian</figcaption>
+</figure>
+
+En Obsidian, las notas se escriben utilizando el lenguaje de [markdown](/notes/markdown), y es posible interconectarlas mediante enlaces internos, tanto usando la sintaxis de “wikilinks” (`[[Nombre de la nota]]`) como mediante enlaces Markdown estándar (`[texto](ruta-al-archivo.md)`), lo que crea una red de ideas navegable y exploratoria.  ￼
+
+La sintaxis de doble corchete es particularmente importante, pues solo basta escribir `[[` y seleccionar o escribir el nombre de otra nota para crear un enlace interno, que no solo conecta al lector con otro contenido, sino que también contribuye a la visualización de cómo las ideas están relacionadas en el grafo de conocimiento.
+
+<figure class="figure-blog">
+  <img src={"/images/obsidian_video.gif"} alt=""/>
+  <figcaption>
+    Grafo de conocimiento en Obsidian, mostrando cómo las notas se interconectan entre sí mediante enlaces internos.
+  </figcaption>
+</figure>
+
+Desde que empecé a utilizar Obsidian a finales de 2021, he escrito y conectado más de 700 notas en mi archivo de conocimiento personal. A medida que estas notas se enlazan unas con otras, comienzan a surgir agrupaciones emergentes que no responden a categorías predefinidas ni a jerarquías rígidas, sino a afinidades conceptuales que se hacen visibles únicamente a través de las conexiónes. Estas constelaciones revelan formas de organización no lineales, dinámicas, que cambian con cada nueva nota añadida o revisada.
+
+Este tipo de estructura encarna lo que [Maggie Appleton](https://maggieappleton.com) describe como un jardín digital: un espacio de escritura en crecimiento continuo, donde las ideas se cultivan, se podan y se reconfiguran con el tiempo, en contraste con el modelo tradicional de la publicación como una secuencia de publicaciones cerradas y cronológicas. En su reconstrucción histórica del concepto, Appleton señala que estos jardines privilegian el proceso sobre el resultado, la exploración sobre la conclusión, y la interconexión sobre la clasificación definitiva.
+
+## .parte_del_ecosistema_de_blog_digital_contemporaneo
+Otro de los motivos que me llevó a implementar un sistema de notas en el sitio fue encontrar que otros desarrolladores y blogueros contemporáneos también lo han hecho, cada uno aportando su propia perspectiva sobre cómo enriquecer los contenidos de un sitio web con notas más breves y ligadas entre sí. 
+
+Por ejemplo, en el blog de **[Emma Goto](https://www.emgoto.com)** no solo se publica contenido tradicional —Emma escribe sobre programación, libros y senderismo en Japón—, sino que también ha añadido [una sección de notas](https://www.emgoto.com/notes/) donde reflexiones más ligeras o fragmentarias conviven con artículos más largos. Esta convivencia sugiere una separación editorial entre pensamiento en desarrollo y narrativa más estructurada que va más allá del archivo cronológico habitual.
+
+Cuando Emma [incorporó la sección de notas en su blog](https://www.emgoto.com/notes-section/), lo hizo motivada por la idea de contar con un espacio sin presiones para compartir apuntes sueltos. _“Me gusta la idea de un jardín digital: tener un lugar donde pueda poner mis notas en bruto sin tener que preocuparme demasiado por si vale la pena publicarlas”_, explica en la introducción de su página de notas. 
+
+En esencia, utiliza este apartado para contenido _“que no está lo suficientemente pulido como para ser una entrada de blog propiamente dicha, pero que aun así quería publicar por si le resulta útil a alguien”_.
+
+Este enfoque le permitió sacar a la luz ideas embrionarias de forma rápida, con la posibilidad de desarrollarlas más adelante si resultaban prometedoras. De hecho, así ocurrió con una de sus publicaciones más populares: al notar que una nota técnica sobre la herramienta **Cursor** comenzaba a recibir visitas inesperadas desde buscadores, decidió convertir ese apunte informal en un artículo completo poco después.
+
+Esta dinámica de “**siembra y cultivo**” valida el valor de compartir incluso borradores. Las notas de Emma funcionan como semillas de textos futuros y como un lugar donde pueden habitar temas personales o menores que no encajan del todo en sus categorías principales. Cabe destacar que implementó esta funcionalidad de manera personalizada: escribe sus notas en [Obsidian](/notes/obsidian) y, mediante un plugin, las sincroniza automáticamente con el repositorio de su sitio construido en [Astro](/notes/astro), integrando sin fricción su flujo de notas privadas con su blog público.
+
+Un dilema parecido aparece en el blog de [Koos Looijesteijn](https://www.kooslooijesteijn.net), quien publica principalmente sobre diseño web. En su [publicación sobre su propio sistema de notas](https://www.kooslooijesteijn.net/blog/add-notes-to-website), notó que “_de vez en cuando tenía una idea para una publicación corta y más personal, pero no quería diluir el archivo… con un aluvión de entradas rápidas y de calidad algo menor_”. Es decir, sentía la necesidad de escribir piezas breves e informales, pero le preocupaba afectar el tono de sus artículos más elaborados.
+
+Al observar que otros autores habían incorporado secciones de notas para este tipo de contenido, decidió experimentar con una solución similar. Planteó que sus notas serían, en esencia, publicaciones corrientes, pero sujetas a restricciones deliberadas: debían ser “_cortas y centradas únicamente en un solo tema_”, con un formato muy básico (como máximo una imagen), escritas en menos de veinte minutos y aceptando de antemano que “_pueden carecer de enlaces a fuentes_” y que “_la escritura puede ser mala_”.
+
+Estas reglas autoimpuestas buscaban recuperar la espontaneidad de publicar con una inmediatez cercana a la de las redes sociales, pero manteniendo el control del contenido en su propio sitio. La idea de “ser dueño de tu propio contenido” fue clave en su decisión: prefirió publicar estas ideas en su blog personal, donde podía “conectar ideas mediante enlaces” a otros textos, en lugar de dejarlas perderse en plataformas como Twitter o Mastodon.
+
+Resulta especialmente relevante que tanto Goto como Looijesteijn desarrollan sus sitios con [Astro](/notes/astro) —el mismo generador estático que utiliza **escritura::extendida**—, lo que les permitió personalizar estas secciones de notas con gran libertad. 
+
+<figure class="figure-blog">
+  <Image
+    src={emma_site}
+    width={emma_site.width / 2}
+    densities={[1.5, 2]}
+    alt="Captura de pantalla del blog de Emma Goto"
+  />
+  <Image
+    src={koos_site}
+    width={koos_site.width / 2}
+    densities={[1.5, 2]}
+    alt="Captura de pantalla del blog de Koos Looijesteijn"
+  />
+  <Image
+    src={notes_escritura}
+    width={notes_escritura.width / 2}
+    densities={[1.5, 2]}
+    alt="Captura de pantalla de la aplicación Obsidian"
+  />
+  <figcaption>
+    Capturas de los sitios de Emma Goto (arriba), Koos Looijesteijn (centro) y escritura::extendida (abajo), mostrando sus respectivos acercamientos a la sección de notas.
+  </figcaption>
+</figure>
+
+Emma describe la sincronización entre Obsidian y su blog en Astro como “muy útil”, mientras que Koos reconoce que el experimento le permitió “aprender mucho sobre Astro”, algo con lo que me identifico. Tras varias iteraciones, Koos incluso cuestionó si valía la pena mantener una separación estricta entre notas y artículos. Si ni siquiera él tenía clara la frontera entre ambos, ¿para qué imponerla al lector? Su conclusión fue tajante: “_¡No necesito una sección de notas!… después de todo, esto es un blog… donde alguna persona de internet publica sus pensamientos_”.
+
+En última instancia, decidió concebir todo su sitio como un continuo de textos largos y cortos, todos parte de un mismo flujo de pensamiento compartido. Su propuesta no consiste en segmentar el contenido por niveles de “calidad”, sino en abrazar la mezcla natural de reflexiones profundas y apuntes casuales que conforman la voz genuina de un blog personal.
+
+Mientras tanto **escritura::extendida** contempla las notas como anotaciones suplementarias a las entradas principales, pero buscando que las notas mantengan una autonomía suficiente para ser exploradas de forma independiente, y que su red de conexiones internas permita al lector navegar libremente entre ideas relacionadas.
+
+## .implementando_un_sistema_de_notas_en_astro
+
+Toda esta genealogía de jardines digitales y notas perennes no tendría sentido si, al llegar al código, me viera obligado a reinventar una infraestructura compleja para algo que debería ser liviano. La clave estaba en lograr que el sistema de notas fuera **simple como la escritura** pero **riguroso com una arquitectura**. [Astro](/notes/astro) ofrece precisamente esa fricción mínima: convierte los textos en datos, pero deja el control en manos del autor.
+
+La decisión fundamental consistió en separar el contenido en dos colecciones editoriales: `blog` para entradas largas y `notes` para fragmentos breves. En `src/content/config.ts` definí dos colecciones con esquemas distintos, y para las notas utilicé un loader especial que permite importar directamente mi archivo de Obsidian:
+
+```ts 
+// src/content/config.ts
+import { defineCollection, z } from 'astro:content';
+import { ObsidianDocumentSchema, ObsidianMdLoader } from "astro-loader-obsidian";
+
+const notesCollection = defineCollection({
+  loader: ObsidianMdLoader({
+    base: 'src/content/notes',
+    url: 'notes',
+    assetsPattern: '**/*.{svg,png,jpg,jpeg,avif,webp,gif,tiff,ico}',
+  }),
+  schema: () => ObsidianDocumentSchema.extend({
+    title: z.string(),
+    description: z.string().default(""),
+    tags: z.array(z.string()).default([]),
+    pubDate: z.coerce.date(),
+    draft: z.boolean().default(false),
+  }),
+});
+```
+
+En este bloque defino la colección `notes` con un loader específico de Obsidian: `ObsidianMdLoader` apunta a la carpeta de notas y habilita los assets; el esquema extiende `ObsidianDocumentSchema` para garantizar metadatos mínimos (`title`, `description`, `tags`, `pubDate`, `draft`) y forzar que cada nota cumpla ese contrato al momento de compilar.
+
+Dada mi relación prolongada con Obsidian (ya estaba muy familiarizado con su sintaxis en [markdown](/notes/markdown) y su forma de enlazar notas) usar el loader de Obsidian, pude conservar mi vocabulario de siempre (doble corchete, enlaces internos, etiquetas), y hacer que Astro se adaptara a ese idioma. El loader de Obsidian me permite continuar escribiendo en mi herramienta habitual, mantener wikilinks y assets en su lugar, y a la vez exponer esa red de notas como datos consumibles en Astro.
+
+Además, el loader es software libre: [astro-loader-obsidian](https://github.com/aitorllj93/astro-loader-obsidian) se mantiene abierto en GitHub, y su licencia permisiva facilita que otros sitios adapten y mejoren el flujo entre Obsidian y Astro sin reinventar la rueda.
+
+Con esa colección definida, crear una página índice de notas fue trivial: el codigo consulta la colección completa, filtra borradores y genera una lista de enlaces. En `src/pages/notes/index.astro`:
+
+```astro
+---
+import { getCollection } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+const notesEntries = await getCollection('notes', ({ data }) => {
+  return data.draft !== true;
+});
+---
+
+<Base title=".notas" description="Colección de notas" pageType="noteIndex">
+  <ul class="notes-list">
+    {notesEntries.map((note) => (
+      <li>
+        <a href={`/notes/${note.id}`}><span class="note-marker">.</span>{note.data.title}</a>
+      </li>
+    ))}
+  </ul>
+</Base>
+```
+
+Aquí `getCollection('notes')` obtiene todas las notas y descarta las que estan marcadas como borrador; el componente `Base` recibe título y descripción para la cabecera, y se genera una lista simple donde cada `note.id` construye la ruta estática `/notes/{id}` que enlaza a la nota renderizada.
+
+La lógica es deliberadamente austera: no hay categorías, no hay jerarquías. La lista es un mapa plano de entradas disponibles, un índice vivo. Esa sencillez hace que las notas se comporten como nodos independientes y, a la vez, como una red potencial.
+
+Para cada nota individual, la ruta se resuelve con un archivo dinámico: `src/pages/notes/[slug].astro`. 
+
+El patrón es el mismo que en el blog.
+
+```astro
+---
+import { getCollection } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import Base from '../../layouts/Base.astro';
+
+export async function getStaticPaths() {
+  const notesEntries = await getCollection('notes', ({ data }) => {
+    return data.draft !== true;
+  });
+
+  return notesEntries.map(entry => ({
+    params: { slug: entry.id },
+    props: { entry },
+  }));
+}
+
+const { entry } = Astro.props;
+const Content = entry.rendered?.html || '';
+---
+
+<Base title={entry.data.title} description={entry.data.description}>
+  <article class="page-content note-article">
+    <h1 class="page-title note-title-with-exec">{entry.data.title}</h1>
+    <div class="page-body" set:html={Content}></div>
+  </article>
+</Base>
+```
+
+El `getStaticPaths` itera las notas no-borrador para generar las rutas estáticas y pasar cada `entry` como `props`; luego `Content` toma el HTML renderizado por Astro y se inyecta en el `<div class="page-body">`, mientras `Base` envuelve la página con metadatos de título y descripción.
+
+## .sin_indice_jerarquico_ni_linealidad_forzada
+Este sistema de notas no fue diseñado para ser recorrido de principio a fin. Fue hecho para que el lector tuviera la sensación de abrir una puerta lateral, para seguir asociaciones imprevistas y para permitir lecturas parciales y personales. El lector puede llegar a una nota desde una entrada, o a una entrada desde una nota. En ese desorden controlado reside su sentido: ofrecer un espacio donde [leer sea también explorar](/blog/programar_el_infinito_en_la_web), y donde el pensamiento permanezca siempre en movimiento.
+
+Es por esto que no existe un índice jerárquico ni una estructura de categorías rígidas. Si bien es cierto que navegar a www.escrituraextendida.com/notes/ muestra una lista ordenada de notas, esa lista no pretende ser un mapa definitivo. De hecho, para disuadir la lectura lineal, implementé un pequeño truco en el código que vuelve aleatoria el orden de las notas en cada solicitud:
+
+```ts
+// src/pages/notes/index.astro
+// Mezcla aleatoriamente las notas para evitar un orden fijo
+// Se calcula en build; cada despliegue genera un orden distinto.
+const shuffledNotes = notesEntries
+  .map((note) => ({ note, sortKey: Math.random() }))
+  .sort((a, b) => a.sortKey - b.sortKey)
+  .map(({ note }) => note);
+```
+
+En este fragmento aplico una permutación simple: asigno una clave aleatoria a cada nota y ordeno por ella. El resultado se fija en el build, de modo que cada despliegue publica un orden distinto y disuade la lectura lineal sin requerir trabajo extra en el cliente.
+
+## Referencias (formato APA)
+- Aitorllj93. (2023). *astro-loader-obsidian* [Repositorio GitHub]. GitHub. https://github.com/aitorllj93/astro-loader-obsidian
+- Appleton, M. (2020). *A brief history & ethos of the digital garden* [Entrada de blog]. https://maggieappleton.com/garden-history
+- Goto, E. (2023). *Adding a new notes section to my blog* [Entrada de blog]. https://www.emgoto.com/notes-section/
+- Looijesteijn, K. (2022). *Adding a notes section to my website* [Entrada de blog]. https://www.kooslooijesteijn.net/blog/add-notes-to-website
+- Markdown Guide. (s. f.). *Markdown guide* [Sitio web]. https://www.markdownguide.org/
+- Matuschak, A. (s. f.). *Notes* [Sitio de notas]. https://notes.andymatuschak.org/
+- Obsidian. (s. f.). *Obsidian* [Sitio web]. https://obsidian.md/
+- The Astro Technology Company. (s. f.). *Astro documentation* [Documentación]. https://docs.astro.build/
