@@ -21,7 +21,7 @@ En esta entrada voy a describir el desarrollo conceptual y técnico que signific
 ## .antecedentes_e_inspiracion
 La idea de un sistema de notas interconectadas por hipertexto que sirvieran como material suplementaria para las entradas con mayor desarrollo, ha sido, desde el inicio, un aspecto integral del proyecto de **escritura::extendida**. 
 
-En el [post introductorio](/blog/init_escritura_extendida) al sitio, hable brevemente de mi experiencia con el sitio de notas de Andy Matuschak. 
+En el [post introductorio](/blog/init_escritura_extendida) al sitio, mencioné brevemente mi experiencia leyendo el trabajo de Andy Matuschak. 
 
 <figure class="figure-blog">
   <a href="https://notes.andymatuschak.org/" target="_blank" rel="noopener noreferrer">
@@ -37,14 +37,14 @@ En el [post introductorio](/blog/init_escritura_extendida) al sitio, hable breve
 
 [Andy](https://github.com/andymatuschak) es un pensador brillante y poco convencional, cuyo trabajo gira en torno a una pregunta persistente: cómo diseñar prácticas y estructuras de conocimiento que piensen con nosotros en lugar de limitarse a almacenar información. En su propio sitio de notas describe su colección como un “entorno de pensamiento” compartido públicamente, escrito principalmente para su propio uso y evolucionado con el tiempo, más que como un archivo estático para otros lectores.  ￼
 
-Su enfoque, lejos de querer optimizar la productividad ni ofrecer un método definitivo, busca explorar formas de escritura y lectura que permitan que las ideas se desarrollen de manera acumulativa, asociativa y continua: en su esquema de “**evergreen notes**” (notas perennes), la meta no es tomar mejores notas sino fomentar un mejor pensamiento, escribiendo notas que sean atómicas, orientadas a conceptos y densamente enlazadas entre sí.  ￼
+Su enfoque, lejos de querer optimizar la productividad ni ofrecer un método definitivo, busca explorar formas de escritura y lectura que permitan que las ideas se desarrollen de manera acumulativa, asociativa y continua: en su esquema de “**evergreen notes**” ([notas perennes](/notes/notas_perennes)), la meta no es tomar mejores notas sino fomentar un mejor pensamiento, escribiendo notas que sean atómicas, orientadas a conceptos y densamente enlazadas entre sí.  ￼
 
-Al leer su sitio por primera vez, sentí que se trataba de algo muy diferente a consultar un archivo tradicional, sino como atravesar un espacio de pensamiento en expansión donde cada nota puede actuar tanto como una pieza individual de pensamiento o como una conexión hacia otras ideas, y donde las asociaciones entre notas, y no los índices jerárquicos cerrados, gobiernan la navegación conceptual. 
+Al leer su sitio por primera vez, sentí que se trataba de algo muy diferente a consultar un archivo tradicional. Al leerlo, me encontré atravesando un espacio de pensamiento en expansión donde cada nota actuaba tanto como una pieza individual de pensamiento o como una conexión hacia otras ideas, y donde las asociaciones entre notas, y no los índices jerárquicos cerrados, gobernaban la navegación conceptual. 
  
-Fue gracias a la experiencia de leer el sitio de Andy Matuschak que llegué a interesarme por sistemas de manejo de información y, poco después, a utilizar Obsidian como herramienta para guardar mis notas e interconectarlas. 
+Fue gracias a la experiencia de leer el sitio de Andy Matuschak que llegué a interesarme por [sistemas de manejo de información](/notes/sistemas_de_manejo_de_informacion) y, poco después, a utilizar Obsidian como herramienta para guardar mis notas e interconectarlas. 
 
 ## .obsidian
-[Obsidian](/notes/obsidian) es una aplicación de base de conocimiento personal que opera sobre archivos [Markdown](/notes/markdown).
+[Obsidian](/notes/obsidian) es una aplicación de base de conocimiento personal que opera sobre archivos [markdown](/notes/markdown).
 
 <figure class="figure-blog">
     <Image
@@ -56,9 +56,16 @@ Fue gracias a la experiencia de leer el sitio de Andy Matuschak que llegué a in
   <figcaption>Captura de pantalla de la aplicación Obsidian</figcaption>
 </figure>
 
-En Obsidian, las notas se escriben utilizando [Markdown](/notes/markdown), y es posible interconectarlas mediante enlaces internos, tanto usando la sintaxis de “wikilinks” (`[[Nombre de la nota]]`) como mediante enlaces Markdown estándar (`[texto](ruta-al-archivo.md)`), lo que crea una red de ideas navegable y exploratoria.  ￼
+En Obsidian, las notas se escriben utilizando el lenguaje de [markdown](/notes/markdown), y es posible interconectarlas mediante enlaces internos, tanto usando la sintaxis de “wikilinks” (`[[Nombre de la nota]]`) como mediante enlaces Markdown estándar (`[texto](ruta-al-archivo.md)`), lo que crea una red de ideas navegable y exploratoria.  ￼
 
 La sintaxis de doble corchete es particularmente importante, pues solo basta escribir `[[` y seleccionar o escribir el nombre de otra nota para crear un enlace interno, que no solo conecta al lector con otro contenido, sino que también contribuye a la visualización de cómo las ideas están relacionadas en el grafo de conocimiento.
+
+<figure class="figure-blog">
+  <img src={"/images/obsidian_video.gif"} alt=""/>
+  <figcaption>
+    Grafo de conocimiento en Obsidian, mostrando cómo las notas se interconectan entre sí mediante enlaces internos.
+  </figcaption>
+</figure>
 
 Desde que empecé a utilizar Obsidian a finales de 2021, he escrito y conectado más de 700 notas en mi archivo de conocimiento personal. A medida que estas notas se enlazan unas con otras, comienzan a surgir agrupaciones emergentes que no responden a categorías predefinidas ni a jerarquías rígidas, sino a afinidades conceptuales que se hacen visibles únicamente a través de las conexiónes. Estas constelaciones revelan formas de organización no lineales, dinámicas, que cambian con cada nueva nota añadida o revisada.
 
@@ -117,11 +124,11 @@ Mientras tanto **escritura::extendida** contempla las notas como anotaciones sup
 
 ## .implementando_un_sistema_de_notas_en_astro
 
-Toda esta genealogía de jardines digitales y notas perennes no tendría sentido si, al llegar al código, me viera obligado a reinventar una infraestructura compleja para algo que debería ser liviano. La clave estaba en lograr que el sistema de notas fuera **simple como escritura** y **riguroso como arquitectura**. Astro ofrece precisamente esa fricción mínima: convierte los textos en datos, pero deja el control en manos del autor.
+Toda esta genealogía de jardines digitales y notas perennes no tendría sentido si, al llegar al código, me viera obligado a reinventar una infraestructura compleja para algo que debería ser liviano. La clave estaba en lograr que el sistema de notas fuera **simple como la escritura** pero **riguroso com una arquitectura**. [Astro](/notes/astro) ofrece precisamente esa fricción mínima: convierte los textos en datos, pero deja el control en manos del autor.
 
-La decisión fundamental consistio en separar el contenido en dos colecciones editoriales: `blog` para entradas largas y `notes` para fragmentos breves. En `src/content/config.ts` definí dos colecciones con esquemas distintos, y para las notas utilicé un loader especial que permite importar directamente mi archivo de Obsidian:
+La decisión fundamental consistió en separar el contenido en dos colecciones editoriales: `blog` para entradas largas y `notes` para fragmentos breves. En `src/content/config.ts` definí dos colecciones con esquemas distintos, y para las notas utilicé un loader especial que permite importar directamente mi archivo de Obsidian:
 
-```ts
+```ts 
 // src/content/config.ts
 import { defineCollection, z } from 'astro:content';
 import { ObsidianDocumentSchema, ObsidianMdLoader } from "astro-loader-obsidian";
@@ -144,7 +151,7 @@ const notesCollection = defineCollection({
 
 En este bloque defino la colección `notes` con un loader específico de Obsidian: `ObsidianMdLoader` apunta a la carpeta de notas y habilita los assets; el esquema extiende `ObsidianDocumentSchema` para garantizar metadatos mínimos (`title`, `description`, `tags`, `pubDate`, `draft`) y forzar que cada nota cumpla ese contrato al momento de compilar.
 
-Dada mi relación prolongada con Obsidian (ya conocía su sintaxis, su forma de enlazar ideas y la sensación de escribir en un entorno pensado para el pensamiento) usar el loader de Obsidian, pude conservar mi vocabulario de siempre (doble corchete, enlaces internos, etiquetas), y hacer que Astro se adaptara a ese idioma. El loader de [Obsidian](/notes/obsidian) me permite continuar escribiendo en mi herramienta habitual, mantener wikilinks y assets en su lugar, y a la vez exponer esa red de notas como datos consumibles en Astro.
+Dada mi relación prolongada con Obsidian (ya estaba muy familiarizado con su sintaxis en [markdown](/notes/markdown) y su forma de enlazar notas) usar el loader de Obsidian, pude conservar mi vocabulario de siempre (doble corchete, enlaces internos, etiquetas), y hacer que Astro se adaptara a ese idioma. El loader de Obsidian me permite continuar escribiendo en mi herramienta habitual, mantener wikilinks y assets en su lugar, y a la vez exponer esa red de notas como datos consumibles en Astro.
 
 Además, el loader es software libre: [astro-loader-obsidian](https://github.com/aitorllj93/astro-loader-obsidian) se mantiene abierto en GitHub, y su licencia permisiva facilita que otros sitios adapten y mejoren el flujo entre Obsidian y Astro sin reinventar la rueda.
 
@@ -171,7 +178,7 @@ const notesEntries = await getCollection('notes', ({ data }) => {
 </Base>
 ```
 
-Aquí `getCollection('notes')` obtiene todas las notas y descarta borradores; el componente `Base` recibe título y descripción para la cabecera, y se genera una lista simple donde cada `note.id` construye la ruta estática `/notes/{id}` que enlaza a la nota renderizada.
+Aquí `getCollection('notes')` obtiene todas las notas y descarta las que estan marcadas como borrador; el componente `Base` recibe título y descripción para la cabecera, y se genera una lista simple donde cada `note.id` construye la ruta estática `/notes/{id}` que enlaza a la nota renderizada.
 
 La lógica es deliberadamente austera: no hay categorías, no hay jerarquías. La lista es un mapa plano de entradas disponibles, un índice vivo. Esa sencillez hace que las notas se comporten como nodos independientes y, a la vez, como una red potencial.
 
