@@ -1,0 +1,61 @@
+---
+interface Props {
+  text: string;
+  speed?: number;       // ms por letra
+  loop?: boolean;       // reiniciar cuando termine
+  loopDelayMs?: number; // pausa antes de reiniciar
+  class?: string;
+}
+
+const {
+  text,
+  speed = 35,
+  loop = false,
+  loopDelayMs = 1200,
+  class: className = "",
+} = Astro.props;
+---
+
+<div class={`typewriter ${className}`} aria-live="polite" data-speed={speed} data-delay={loopDelayMs} data-loop={loop}>
+  {text.split("").map((ch) => (
+    <span>{ch === " " ? "\u00A0" : ch}</span>
+  ))}
+</div>
+
+<style>
+  .typewriter {
+    display: inline;
+    white-space: normal;
+  }
+  .typewriter span {
+    opacity: 0;
+    display: inline;
+    transition: opacity var(--spd, 35ms) ease;
+  }
+</style>
+
+<script is:inline>
+  const root = document.currentScript?.previousElementSibling;
+  if (!root) throw new Error("Typewriter target not found");
+
+  const spans = Array.from(root.querySelectorAll("span"));
+  const speed = Number(root.dataset.speed ?? 35);
+  const delay = Number(root.dataset.delay ?? 1200);
+  const loop = root.dataset.loop === "true";
+
+  function run() {
+    spans.forEach((s) => (s.style.opacity = "0"));
+    spans.forEach((s, i) => {
+      setTimeout(() => {
+        s.style.setProperty("--spd", `${speed}ms`);
+        s.style.opacity = "1";
+      }, i * speed);
+    });
+    if (loop) {
+      const total = spans.length * speed + delay;
+      setTimeout(run, total);
+    }
+  }
+
+  run();
+</script>
