@@ -2,7 +2,7 @@
 title: texto
 description: ""
 tags: []
-pubDate: 2025-12-25
+pubDate: 2026-01-25
 upDate:
 image: ""
 draft: false
