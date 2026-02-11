@@ -1,0 +1,487 @@
+---
+title: "coreografiar_transiciones_de_vista"
+description: "Cómo implementé las view transitions para coreografiar el desplazamiento entre páginas en escritura::extendida, creando una sintaxis poética de movimiento que refuerza la semántica de la navegación."
+pubDate: 2026-02-10
+draft: false
+tags: []
+image: "../../assets/images/coreografiar_transiciones_de_vista/la_locomotive.jpg"
+---
+
+import { Image } from 'astro:assets';
+import laLocomotive from '../../assets/images/coreografiar_transiciones_de_vista/la_locomotive.jpg';
+
+En [la entrada anterior](/blog/la_literatura_ergodica_como_espacio_navegable) exploramos cómo escritores como Cortázar, Calvino, Carson, Danielewski y Mitchell convirtieron la lectura en un acto de **desplazamiento**: físico, cognitivo y afectivo. Sus obras coreografían el movimiento del lector a través del texto, transformando la página en espacio navegable.
+
+<figure class="figure-blog">
+  <a href="https://www.metmuseum.org/art/collection/search/384852" target="_blank" rel="noopener noreferrer">
+    <Image
+      src={laLocomotive}
+      alt="La Locomotive, aguafuerte y punta seca (1873)"
+    />
+  </a>
+  <figcaption>Félix Bracquemond (según J.M.W. Turner). La Locomotive, 1873. The Met Museum.</figcaption>
+</figure>
+
+Pues esta misma premisa, pero aplicada al espacio digital, es la que ha servido como guia para el diseño de **escritura::extendida** como blog de lectura. 
+
+Dado que el sitio propone una lectura no lineal basado en notas enlazadas con rutas alternativas de lectura, entonces el salto entre páginas no puede ser un parpadeo mudo. Debe ser un **gesto**, una señal que refuerce la semántica del movimiento.
+
+En esta entrada voy a documentar cómo incorporé **las transiciones de vista** como una **sintaxis poética**: una forma de que el navegador pueda hablar el mismo lenguaje que el texto.
+
+<figure class="figure-blog">
+  <img src={"/images/escritura-salto-pagina.gif"} alt="Demostración de las transiciones de vista entre páginas"/>
+  <figcaption>
+    Versión 1.6.2 de escritura::extendida mostrando los saltos por defecto entre paginas.
+  </figcaption>
+</figure>
+
+## .de_la_pagina_al_gesto
+
+La web clásica trata cada navegación como evento binario: página vieja desaparece, página nueva aparece; no existe ninguna clase de tránsito, solo un reemplazo. Aunque esto funciona para documentos neutrales, deshace la **cohesión estética** de un sitio como **escritura::extendida**, donde cada página es un fragmento de un todo, y el salto entre fragmentos puede ser parte de la experiencia.
+
+Si el [texto puede comportarse](/blog/aprender_de_la_primera_iteracion_fallida), entonces **la navegación también puede comportarse**. 
+
+El salto entre páginas debía convertirse en:
+
+- Un **zoom-in** al entrar a un post: gesto de foco, de acercamiento a un fragmento.
+- Un **deslizado lateral** entre posts y notas: visualización de la línea temporal, dirección de lectura.
+- Un **zoom-out** al volver al índice: reencuadre, panorámica, mapa.
+- Un **fade lento** al pasar y volver a páginas auxiliares: pausa, respiración, cambio de tono.
+
+Cada transición sirve como un **comentario editorial** que amplifica la semántica del salto.
+
+## .view_transitions_como_sintaxis
+
+La API de **view transitions** (`@view-transition`) permite animar el cambio entre documentos completos sin convertir el sitio en una [SPA](/notes/spa). Con una simple directiva en CSS:
+
+```css
+@view-transition {
+  navigation: auto;
+}
+```
+
+el navegador captura el [DOM](/notes/arbol_del_dom) saliente, renderiza el DOM entrante y permite animarlos mediante pseudo-elementos.
+
+### .como_funciona_la_captura
+
+Cuando el navegador detecta una navegación entre documentos que declaran `@view-transition`, ejecuta esta secuencia:
+
+1. **Captura**: congela la vista actual como imagen (`::view-transition-old(root)`)
+2. **Renderiza**: carga el nuevo documento y lo mantiene oculto
+3. **Superpone**: crea un pseudo-elemento contenedor que superpone ambas vistas
+4. **Anima**: ejecuta las animaciones CSS definidas para `old` y `new`
+5. **Reemplaza**: elimina la vista vieja y muestra la nueva
+
+Los pseudo-elementos disponibles son:
+
+```css
+::view-transition-old(root)  /* La página saliente */
+::view-transition-new(root)  /* La página entrante */
+::view-transition-group(root) /* Contenedor de ambas */
+::view-transition-image-pair(root) /* Par de imágenes */
+```
+
+Cada uno puede animarse independientemente. Por ejemplo, para crear un zoom-in donde la página vieja se aleja y la nueva se acerca:
+
+```css
+::view-transition-old(root) {
+  animation: zoom-out 0.3s ease-out;
+}
+::view-transition-new(root) {
+  animation: zoom-in 0.3s ease-in;
+}
+```
+## .coreografia_semantica
+
+Decidí que cada transición respondiera a **la relación entre páginas**:
+
+- **inicio → entrada** y **lista de entradas → entrada**: `zoom-in` (como entrar a un fragmento).
+- **entrada → entrada**: `deslizamiento a la izquierda` o `deslizamiento a la derecha` según la dirección cronológica.
+- **entrada → lista de entradas** y **entrada → nota**: `zoom-out` (salir al mapa).
+- **acerca de ↔ cualquier**: `slow-fade` (pausa, respiración).
+- **ir al inicio**: `fade`.
+
+Para lograrlo, cada página declara su rol en `Base.astro` mediante `data-page-type` (`home`, `blog-list`, `post`, `note`, `about`). Los posts llevan además `data-post-index` para saber si el lector avanza o retrocede en el tiempo.
+
+### .declaracion_de_roles_en_base_astro
+
+Cada página inyecta sus atributos semánticos en el elemento `<html>`:
+
+```astro
+---
+const { title = "Site", pageType = "default", postIndex } = Astro.props;
+---
+<html lang="es" data-page-type={pageType} data-post-index={postIndex}>
+```
+
+Esto permite que el [DOM](/notes/arbol_del_dom) en portador de **metadata navegacional**. El navegador no solo renderiza contenido, sino que declara qué tipo de contenido es y dónde se ubica en la línea temporal del sitio.
+
+### .mapeo_de_transiciones_en_typescript
+
+La lógica vive en `src/utils/transitions.ts` y opera mediante un sistema de reglas declarativas:
+
+```ts
+type TipoDeTransicion = 'zoom-in' | 'zoom-out' | 'fade' | 'slow-fade' | 'slide-left' | 'slide-right';
+type ReglaDeTransicion = TipoDeTransicion | (() => TipoDeTransicion);
+
+const REGLAS_DE_TRANSICION: Record<string, ReglaDeTransicion> = {
+  'home->post': 'zoom-in',
+  'blog-list->post': 'zoom-in',
+  'post->post': obtenerDeslizamientoDireccional,
+  'post->blog-list': 'zoom-out',
+  'post->note': 'zoom-in',
+  'note->post': 'zoom-out',
+  'about->*': 'slow-fade',
+  '*->about': 'slow-fade',
+  '*->home': 'slow-fade',
+  'default': 'fade'
+};
+```
+
+El objeto `REGLAS_DE_TRANSICION` funciona como un **diccionario de intenciones** que dice: "cuando vayas de X a Y, significa Z".
+
+### .direccion_temporal_con_obtenerdeslizamientodireccional
+
+Para navegar entre posts, necesitaba saber si el lector avanza o retrocede en el tiempo. Cada post tiene un `postIndex` (su posición en el orden cronológico inverso: el post más nuevo tiene índice 0, el siguiente 1, etc.).
+
+```ts
+function obtenerDeslizamientoDireccional(): TipoDeTransicion {
+  const ultimoIndicePost = parseInt(sessionStorage.getItem('lastPostIndex') || '0', 10);
+  const indicePostActual = parseInt(document.documentElement.dataset.postIndex || '0', 10);
+
+  // Si es el mismo post, solo hacer fade
+  if (indicePostActual === ultimoIndicePost) {
+    return 'fade';
+  }
+
+  // Índice más bajo = post más nuevo, avanzar en el tiempo desliza a la izquierda
+  return indicePostActual < ultimoIndicePost ? 'slide-left' : 'slide-right';
+}
+```
+
+El razonamiento: si pasas de post índice 5 a post índice 3, estás **avanzando hacia el presente** (índices más bajos), entonces la animación desliza a la izquierda. Si vas de 3 a 5, **retrocedes al pasado**, entonces desliza a la derecha.
+
+### .resolucion_de_reglas_con_wildcards
+
+La función `obtenerTipoDeTransicion` resuelve qué transición aplicar usando un sistema de prioridad con [wildcards](/notes/wildcard):
+
+```ts
+function obtenerTipoDeTransicion(from: string, to: string): TipoDeTransicion {
+  const claves = [
+    `${from}->${to}`,    // 1. Coincidencia exacta (ej: "home->post")
+    `${from}->*`,        // 2. [Wildcard](/notes/wildcard) destino (ej: "about->*")
+    `*->${to}`,          // 3. [Wildcard](/notes/wildcard) origen (ej: "*->about")
+    'default'            // 4. Fallback
+  ];
+
+  for (const clave of claves) {
+    if (clave in REGLAS_DE_TRANSICION) {
+      const regla = REGLAS_DE_TRANSICION[clave];
+      return typeof regla === 'function' ? regla() : regla;
+    }
+  }
+
+  return 'fade';
+}
+```
+
+Esto permite reglas expresivas como `'about->*': 'slow-fade'`, que significa "siempre que salgas de about, usa slow-fade, sin importar el destino".
+
+### .aplicacion_de_transiciones
+
+La aplicación de transiciones se divide en dos funciones con responsabilidades claramente separadas:
+
+```ts
+function aplicarTransicion(): void {
+  const tipoPaginaActual = document.documentElement.dataset.pageType || 'default';
+  const tipoPaginaAnterior = sessionStorage.getItem('lastPageType') || 'default';
+
+  const tipoTransicion = obtenerTipoDeTransicion(tipoPaginaAnterior, tipoPaginaActual);
+  document.documentElement.setAttribute('data-transition', tipoTransicion);
+}
+
+function guardarEstadoNavegacion(): void {
+  const tipoPaginaActual = document.documentElement.dataset.pageType || 'default';
+  sessionStorage.setItem('lastPageType', tipoPaginaActual);
+
+  const indicePost = document.documentElement.dataset.postIndex;
+  if (indicePost) {
+    sessionStorage.setItem('lastPostIndex', indicePost);
+  }
+}
+```
+
+La función `aplicarTransicion()` se enfoca únicamente en calcular y aplicar la transición al DOM, mientras que `guardarEstadoNavegacion()` se encarga de persistir el estado para la próxima navegación. 
+
+El atributo `data-transition` en `<html>` es la **señal** que el CSS escucha para ejecutar la animación correspondiente.
+
+### .definicion_de_animaciones_en_css
+
+En `src/styles/transitions.css`, cada tipo de transición se mapea a keyframes específicos:
+
+```css
+/* Keyframes para zoom-in */
+@keyframes zoom-out {
+  to { transform: scale(1.1); opacity: 0; }
+}
+@keyframes zoom-in {
+  from { transform: scale(0.9); opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* Aplicación según data-transition */
+html[data-transition="zoom-in"]::view-transition-old(root) {
+  animation: zoom-out 0.3s ease-out;
+}
+html[data-transition="zoom-in"]::view-transition-new(root) {
+  animation: zoom-in 0.3s ease-in;
+}
+```
+
+Para el deslizado lateral, uso una propiedad de animación estilo cubic-bezier para crear una aceleración natural:
+
+```css
+@keyframes slide-out-left {
+  to { transform: translateX(-30%); opacity: 0; }
+}
+@keyframes slide-in-right {
+  from { transform: translateX(30%); opacity: 0; }
+}
+
+html[data-transition="slide-left"]::view-transition-old(root) {
+  animation: slide-out-left 0.35s cubic-bezier(0.4, 0, 1, 1);
+}
+html[data-transition="slide-left"]::view-transition-new(root) {
+  animation: slide-in-right 0.35s cubic-bezier(0, 0, 0.2, 1);
+}
+```
+
+El tiempo de transición fue descubierto a través de prueba y error, buscando un equilibrio entre fluidez y claridad. En general, los tiempos que mejor funcionaron fueron:
+300ms para zoom (rápido, focal), 350ms para slide (fluido, direccional), 1500ms para slow-fade (contemplativo, pausado).
+
+## .arquitectura_de_inicializacion
+
+El sistema se activa mediante un flujo minimalista que respeta el modelo estático de Astro.
+
+En `src/layouts/Base.astro`, el layout base inyecta dos piezas críticas en el `<head>`:
+
+```astro
+---
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+const { title = "Site", pageType = "default", postIndex } = Astro.props;
+import "../styles/global.css";
+import "../styles/transitions.css";
+---
+<html lang="es" data-page-type={pageType} data-post-index={postIndex}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <!-- Meta tag para habilitar view transitions -->
+    <meta name="view-transition" content="same-origin" />
+
+    <!-- Script de inicialización -->
+    <script>
+      import { inicializarTransiciones } from '../utils/transitions';
+      inicializarTransiciones();
+    </script>
+
+    <title>{title}</title>
+  </head>
+  <body>
+    <Header title={title} />
+    <main class="container">
+      <slot />
+    </main>
+    <Footer />
+  </body>
+</html>
+```
+
+La meta tag `<meta name="view-transition" content="same-origin" />` señala al navegador que debe **capturar** la vista antes de destruirla. `same-origin` limita las transiciones al mismo dominio, evitando fugas a sitios externos.
+
+El script importa `inicializarTransiciones()` y se ejecuta **inmediatamente** al cargar cada página. Astro empaqueta este módulo como ES module, lo que garantiza que se ejecuta solo una vez por navegación, incluso si el usuario vuelve atrás con el botón del navegador.
+
+### .manejo_de_bfcache
+
+El **Back/Forward Cache** (BFCache) es una optimización del navegador que congela páginas en memoria al navegar atrás/adelante, en lugar de recargarlas desde cero. Esto plantea un problema: si el usuario va de página A → B → A (usando el botón "atrás"), la página A se **restaura desde caché**, no se recarga, y el script no se vuelve a ejecutar.
+
+Para manejar esto, escucho el evento `pageshow`:
+
+```ts
+export function inicializarTransiciones(): void {
+  if (typeof sessionStorage !== 'undefined') {
+    aplicarTransicion();
+    guardarEstadoNavegacion();
+
+    // Escuchar eventos de navegación del navegador
+    window.addEventListener('pageshow', (event) => {
+      // Si la página se restaura desde BFCache, recalcular la transición
+      if (event.persisted) {
+        aplicarTransicion();
+      }
+    });
+  }
+}
+```
+
+`event.persisted` es `true` cuando la página viene del BFCache. En ese caso, vuelvo a ejecutar `aplicarTransicion()` para recalcular el atributo `data-transition` según el nuevo contexto de navegación.
+
+### .uso_de_sessionstorage_como_memoria_minima
+
+El sistema necesita **recordar** de dónde viene el lector para elegir la transición correcta. Para esto uso `sessionStorage` (no `localStorage`, que persiste entre sesiones). 
+
+Guardo dos datos clave:
+
+- **`lastPageType`**: tipo de la página anterior (ej: `"post"`, `"home"`)
+- **`lastPostIndex`**: índice del post anterior (solo si era un post)
+
+`sessionStorage` persiste solo durante la sesión del navegador (mientras la pestaña esté abierta), lo que evita contaminar entre sesiones diferentes. Si el usuario cierra la pestaña y vuelve, `sessionStorage` se limpia automáticamente.
+
+La lectura y escritura ocurre en cada navegación:
+
+```ts
+// Leer estado anterior
+const tipoPaginaAnterior = sessionStorage.getItem('lastPageType') || 'default';
+
+// Guardar estado actual para la próxima navegación
+sessionStorage.setItem('lastPageType', tipoPaginaActual);
+```
+
+Este patrón **"leer pasado, escribir presente"** convierte cada navegación en un nodo de una cadena temporal.
+
+### .repertorio_completo_de_animaciones
+
+El archivo `transitions.css` define seis pares de keyframes (uno para salida, otro para entrada):
+
+```css
+/* 1. ZOOM-IN: acercamiento focal */
+@keyframes zoom-out {
+  to { transform: scale(1.1); opacity: 0; }
+}
+@keyframes zoom-in {
+  from { transform: scale(0.9); opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 2. ZOOM-OUT-REVERSE: alejamiento panorámico */
+@keyframes zoom-out-reverse {
+  to { transform: scale(0.9); opacity: 0; }
+}
+@keyframes zoom-in-reverse {
+  from { transform: scale(1.1); opacity: 0; }
+  to { opacity: 1; }
+}
+
+/* 3. FADE: disolución neutra */
+@keyframes fade-out {
+  to { opacity: 0; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+
+/* 4. SLOW-FADE: disolución contemplativa */
+@keyframes slow-fade-out {
+  to { opacity: 0; }
+}
+@keyframes slow-fade-in {
+  from { opacity: 0; }
+}
+
+/* 5. SLIDE-LEFT: deslizado hacia la izquierda (avanzar en el tiempo) */
+@keyframes slide-out-left {
+  to { transform: translateX(-30%); opacity: 0; }
+}
+@keyframes slide-in-right {
+  from { transform: translateX(30%); opacity: 0; }
+}
+
+/* 6. SLIDE-RIGHT: deslizado hacia la derecha (retroceder en el tiempo) */
+@keyframes slide-out-right {
+  to { transform: translateX(30%); opacity: 0; }
+}
+@keyframes slide-in-left {
+  from { transform: translateX(-30%); opacity: 0; }
+}
+```
+
+Cada par se aplica mediante selectores que leen `data-transition`:
+
+```css
+html[data-transition="zoom-in"]::view-transition-old(root) {
+  animation: zoom-out 0.3s ease-out;
+}
+html[data-transition="zoom-in"]::view-transition-new(root) {
+  animation: zoom-in 0.3s ease-in;
+}
+
+html[data-transition="slide-left"]::view-transition-old(root) {
+  animation: slide-out-left 0.35s cubic-bezier(0.4, 0, 1, 1);
+}
+html[data-transition="slide-left"]::view-transition-new(root) {
+  animation: slide-in-right 0.35s cubic-bezier(0, 0, 0.2, 1);
+}
+
+html[data-transition="slow-fade"]::view-transition-old(root) {
+  animation: slow-fade-out 1.5s ease;
+}
+html[data-transition="slow-fade"]::view-transition-new(root) {
+  animation: slow-fade-in 1.5s ease;
+}
+```
+
+La diferencia entre `fade` y `slow-fade` no está en los keyframes (ambos solo modulan opacity), sino en la **duración**: `fade` dura 0.6s (un suspiro), `slow-fade` dura 1.5s (una pausa meditativa).
+
+## .desplazamiento_fisico_en_pantalla
+
+Es a través de los **gestos de movimiento** que el sitio puede comunicar la semántica de la navegación. Se trata de **coreografiar** la sensación de desplazamiento para que el cambio entre páginas sea parte del contenido.
+
+Cuando entras a un post desde el índice, el zoom-in señala: "enfócate en este fragmento". Cuando saltas entre posts, el deslizado lateral indica dirección: "estás avanzando en el tiempo" o "estás retrocediendo".
+
+Esto reduce la **carga cognitiva** de la navegación no lineal. En [_Rayuela_](/blog/la_literatura_ergodica_como_espacio_navegable#cortázar_lector_cómplice_en_un_itinerario) de Cortázar, se obliga al lector a recordar qué capítulo leyó antes y cuál viene después. Aquí, la animación le dice: "estás yendo hacia adelante" o "estás yendo hacia atrás", sin necesidad de recordar números o títulos.
+
+### .desplazamiento_afectivo
+
+Cada transición porta una **emoción implícita**:
+
+- El **zoom-in** transmite curiosidad, foco, inmersión.
+- El **zoom-out** transmite distancia, panorámica, reencuadre.
+- El **slide** transmite continuidad temporal, fluidez cronológica.
+- El **slow-fade** transmite pausa, introspección, cambio de registro.
+
+Como en [_Nox_](/blog/la_literatura_ergodica_como_espacio_navegable#carson_poesía_exploración_espacial_de_la_memoria) de Anne Carson, donde desplegar el acordeón evoca la excavación de la memoria, aquí la animación evoca el **ritmo emocional del desplazamiento**.
+
+## .micro_sensaciones_como_poetica
+
+Lo que distingue a **escritura::extendida** de una documentación técnica es que busca **micro-sensaciones**:
+
+- Entrar a un post no es "hacer clic en un enlace", sino **entrar a un espacio**.
+- Saltar entre posts no es "navegar hacia atrás/adelante", sino **recorrer una línea temporal**.
+- Volver al índice no es "regresar a la lista", sino **recuperar la panorámica**.
+- Leer el _about_ no es "abrir una página de autor", sino **transportarse al espacio del autor**.
+
+Estas micro-sensaciones son la **forma visible del contenido**. Como Danielewski declaró sobre _[La casa de hojas](/blog/la_literatura_ergodica_como_espacio_navegable#mark_danielewski_diseño_en_laberinto_y_lector_intruso)_: "no es un juego visual. Es un síntoma". La transición no decora, **significa**.
+
+<figure class="figure-blog">
+  <img src={"/images/escritura-view-transitions-pagina.gif"} alt="Demostración de las transiciones de vista entre páginas"/>
+  <figcaption>
+    Versión 2.0 de escritura::extendida demostrando las transiciones de vista entre páginas.
+  </figcaption>
+</figure>
+
+## .el_ultimo_paso_antes_de_experimentar
+
+Con las transiciones de vista implementadas, **escritura::extendida** cierra el ciclo que empezó en [escribir_en_la_no-linealidad](/blog/escribir_en_la_no-linealidad) para construir la infraestructura tecnológica que permita experimentar con la escritura ergódica en la web.
+
+Este sitio ya no es solo una colección de textos sobre escritura digital, si no que tiene la capacidad de ser una **demostración activa** de lo que significa escribir en un entorno aumentado.
+
+Con este componente final, **escritura::extendida** inaugura su [versión 2.0](/blog/version_semantica). Un **cambio mayor** que marca una mutación conceptual del proyecto: el salto de sitio web a espacio literario, de medio técnico a medio expresivo, de infraestructura a experiencia.
+
+Ahora llega el momento para el que todo esto fue construido: **albergar verdaderos experimentos literarios y poéticos** que hagan uso de esta arquitectura. Textos que **encarnen** y obliguen al lector a interactuar con ellos, que muten según el recorrido, que conviertan la lectura en exploración y el desplazamiento en sentido.
+
+## Referencias
+
+- Aarseth, E.J. (1997). _Cybertext: Perspectives on Ergodic Literature_. Johns Hopkins University Press.
+- Documentación experimental de [View Transitions](https://developer.chrome.com/docs/web-platform/view-transitions/) (Chrome Developers).
