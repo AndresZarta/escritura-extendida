@@ -29,3 +29,7 @@ bump-version.sh
 # obsidian vault files to ignore
 .obsidian/
 _templates
+
+# Claude Code files (personal and project skills, commands, agents, memory)
+.claude/
+CLAUDE.md
