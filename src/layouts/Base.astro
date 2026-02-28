@@ -23,6 +23,29 @@ import "../styles/transitions.css";
       import { inicializarTransiciones } from '../utils/transitions';
       inicializarTransiciones();
     </script>
+    <script>
+      function addHeadingBreaks() {
+        document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach(heading => {
+          const walker = document.createTreeWalker(heading, NodeFilter.SHOW_TEXT);
+          const textNodes: Text[] = [];
+          let node: Node | null;
+          while ((node = walker.nextNode())) textNodes.push(node as Text);
+
+          textNodes.forEach(textNode => {
+            if (!textNode.textContent?.includes('_')) return;
+            const frag = document.createDocumentFragment();
+            textNode.textContent.split('_').forEach((part, i, arr) => {
+              frag.appendChild(document.createTextNode(i === 0 ? part : '_' + part));
+              if (i < arr.length - 1) frag.appendChild(document.createElement('wbr'));
+            });
+            textNode.parentNode?.replaceChild(frag, textNode);
+          });
+        });
+      }
+
+      addHeadingBreaks();
+      document.addEventListener('astro:page-load', addHeadingBreaks);
+    </script>
   </head>
   <body>
     <Header title={title} />
