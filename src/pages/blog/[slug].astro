@@ -84,32 +84,39 @@ const postIndex = currentIndex;
 </Base>
 
 <style>
-  /* Only blog-specific styling: the hash mark */
+  /* Only blog-specific styling: the ./ prefix */
   .blog-title-with-exec {
-    position: relative;
-    padding-left: 0px;
+    padding-left: 1.5em;
   }
-  
+
   .blog-title-with-exec::before {
     content: './';
-    margin-left: -28px;
+    display: inline-block;
+    margin-left: -1.5em;
+    width: 1.5em;
     color: var(--color-accent-4);
-    position: absolute;
-    left: 0;
     font-weight: normal;
   }
 
   .blog-title-with-exec:hover::before {
     color: var(--color-primary);
   }
-  
+
+  /* Post dates — mobile: stacked */
   .post-dates {
     display: flex;
-    flex-direction: row;
-    gap: 30px;
+    flex-direction: column;
+    gap: var(--space-30);
     margin-bottom: var(--space-60);
   }
-  
+
+  @media (min-width: 640px) {
+    .post-dates {
+      flex-direction: row;
+      gap: var(--space-60);
+    }
+  }
+
   .page-date-updated {
     color: var(--color-tertiary);
   }

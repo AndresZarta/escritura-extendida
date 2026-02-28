@@ -73,14 +73,20 @@ const Content = entry.rendered?.html || '';
   /* Add visual distinction to note content - raised paper effect */
   .note-article .page-body {
     border-left: 2px solid var(--color-accent-2);
-    padding: 2rem 1.5rem;
-    margin-left: -8px;
+    padding: var(--space-60);
     position: relative;
     background-color: rgba(255, 255, 255, 0.03);
-    box-shadow: 
+    box-shadow:
       0 1px 3px rgba(0, 0, 0, 0.12),
       0 1px 2px rgba(0, 0, 0, 0.08);
     border-radius: 10px;
+  }
+
+  @media (min-width: 640px) {
+    .note-article .page-body {
+      padding: 2rem 1.5rem;
+      margin-left: -8px; /* decorative indent at wider widths */
+    }
   }
 
   /* Dotted background - separate from text opacity */
