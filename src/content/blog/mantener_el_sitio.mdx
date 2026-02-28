@@ -1,0 +1,243 @@
+---
+title: "mantener_el_sitio"
+pubDate: 2026-02-28
+description: "Sobre el mantenimiento como práctica esencial de la ingeniería de software, documentado a través de tres intervenciones en escritura::extendida."
+image: ""
+draft: false
+---
+
+import { Image } from 'astro:assets';
+import pagina404 from '../../assets/images/mantener_el_sitio/404.png';
+import validator from '../../assets/images/mantener_el_sitio/validator.png';
+import titulosSeExtienden from '../../assets/images/mantener_el_sitio/titulos_se_pasan.png';
+import urlSeExtiende from '../../assets/images/mantener_el_sitio/url_se_extiende.png';
+import modoResponsivo from '../../assets/images/mantener_el_sitio/uso_de_modo_responsivo.png';
+import armourersVise from '../../assets/images/mantener_el_sitio/armourers_vise.jpg';
+
+En [la entrada anterior](/blog/coreografiar_transiciones_de_vista) cerramos el ciclo de construcción de la infraestructura de **escritura::extendida** con la implementación de las transiciones de vista, marcando el salto a la [versión 2.0](https://github.com/AndresZarta/escritura-extendida/pull/36). Con ese gesto, el sitio dejó de ser un proyecto en construcción para convertirse en un espacio expresivo listo para albergar experimentos literarios.
+
+Pero construir algo es solo el comienzo. La mayor parte de la vida de un sistema de software no transcurre en la fase de construcción, sino en lo que viene después: el mantenimiento. Corregir lo que se rompe, adaptar lo que ya no sirve, cuidar lo que funciona para que siga funcionando. Es un trabajo silencioso, pero sin él cualquier sistema, por bien diseñado que esté, termina por deteriorarse.
+
+Así que antes de publicar mi primer cuento, quise hacer un repaso del sitio: recorrerlo con cuidado, buscar lo que se había roto o desajustado y verificar que el lienzo digital sobre el cual iba a escribir estuviera en las condiciones adecuadas. Fue ese repaso el que reveló los tres problemas que documentaré en esta entrada.
+
+## .el_menu_que_saltaba
+
+El primer síntoma apareció al navegar el sitio después de los muchos cambios que sufrió durante la transición a la versión 2.0. Al cargar cualquier página del sitio con la ventana del navegador todo se veía aparentemente bien. Pero si la ventana del navegador estaba dimensionada a un tamaño menor a su máximo, reduciendo su ancho, el menú de navegación del header exhibía un salto visible: se desplazaba hacia la derecha y fuera de la vista. Un parpadeo breve pero perceptible, el tipo de detalle que distrae y erosiona la experiencia de usuario.
+
+<figure class="figure-blog">
+  <img src={"/images/escritura-salto-menu.gif"} alt="Bug del menú de navegación saltando hacia la derecha al redimensionar la ventana del navegador"/>
+  <figcaption>
+    Versión 2.0 de escritura::extendida mostrando el salto del menú de navegación en ventana pequeña.
+  </figcaption>
+</figure>
+
+El origen del problema no era un error aislado sino el resultado acumulado de cómo los estilos del sitio habían crecido. Desde el principio, **escritura::extendida** fue diseñada para pantalla de escritorio. Los estilos base definían el layout para pantallas anchas, y las adaptaciones para pantallas más pequeñas se fueron añadiendo después como parches: media queries con `max-width` que sobreescribían las reglas originales. Cada nuevo componente, cada ajuste visual, agregaba una capa más de sobreescrituras.
+
+Este patrón de acumulación tiene un nombre en ingeniería de software: [**deuda técnica**](/notes/deuda_tecnica). No es un bug en el sentido clásico, no es un error de lógica ni una instrucción mal escrita. Es la consecuencia natural de tomar decisiones razonables en el momento que, con el tiempo, generan una complejidad difícil de gestionar. Como una deuda financiera, se acumula silenciosamente y cobra intereses: cada nuevo cambio se vuelve más costoso porque debe navegar las capas de decisiones anteriores.
+
+El origen específico del salto estaba en la animación de máquina de escribir del tagline. El CSS original usaba `max-width` para simular el efecto de tipeo:
+
+```css
+.site-tagline {
+  max-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+  animation: typewriter 4s steps(80, end) 1s forwards;
+}
+
+@keyframes typewriter {
+  from { max-width: 0; }
+  to   { max-width: 100%; }
+}
+```
+
+El problema es que `max-width: 100%` es un valor relativo: depende del ancho del contenedor padre. Y el contenedor padre era un `flex` item cuyo tamaño dependía, a su vez, del espacio que le dejaba el menú de navegación. El header usaba `display: flex` con `justify-content: space-between` para distribuir el título a la izquierda y el menú a la derecha:
+
+```css
+.header-contents {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+```
+
+El problema ocurría al inicio de la animación. Antes de que el tagline comenzara a expandirse, su `max-width` era `0`, lo que significaba que el `.header-start` ocupaba solo el ancho del título. Todo el espacio restante quedaba disponible para el menú, y el `justify-content: space-between` lo empujaba hacia la derecha. Cuando la animación arrancaba y el tagline comenzaba a ocupar espacio, el flex-container en el [DOM](/notes/arbol_del_dom) recalculaba la distribución y el menú se reacomodaba hacia su posición final. Ese empujón inicial hacia la derecha era el salto visible.
+
+La solución fue reemplazar la animación basada en `max-width` por una basada en `clip-path`, y sacar el tagline del flujo normal del flex layout:
+
+```css
+/* El tagline se posiciona absolutamente, fuera del flujo flex */
+.branding-bundle {
+  position: relative;
+  padding-bottom: calc(1.6rem + 4px); /* reserva espacio fijo */
+}
+
+.tagline-wrapper {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: max-content;
+}
+
+/* La animación usa clip-path en vez de max-width */
+.site-tagline {
+  white-space: nowrap;
+  clip-path: inset(0 100% 0 0); /* oculto inicialmente */
+  animation: typewriter 4s steps(80, end) 1s forwards;
+}
+
+@keyframes typewriter {
+  from { clip-path: inset(0 100% 0 0); }
+  to   { clip-path: inset(0 0% 0 0); }
+}
+```
+
+La diferencia es fundamental: `clip-path` recorta visualmente el elemento sin alterar su tamaño en el layout. El tagline ocupa su espacio completo desde el inicio, pero se revela progresivamente. Y al estar posicionado absolutamente, su presencia no afecta la distribución del flex container. El menú ya no tiene razón para moverse.
+
+Pero esta corrección puntual reveló un problema más profundo: la arquitectura de estilos necesitaba una reestructuración completa. Volveremos a esto.
+
+## .links_que_no_llevan_a_ninguna_parte
+
+<figure class="figure-blog">
+  <Image
+    src={pagina404}
+    alt="Página 404 de GitHub Pages mostrando el mensaje File not found"
+  />
+  <figcaption>
+    Página 404 de GitHub Pages: el destino silencioso de los enlaces rotos en escritura::extendida.
+  </figcaption>
+</figure>
+
+A medida que **escritura::extendida** fue creciendo, con diez posts publicados, múltiples notas interconectadas y referencias cruzadas entre ellos, verificar manualmente que cada enlace interno apuntara al lugar correcto se volvió inviable. Es un problema de escala: lo que funciona con dos o tres páginas deja de funcionar con veinte.
+
+Así como en [la entrada técnica sobre el tag de versión](/blog/desarrollar_tag_de_version) integramos un chequeo automatizado en **GitHub Actions** para verificar que la versión del sitio se actualizara con cada cambio, aquí la necesidad era similar: incorporar una herramienta que verificara la integridad de los enlaces de forma automática como parte del proceso de construcción del sitio.
+
+La herramienta elegida fue **astro-link-validator**, creada por **Travis Rodgers**, un desarrollador que, enfrentando el mismo problema en sus propios proyectos de **Astro**, decidió construir una solución y publicarla bajo licencia **MIT** para que cualquiera pudiera utilizarla. Este gesto es la esencia del **open source**: un desarrollador resuelve un problema local y, al hacer pública su solución, beneficia a todo el ecosistema. La licencia MIT, una de las más permisivas en el mundo del software libre, permite usar, modificar y distribuir la herramienta sin restricción, a cambio únicamente de preservar la atribución al autor original. Es un acto de generosidad estructural que sostiene gran parte de la infraestructura del software moderno.
+
+**astro-link-validator** es una integración de [Astro](/notes/astro) que revisa todos los enlaces internos del sitio durante el `build` y detiene la compilación si encuentra alguno roto.
+
+La integración se configuró en `astro.config.mjs`:
+
+```javascript
+import linkValidator from 'astro-link-validator';
+
+export default defineConfig({
+  integrations: [
+    mdx(),
+    linkValidator({
+      checkExternal: false,   // solo enlaces internos
+      failOnBrokenLinks: true, // detener el build si hay links rotos
+      verbose: false,
+    }),
+  ],
+});
+```
+
+Al ejecutar el validador por primera vez, aparecieron cinco enlaces rotos. Tres de ellos eran links relativos entre posts que carecían del prefijo `/blog/`: en lugar de apuntar a `/blog/construir_el_sitio_en_astro`, apuntaban a `construir_el_sitio_en_astro`, lo cual funcionaba dentro de la página del post pero fallaba al resolverse como ruta absoluta. Un cuarto enlace apuntaba a una nota que no existía. Y el quinto era una referencia a una imagen cuyo nombre de archivo contenía un acento, `cortázar.jpg`, que no coincidía con el archivo real en el sistema.
+ 
+<figure class="figure-blog">
+  <Image
+    src={validator}
+    alt="Salida de la terminal mostrando astro-link-validator detectando 5 enlaces rotos durante el build"
+  />
+  <figcaption>
+    astro-link-validator en acción: la herramienta detecta cinco enlaces rotos y detiene el build antes de que lleguen a producción.
+  </figcaption>
+</figure>
+
+Estos links llevaban a la misma página: el 404 de **GitHub Pages**. El lector que hiciera clic en cualquiera de ellos encontraría un callejón sin salida silencioso.
+
+Lo revelador de estos errores es que ninguno producía un fallo visible durante el desarrollo. El sitio compilaba sin problemas, las páginas se renderizaban correctamente, y solo un lector que hiciera clic en el enlace equivocado en el momento adecuado habría descubierto el problema. Es exactamente el tipo de error que la verificación manual no escala para detectar y que la verificación automatizada resuelve de forma definitiva: una vez integrada, cada `build` futuro atrapará cualquier enlace roto antes de que llegue a producción.
+
+La analogía con el testing es directa. A medida que un sistema crece, la verificación manual se vuelve insostenible. La respuesta no es verificar más cuidadosamente, sino cambiar la naturaleza de la verificación: convertir lo que era un acto humano propenso a error en un proceso automatizado, repetible y exhaustivo.
+
+## .diseñar_para_todas_las_pantallas
+
+El bug del menú y los enlaces rotos fueron correcciones puntuales. Pero la reestructuración de los estilos CSS fue un trabajo de otra escala: una reescritura de la arquitectura visual del sitio que no cambió su apariencia pero transformó su estructura interna.
+
+**escritura::extendida** siempre fue concebida para pantalla de escritorio. Su estética lo refleja: márgenes amplios que enmarcan el texto como una hoja sobre un escritorio, tipografía monoespaciada que evoca la máquina de escribir, un layout horizontal que presupone un lienzo ancho. Esta decisión estética era también una decisión técnica: los estilos base estaban escritos para pantallas anchas, y la versión móvil se construyó como una serie de excepciones.
+
+Pero la versión móvil tenía falencias que iban más allá de lo cosmético. El contenido desbordaba horizontalmente en pantallas pequeñas, forzando un scroll lateral involuntario. La tipografía no escalaba y se leía demasiado grande o demasiado pequeña según el dispositivo. El efecto de máquina de escribir que anima los títulos desbordaba su contenedor. URLs largas dentro del texto rompían el ancho de la página. Y los headings en [`snake_case`](/notes/snake_case), una decisión estética central del blog, se partían en posiciones arbitrarias dentro de las palabras en lugar de respetar los guiones bajos como puntos de corte naturales.
+
+<figure class="figure-blog">
+  <Image
+    src={titulosSeExtienden}
+    alt="Vista móvil de escritura::extendida mostrando títulos en snake_case que se cortan en posiciones arbitrarias"
+  />
+  <figcaption>
+    Los títulos en snake_case se partían en posiciones arbitrarias, ignorando los guiones bajos como puntos de corte naturales.
+  </figcaption>
+</figure>
+
+<figure class="figure-blog">
+  <Image
+    src={urlSeExtiende}
+    alt="Vista móvil de escritura::extendida mostrando URLs largas que desbordan el contenedor del texto"
+  />
+  <figcaption>
+    URLs largas en la sección de referencias rompían el ancho del contenedor, forzando un scroll horizontal involuntario.
+  </figcaption>
+</figure>
+
+Estos problemas los descubrí usando el **modo responsivo** del navegador, una herramienta integrada en los navegadores modernos que permite simular diferentes tamaños de pantalla sin necesidad de un dispositivo físico. En **Safari**, por ejemplo, se accede desde el menú **Develop → Enter Responsive Design Mode**, lo que permite visualizar cómo se verá la página en distintos dispositivos y dimensiones de pantalla directamente desde el escritorio.
+
+<figure class="figure-blog">
+  <Image
+    src={modoResponsivo}
+    alt="Menú de Safari mostrando la opción Enter Responsive Design Mode en el menú Develop"
+  />
+  <figcaption>
+    El modo responsivo en Safari: una herramienta esencial para detectar problemas de visualización en pantallas pequeñas.
+  </figcaption>
+</figure>
+
+Cada uno de estos problemas era un supuesto implícito del diseño original hecho visible por un contexto diferente. El diseño original asumía pantalla ancha, tipografía fija, y contenido acotado. La pantalla móvil rompía cada una de esos supuestos.
+
+La solución fue reestructurar los estilos para que fueran **conscientes de la vista en móvil**. No se trataba de invertir la prioridad y diseñar primero para pantallas pequeñas — **escritura::extendida** sigue siendo un proyecto concebido para el lienzo ancho del escritorio. Se trataba de que los estilos dejaran de ignorar las pantallas pequeñas y empezaran a contemplarlas como un contexto legítimo. 
+
+Los cambios principales incluyeron:
+
+- **Tipografía fluida con `clamp()`**: en lugar de tamaños fijos que saltan entre breakpoints, la tipografía ahora escala continuamente entre un mínimo y un máximo, adaptándose al ancho de la pantalla sin discontinuidades.
+- **Header con stacking vertical en móvil**: el menú de navegación, diseñado como una barra horizontal, se reorganiza verticalmente en pantallas pequeñas.
+- **Word breaks inteligentes para `snake_case`**: los headings del blog, que usan guiones bajos como parte de su identidad visual, ahora se cortan preferentemente en esos guiones, preservando la legibilidad del formato.
+- **Contención de overflow**: URLs, bloques de código y elementos largos ahora respetan los límites de su contenedor en cualquier ancho de pantalla.
+
+En lugar de incluir aquí los fragmentos de código específicos, invito al lector a explorar los cambios directamente en el [diff de GitHub](https://github.com/AndresZarta/escritura-extendida/pull/37/files). Una reestructuración de CSS no se entiende bien leyendo fragmentos aislados: lo que importa es ver qué se eliminó y qué lo reemplazó, cómo las reglas se reorganizaron y hacia dónde se movieron. La vista de diferencias de **GitHub** es precisamente la herramienta diseñada para eso: muestra lado a lado el antes y el después, resalta las líneas añadidas y eliminadas, y permite recorrer el cambio archivo por archivo.
+
+La magnitud del cambio fue considerable: más de mil líneas de CSS reestructuradas entre adiciones y eliminaciones. Pero el resultado visible para el usuario fue, idealmente, ninguno. Un lector de escritorio no debería notar diferencia alguna. Un lector de móvil debería encontrar un sitio que, ahora sí, se lee con la misma fluidez que en pantalla grande.
+
+Este tipo de intervención tiene un nombre preciso en ingeniería de software: [reestructurar código sin cambiar su comportamiento externo](/notes/refactoring) para mejorar su mantenibilidad interna. La idea es que el código acumula complejidad con el tiempo, y periódicamente necesita ser reorganizado no para agregar funcionalidad nueva sino para sostener la funcionalidad existente.
+
+Pero hay una idea más profunda. El mantenimiento no solo preserva: **revela**. Cada uno de estos ajustes sacó a la superficie un supuesto que estaba oculto en el diseño original. El header asumía un espacio horizontal infinito. La tipografía asumía una relación fija entre tamaño de fuente y ancho de pantalla. Los `snake_case` headings asumían que nunca necesitarían partirse. El mantenimiento es la práctica que encuentra y explicita estos supuestos, convirtiendo decisiones implícitas en decisiones conscientes.
+
+## .mantenimiento_como_lectura
+
+<figure class="figure-blog">
+  <a href="https://www.metmuseum.org/art/collection/search/187398" target="_blank" rel="noopener noreferrer">
+    <Image
+      src={armourersVise}
+      alt="Armourer's vise and lever wrench, acero (1706)"
+    />
+  </a>
+  <figcaption>Sur de Alemania. Armourer's vise and lever wrench, 1706. The Met Museum.</figcaption>
+</figure>
+
+Estas tres intervenciones, el bug del menú, los enlaces rotos, la reestructuración de estilos, constituyen en conjunto la [versión 2.0.1](https://github.com/AndresZarta/escritura-extendida/pull/37/changes) de **escritura::extendida**: un **parche** en los términos de nuestro [versionado semántico](/blog/version_semantica). Un ajuste de mantenimiento que corrige errores y mejora la estabilidad sin alterar la funcionalidad del sitio.
+
+Pero documentar este proceso no es solo un ejercicio de transparencia técnica. Es una forma de hacer visible una verdad que la construcción oculta: que un sistema de software no termina cuando se despliega. Lo que sigue después, el cuidado cotidiano, la atención a los detalles que se degradan, la voluntad de volver a lo que ya funciona para entender por qué funciona, es donde se revela el carácter duradero del proyecto.
+
+Mantener un sistema es una forma de leerlo. Es una lectura profunda de quien vuelve a un texto conocido y descubre en él capas que no había visto antes. Cada sesión de mantenimiento me obligó a releer el código del sitio con ojos nuevos: a entender por qué los estilos estaban organizados de cierta manera, a descubrir los supuestos que había tomado por sentados, a reconocer las decisiones que tomé implícitamente al no tomar ninguna decisión explícita.
+
+Y aquí es donde **escritura::extendida** revela algo sobre la naturaleza del texto digital. Un libro impreso, una vez publicado, se fija. Su forma material no cambia: la tinta sobre el papel es la misma hoy que dentro de cincuenta años. Si acaso, una edición posterior corrige una errata o ajusta una nota al pie, pero estos cambios son mínimos y no alteran la estructura de la obra. El texto digital, en cambio, es inherentemente susceptible al cambio. No porque el autor lo revise, sino porque el medio que lo alberga se transforma. Los navegadores se actualizan, las pantallas se multiplican, los estándares evolucionan. Un enlace que hoy funciona puede romperse mañana. Un diseño que hoy se lee bien puede desbordarse en un dispositivo que no existía cuando fue escrito. El texto digital vive en un entorno inestable, y esa inestabilidad lo convierte en algo distinto: un texto cuya legibilidad depende no solo de su contenido sino del estado del sistema que lo presenta. Por eso necesita mantenimiento. No revisión editorial, sino cuidado técnico continuo — el mismo tipo de atención que se le da a cualquier sistema vivo.
+
+**escritura::extendida** entra ahora en una fase donde la infraestructura está construida y el mantenimiento se integra como práctica continua. El sitio tiene las herramientas para verificar sus propios enlaces, una arquitectura de estilos preparada para cualquier pantalla y un sistema de versionado que documenta cada cambio. Sobre esta base, lo que viene es lo que siempre fue el propósito: escribir.
+
+## Referencias
+
+- **astro-link-validator** — Integración de Astro para validar enlaces internos durante el proceso de build, creada por Travis Rodgers bajo licencia MIT.
+  Fuente: [github.com/rodgtr1/astro-link-validator](https://github.com/rodgtr1/astro-link-validator)
+- **Add Broken Link Checking to Astro** — Entrada de blog de Travis Rodgers documentando la motivación y el uso de astro-link-validator.
+  Fuente: [travis.media/blog/astro-broken-links-validator](https://travis.media/blog/astro-broken-links-validator/)
+- **Versionado semántico** — Propuesta original de Tom Preston-Werner que define las reglas y convenciones del versionado semántico en software.
+  Fuente: [semver.org](https://semver.org/lang/es/)
