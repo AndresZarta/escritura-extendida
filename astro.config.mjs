@@ -2,11 +2,19 @@
 import { defineConfig } from 'astro/config';
 
 import mdx from '@astrojs/mdx';
+import linkValidator from 'astro-link-validator';
 
 // https://astro.build/config
 export default defineConfig({
   site: 'https://www.escrituraextendida.com',
-  integrations: [mdx()],
+  integrations: [
+    mdx(),
+    linkValidator({
+      checkExternal: false,
+      failOnBrokenLinks: true,
+      verbose: false,
+    }),
+  ],
   markdown: {
     // Example: switch highlight type or theme
     syntaxHighlight: {
