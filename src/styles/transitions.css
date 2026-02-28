@@ -1,0 +1,95 @@
+/* ========================================================================
+   VIEW TRANSITIONS
+   ======================================================================== */
+
+@view-transition {
+  navigation: auto;
+}
+
+/* Transition keyframes */
+@keyframes zoom-out {
+  to { transform: scale(1.1); opacity: 0; }
+}
+@keyframes zoom-in {
+  from { transform: scale(0.9); opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes zoom-out-reverse {
+  to { transform: scale(0.9); opacity: 0; }
+}
+@keyframes zoom-in-reverse {
+  from { transform: scale(1.1); opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes fade-out {
+  to { opacity: 0; }
+}
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+
+@keyframes slow-fade-out {
+  to { opacity: 0; }
+}
+@keyframes slow-fade-in {
+  from { opacity: 0; }
+}
+
+@keyframes slide-out-left {
+  to { transform: translateX(-30%); opacity: 0; }
+}
+@keyframes slide-in-right {
+  from { transform: translateX(30%); opacity: 0; }
+}
+
+@keyframes slide-out-right {
+  to { transform: translateX(30%); opacity: 0; }
+}
+@keyframes slide-in-left {
+  from { transform: translateX(-30%); opacity: 0; }
+}
+
+/* Transition type selectors (set by JavaScript) */
+html[data-transition="zoom-in"]::view-transition-old(root) {
+  animation: zoom-out 0.3s ease-out;
+}
+html[data-transition="zoom-in"]::view-transition-new(root) {
+  animation: zoom-in 0.3s ease-in;
+}
+
+html[data-transition="zoom-out"]::view-transition-old(root) {
+  animation: zoom-out-reverse 0.3s ease-out;
+}
+html[data-transition="zoom-out"]::view-transition-new(root) {
+  animation: zoom-in-reverse 0.3s ease-in;
+}
+
+html[data-transition="fade"]::view-transition-old(root) {
+  animation: fade-out 0.6s ease;
+}
+html[data-transition="fade"]::view-transition-new(root) {
+  animation: fade-in 0.6s ease;
+}
+
+html[data-transition="slow-fade"]::view-transition-old(root) {
+  animation: slow-fade-out 1.5s ease;
+}
+html[data-transition="slow-fade"]::view-transition-new(root) {
+  animation: slow-fade-in 1.5s ease;
+}
+
+html[data-transition="slide-left"]::view-transition-old(root) {
+  animation: slide-out-left 0.35s cubic-bezier(0.4, 0, 1, 1);
+}
+html[data-transition="slide-left"]::view-transition-new(root) {
+  animation: slide-in-right 0.35s cubic-bezier(0, 0, 0.2, 1);
+}
+
+html[data-transition="slide-right"]::view-transition-old(root) {
+  animation: slide-out-right 0.35s cubic-bezier(0.4, 0, 1, 1);
+}
+html[data-transition="slide-right"]::view-transition-new(root) {
+  animation: slide-in-left 0.35s cubic-bezier(0, 0, 0.2, 1);
+}

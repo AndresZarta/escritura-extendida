@@ -1,4 +1,7 @@
-/* Font faces */
+/* =============================================================================
+   FONTS
+   ============================================================================= */
+
 @font-face {
   font-family: 'DM Mono';
   font-style: normal;
@@ -75,6 +78,12 @@
 }
 
 /* CSS Variables (from theme.json) */
+
+/* =============================================================================
+   VARIABLES — mobile-first defaults
+   (overrides in the breakpoint sections at the bottom of this file)
+   ============================================================================= */
+
 :root {
   /* Colors */
   --color-base: #ffffff;
@@ -86,11 +95,12 @@
   --color-accent-3: #11111111;
   --color-accent-4: #ABB8C3;
 
-  /* Spacing */
-  --space-30: 12px;
-  --space-50: 16px;
-  --space-60: 24px;
-  --space-70: 32px;
+  /* Spacing — mobile defaults */
+  --space-20: 6px;
+  --space-30: 8px;
+  --space-50: 12px;
+  --space-60: 16px;
+  --space-70: 20px;
 
   /* Typography */
   --font-family: 'DM Mono', monospace;
@@ -101,18 +111,22 @@
   --font-size-xl: clamp(1.75rem, 4vw, 2.25rem);
   --font-size-xxl: clamp(2.25rem, 5vw, 3rem);
 
-  /* Link colors (used for markdown and inline links) */
+  /* Link colors */
   --color-link: var(--color-primary);
   --color-link-hover: var(--color-primary);
 
-  /* Layout */
+  /* Layout — mobile is full-width */
+  --content-padding: var(--space-60);
+  --wide-width: 100%;
+  --content-width: 100%;
   --max-side: 360px;
-  --content-width: min(calc(100% - 2 * var(--space-60)), max(68vw, calc(80vw + (500px - 100vw) * 0.5)));
-  --wide-width: calc(100% - 2 * var(--space-60));
-
 }
 
-/* Reset & Base */
+
+/* =============================================================================
+   RESET & BASE ELEMENTS
+   ============================================================================= */
+
 * {
   box-sizing: border-box;
 }
@@ -120,7 +134,7 @@
 body {
   margin: 0;
   font-family: var(--font-family);
-  font-size: var(--font-size-large);
+  font-size: var(--font-size-small);
   font-weight: 300;
   line-height: 1.6;
   color: var(--color-secondary);
@@ -137,13 +151,13 @@ body-mock {
   background-color: var(--color-base);
 }
 
-/* Typography */
 h1, h2, h3 {
   font-size: var(--font-size-large);
   font-weight: 700;
   line-height: 1.1;
   margin: var(--space-70) 0 var(--space-30);
   color: var(--color-primary);
+  overflow-wrap: break-word;
 }
 
 h4, h5 {
@@ -158,58 +172,6 @@ h6 {
   line-height: 1.6;
 }
 
-/* texto con degradado tricolor (varias variantes) */
-/*
-  .tri-gradient: utility para usar el degradado siempre visible.
-  .tri-gradient-hover: aplica el degradado SOLO en :hover y :focus-visible.
-  .tri-span-hover: padre que al hacer hover cambia el color de sus spans .tri-1/.tri-2/.tri-3
-*/
-.tri-gradient {
-  background: linear-gradient(90deg, #E63946 0%, #F4D35E 50%, #457B9D 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent; /* necesario para que se vea el gradient en el texto */
-}
-
-/* Degradado solo al hover/focus (accesible desde teclado con focus-visible) */
-.tri-gradient-hover {
-  color: var(--color-secondary); /* color por defecto */
-  transition: color 180ms ease, background 180ms ease;
-}
-.tri-gradient-hover:hover,
-.tri-gradient-hover:focus-visible {
-  background: linear-gradient(90deg, #F4D35E 0%, #457B9D 50%, #E63946 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-}
-
-/* Color por spans: los spans estarán neutrales y se colorean cuando el padre se hoveree */
-.tri-span-hover .tri-1,
-.tri-span-hover .tri-2,
-.tri-span-hover .tri-3 {
-  color: var(--color-secondary);
-  transition: color 180ms ease;
-}
-.tri-span-hover:hover .tri-1,
-.tri-span-hover:focus-visible .tri-1 {
-  color: #F4D35E; /* amarillo */
-}
-.tri-span-hover:hover .tri-2,
-.tri-span-hover:focus-visible .tri-2 {
-  color: #457B9D; /* azul */
-}
-.tri-span-hover:hover .tri-3,
-.tri-span-hover:focus-visible .tri-3 {
-  color: #E63946; /* rojo */
-}
-
-/* legacy single-span color classes (pueden usarse también directamente) */
-.tri-1 { color: #F4D35E; } /* amarillo */
-.tri-2 { color: #457B9D; } /* azul */
-.tri-3 { color: #E63946; } /* rojo */
-
-/* Links */
 a {
   color: var(--color-link);
   text-decoration: underline;
@@ -224,7 +186,6 @@ a:focus {
   text-decoration-color: var(--color-link-hover);
 }
 
-/* Buttons */
 button,
 .button {
   background-color: var(--color-secondary);
@@ -246,13 +207,7 @@ button:hover,
   color: var(--color-base);
 }
 
-/* =============================================================================
-   CODE STYLING
-   ============================================================================= */
-
-/* 1. BASE INLINE CODE STYLING
-   Applied to all inline code (e.g., `code` in markdown)
-   Gets light gray background to distinguish from regular text */
+/* Inline code */
 code {
   font-family: var(--font-family);
   font-size: var(--font-size-small);
@@ -261,9 +216,7 @@ code {
   border-radius: 5px;
 }
 
-/* 2. CODE BLOCK CONTAINER (pre)
-   Applied to fenced code blocks (e.g., ```js...```)
-   Gets border and padding to create a distinct block */
+/* Code blocks */
 pre {
   border: 2px solid var(--color-accent-4);
   padding: var(--space-50);
@@ -272,15 +225,12 @@ pre {
   border-radius: 4px;
 }
 
-/* 3. CODE INSIDE PRE BLOCKS
-   Removes the inline code styling when code is inside a pre block
-   This prevents double backgrounds and padding */
+/* Inline code inside a code block — remove double styling */
 pre code {
   background-color: transparent;
   padding: 0;
 }
 
-/* Quotes */
 blockquote {
   border-left: 4px solid var(--color-primary);
   padding-left: var(--space-50);
@@ -295,7 +245,6 @@ blockquote cite {
   font-style: normal;
 }
 
-/* Images & Media */
 img,
 figure,
 video {
@@ -309,85 +258,68 @@ figcaption {
   margin-top: var(--space-30);
 }
 
-.figure-blog {
-  text-align: center;
-  margin: 2rem auto;
-  max-width: 60%;
+ul,
+ol {
+  padding-left: var(--space-70);
 }
 
-.figure-blog img {
-  display: block;
-  width: 100%;
-  height: auto;
-}
-
-.figure-blog figcaption {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--color-tertiary);
+hr {
+  border: 0;
+  border-bottom: 1px solid var(--color-secondary);
+  margin: var(--space-60) 0;
 }
 
 
-.figure-blog-small {
-  text-align: center;
-  margin: 2rem 0;
+/* =============================================================================
+   GRADIENT UTILITIES
+   ============================================================================= */
+
+/*
+  .tri-gradient: degradado siempre visible.
+  .tri-gradient-hover: degradado SOLO en :hover y :focus-visible.
+  .tri-span-hover: padre que al hover colorea sus spans .tri-1/.tri-2/.tri-3
+*/
+.tri-gradient {
+  background: linear-gradient(90deg, #E63946 0%, #F4D35E 50%, #457B9D 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.figure-blog-small img {
-  display: block;
-  width: 30%;
-  height: auto;
-  margin: 0 auto;
+.tri-gradient-hover {
+  color: var(--color-secondary);
+  transition: color 180ms ease, background 180ms ease;
+}
+.tri-gradient-hover:hover,
+.tri-gradient-hover:focus-visible {
+  background: linear-gradient(90deg, #F4D35E 0%, #457B9D 50%, #E63946 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
 }
 
-.figure-blog-small figcaption {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--color-tertiary);
+.tri-span-hover .tri-1,
+.tri-span-hover .tri-2,
+.tri-span-hover .tri-3 {
+  color: var(--color-secondary);
+  transition: color 180ms ease;
 }
+.tri-span-hover:hover .tri-1,
+.tri-span-hover:focus-visible .tri-1 { color: #F4D35E; }
+.tri-span-hover:hover .tri-2,
+.tri-span-hover:focus-visible .tri-2 { color: #457B9D; }
+.tri-span-hover:hover .tri-3,
+.tri-span-hover:focus-visible .tri-3 { color: #E63946; }
 
-/* Medium version of figure-blog */
-.figure-blog-medium {
-  text-align: center;
-  margin: 2rem 0;
-}
-
-.figure-blog-medium img {
-  display: block;
-  width: 50%;
-  height: auto;
-  margin: 0 auto;
-}
-
-.figure-blog-medium figcaption {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--color-tertiary);
-}
-
-/* Large version of figure-blog */
-.figure-blog-large {
-  text-align: center;
-  margin: 0rem 0;
-  margin-left: 0;
-  margin-right: 0;
-}
-
-.figure-blog-large img {
-  display: block;
-  width: 100%;
-  height: auto;
-  margin: 0 auto;
-}
-
-.figure-blog-large figcaption {
-  margin-top: 0.5rem;
-  font-size: 0.875rem;
-  color: var(--color-tertiary);
-}
+.tri-1 { color: #F4D35E; }
+.tri-2 { color: #457B9D; }
+.tri-3 { color: #E63946; }
 
 
-/* Site Header */
+/* =============================================================================
+   SITE CHROME
+   ============================================================================= */
+
 .site-header {
   padding: var(--space-50) var(--space-60);
   border-bottom: 1px solid var(--color-accent-3);
@@ -405,7 +337,6 @@ figcaption {
   color: var(--color-primary);
 }
 
-/* Site Footer */
 .site-footer {
   padding: var(--space-50) var(--space-60);
   border-top: 1px solid var(--color-accent-3);
@@ -413,76 +344,68 @@ figcaption {
   font-size: var(--font-size-small);
 }
 
-/* Container */
-.container {
-  padding: var(--space-60);
-  max-width: var(--wide-width);
-  margin: 0 auto;
+.spacer-large {
+  height: 25px;
 }
 
-/* Columns Layout */
-.columns {
-  display: grid;
-  grid-template-columns: 2fr 1fr;
-  gap: var(--space-60);
-  align-items: start;
-  max-width: var(--content-width); /* constrain to main content width */
-  margin: 0 auto; /* center within the page/container */
+
+/* =============================================================================
+   LAYOUT — mobile base (single column, full width)
+   ============================================================================= */
+
+.container {
+  padding: var(--space-60);
   width: 100%;
 }
 
-/* Main Content */
+.columns {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-60);
+  align-items: start;
+  width: 100%;
+}
+
 .col-main {
-  width: 100%; /* let the grid control widths; keep content full inside the main column */
+  width: 100%;
 }
 
-.post-title {
-  margin: 0 0 var(--space-70);
-  position: relative;
-  padding-left: 0px;
-}
-
-.post-title::before {
-  content: './';
-  margin-left: -28px;
-  color: var(--color-accent-4);
-  position: absolute;
-  left: 0;
-  font-weight: normal;
-}
-
-.post-title:hover::before {
-  color: var(--color-primary);
-}
-
-.post-title a {
-  color: var(--color-secondary);
-}
-
-.post-title a:hover {
-  background-color: var(--color-accent);
-  color: var(--color-primary);
-}
-
-/* Post Content Links */
-.post-content a {
-  background-color: var(--color-accent-2);
-  padding: 2px 4px;
-}
-
-.post-content a:hover {
-  background-color: var(--color-accent);
-  color: var(--color-primary);
-}
-
-/* Sidebar */
 .col-side {
-  position: sticky;
-  top: var(--space-60);
+  position: static;
 }
+
+.page-container {
+  width: 100%;
+}
+
+.page-content {
+  width: 100%;
+}
+
+.posts-container {
+  padding: var(--space-60);
+  width: 100%;
+}
+
+.posts-wrapper {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: var(--space-50);
+  align-items: start;
+}
+
+.posts-sidebar {
+  position: static;
+  padding: 0 0 var(--space-50);
+  align-self: start;
+}
+
+
+/* =============================================================================
+   SIDEBAR (about page)
+   ============================================================================= */
 
 .sidebar {
-  min-height: 100vh;
   margin: 0;
   padding: var(--space-50) var(--space-60);
   display: flex;
@@ -507,7 +430,7 @@ figcaption {
   max-width: var(--max-side);
   margin: 0px 0 0;
   aspect-ratio: 1/1;
-  border-radius: 50%; /* make container circular */
+  border-radius: 50%;
   overflow: hidden;
 }
 
@@ -516,11 +439,9 @@ figcaption {
   height: 100%;
   object-fit: cover;
   display: block;
-  /* ensure the image follows the circular mask */
   border-radius: inherit;
 }
 
-/* Social Links */
 .social {
   display: flex;
   gap: 12px;
@@ -534,10 +455,10 @@ figcaption {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 0; /* no button padding */
-  border: none; /* remove button border */
+  padding: 0;
+  border: none;
   border-radius: 0;
-  background: transparent; /* ensure no button background */
+  background: transparent;
   font-size: var(--font-size-tiny);
 }
 
@@ -553,35 +474,10 @@ figcaption {
   height: 18px;
 }
 
-/* Lists */
-ul,
-ol {
-  padding-left: var(--space-70);
-}
 
-/* Separator */
-hr {
-  border: 0;
-  border-bottom: 1px solid var(--color-secondary);
-  margin: var(--space-60) 0;
-}
-
-/* Spacers */
-.spacer-large {
-  height: 25px;
-}
-
-/* Shared Content Page Styles */
-.page-container {
-  width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: 0 var(--space-60);
-}
-
-.page-content {
-  width: 100%;
-}
+/* =============================================================================
+   PAGE CONTENT (shared by blog posts and notes)
+   ============================================================================= */
 
 .page-title {
   font-size: var(--font-size-l);
@@ -601,6 +497,8 @@ hr {
   font-weight: 300;
   line-height: 1.6;
   color: var(--color-secondary);
+  overflow-wrap: anywhere;
+  min-width: 0;
 }
 
 .page-body :global(h2),
@@ -620,16 +518,18 @@ hr {
 .page-body :global(p),
 .page-body p {
   margin: var(--space-50) 0;
+  overflow-wrap: anywhere;
 }
 
 .page-body :global(a),
 .page-body a {
   color: var(--color-link);
-  background-color: transparent; /* keep inline links unobtrusive in prose */
-  padding: 0; /* remove code-like padding for normal links */
+  background-color: transparent;
+  padding: 0;
   text-decoration: underline;
   text-decoration-color: transparent;
   transition: color 0.15s ease, background-color 0.15s ease, text-decoration-color 0.15s ease;
+  overflow-wrap: anywhere;
 }
 
 .page-body :global(a:hover),
@@ -649,13 +549,11 @@ hr {
   font-style: italic;
 }
 
-/* CODE STYLING FOR MDX/MARKDOWN CONTENT
-   These rules override the base code styles specifically for .page-body
-   (where MDX blog posts are rendered). They exist separately because:
-   - Astro's MDX processing uses :global() to scope styles
-   - We need to target both scoped and unscoped code elements
-   - Adds vertical margins specific to blog post content flow */
-
+/*
+  Code styling for MDX/markdown content — overrides the base code styles
+  inside .page-body. Uses :global() because Astro's MDX processing generates
+  unscoped elements alongside scoped ones.
+*/
 .page-body :global(code),
 .page-body code {
   font-family: var(--font-family);
@@ -672,7 +570,7 @@ hr {
   padding: var(--space-50);
   overflow-x: auto;
   border-radius: 4px;
-  margin: var(--space-60) 0; /* Vertical spacing for blog content */
+  margin: var(--space-60) 0;
 }
 
 .page-body :global(pre code),
@@ -702,6 +600,7 @@ hr {
 .page-body :global(li),
 .page-body li {
   margin: var(--space-30) 0;
+  overflow-wrap: anywhere;
 }
 
 .page-date {
@@ -712,17 +611,130 @@ hr {
   margin-bottom: var(--space-60);
 }
 
-/* Posts Container */
-.posts-container {
-  display: flex;
-  gap: var(--space-60);
+
+/* =============================================================================
+   FIGURES — mobile: full width
+   (desktop overrides in the 640px section below)
+   ============================================================================= */
+
+.figure-blog {
+  text-align: center;
   width: 100%;
-  max-width: 1000px;
-  margin: 0 auto;
-  padding: var(--space-60) var(--space-60) 0;
+  margin: 1.5rem 0;
 }
 
-/* Post navigation (previous / next) */
+.figure-blog img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+.figure-blog figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-tertiary);
+}
+
+.figure-blog-small {
+  text-align: center;
+  width: 100%;
+  margin: 1.5rem 0;
+}
+
+.figure-blog-small img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.figure-blog-small figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-tertiary);
+}
+
+.figure-blog-medium {
+  text-align: center;
+  width: 100%;
+  margin: 1.5rem 0;
+}
+
+.figure-blog-medium img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.figure-blog-medium figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-tertiary);
+}
+
+.figure-blog-large {
+  text-align: center;
+  width: 100%;
+  margin: 1rem 0;
+}
+
+.figure-blog-large img {
+  display: block;
+  width: 100%;
+  height: auto;
+  margin: 0 auto;
+}
+
+.figure-blog-large figcaption {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: var(--color-tertiary);
+}
+
+
+/* =============================================================================
+   POST CHROME
+   ============================================================================= */
+
+.post-title {
+  margin: 0 0 var(--space-70);
+  position: relative;
+  padding-left: 0px;
+}
+
+.post-title::before {
+  content: './';
+  margin-left: -28px;
+  color: var(--color-accent-4);
+  position: absolute;
+  left: 0;
+  font-weight: normal;
+}
+
+.post-title:hover::before {
+  color: var(--color-primary);
+}
+
+.post-title a {
+  color: var(--color-secondary);
+}
+
+.post-title a:hover {
+  background-color: var(--color-accent);
+  color: var(--color-primary);
+}
+
+.post-content a {
+  background-color: var(--color-accent-2);
+  padding: 2px 4px;
+}
+
+.post-content a:hover {
+  background-color: var(--color-accent);
+  color: var(--color-primary);
+}
+
 .post-nav {
   display: flex;
   justify-content: center;
@@ -745,41 +757,21 @@ hr {
   transform: translateY(-2px);
 }
 
-.prev-post {
-  justify-self: start;
-}
+.prev-post { justify-self: start; }
+.next-post  { justify-self: end; }
 
-.next-post {
-  justify-self: end;
-}
 
-.posts-wrapper {
-  display: grid;
-  /* Left column reserved for intro/sidebar, right column for posts list */
-  grid-template-columns: minmax(220px, 340px) 1fr;
-  gap: var(--space-60);
-  align-items: start;
-}
-
-/* Posts Sidebar (Left Column - Sticky Heading) */
-.posts-sidebar {
-  position: sticky;
-  top: var(--space-60);
-  padding: var(--space-50) 0 var(--space-70);
-  align-self: start; /* ensure it aligns with the top of the posts list */
-}
+/* =============================================================================
+   POSTS LISTING
+   ============================================================================= */
 
 .posts-sidebar-content {
   max-width: 340px;
-}
-
-.posts-sidebar-content {
   display: flex;
   flex-direction: column;
   gap: var(--space-30);
 }
 
-/* Index page intro aside and latest posts list */
 .intro-aside {
   max-width: var(--content-width);
   margin: 0 auto;
@@ -891,18 +883,18 @@ hr {
   color: var(--color-primary);
 }
 
-/* Posts List (Right Column) */
 .posts-list {
   display: flex;
   flex-direction: column;
   gap: 0;
 }
 
+/* Post item — mobile: stacked (desktop grid in 640px section below) */
 .post-item {
-  display: grid;
-  grid-template-columns: 50px 1fr;
-  gap: 24px;
-  padding: 0 0 var(--space-50);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-30);
+  padding-bottom: var(--space-50);
   margin-bottom: var(--space-50);
   border-bottom: 1px solid var(--color-accent-3);
 }
@@ -937,7 +929,6 @@ hr {
   display: flex;
   flex-direction: column;
   gap: 8px;
-  grid-column: 2;
 }
 
 .post-item-title {
@@ -945,6 +936,7 @@ hr {
   font-weight: 700;
   line-height: 1.2;
   margin: 0;
+  overflow-wrap: break-word;
 }
 
 .post-item-title::before {
@@ -977,7 +969,6 @@ hr {
 }
 
 .post-excerpt {
-  grid-column: 1 / -1;
   font-size: var(--font-size-medium);
   font-weight: 300;
   line-height: 1.6;
@@ -987,10 +978,13 @@ hr {
 
 .post-spacer {
   height: var(--space-50);
-  grid-column: 1 / -1;
 }
 
-/* Pagination styles */
+
+/* =============================================================================
+   PAGINATION
+   ============================================================================= */
+
 .pagination {
   display: flex;
   align-items: center;
@@ -1173,86 +1167,10 @@ hr {
     grid-template-columns: 1fr;
   }
 
-  .col-side {
-    position: static;
-  }
+/* =============================================================================
+   DEMO STYLES (used in html.mdx and js.mdx posts)
+   ============================================================================= */
 
-  .sidebar {
-    min-height: auto;
-  }
-
-  .post-title {
-    font-size: var(--font-size-medium);
-  }
-
-  .posts-wrapper {
-    grid-template-columns: 1fr;
-    gap: var(--space-50);
-  }
-
-  .posts-sidebar {
-    position: static;
-    padding: 0 0 var(--space-50);
-  }
-}
-
-@media (max-width: 640px) {
-  :root {
-    --space-60: 16px;
-  }
-
-  body {
-    font-size: var(--font-size-small);
-  }
-
-  .site-header,
-  .site-footer {
-    padding: var(--space-50);
-  }
-
-  .container {
-    padding: var(--space-50);
-  }
-
-  .posts-container {
-    padding: var(--space-50);
-  }
-
-  .spacer-large {
-    height: 50px;
-  }
-
-  .post-item {
-    grid-template-columns: 1fr;
-    gap: var(--space-30);
-  }
-
-  .post-thumbnail {
-    grid-column: 1;
-  }
-
-  .post-header {
-    grid-column: 1;
-  }
-
-  .post-excerpt {
-    grid-column: 1;
-  }
-
-  .page-container {
-    padding: 0 var(--space-50);
-  }
-
-  .page-title {
-    font-size: var(--font-size-large);
-  }
-
-  .page-body {
-    font-size: var(--font-size-small);
-  }
-}
-
-/* Demo CSS styles for html.mdx */
 .demo-css p {
   font-size: 24px;
   color: #3366ff;
@@ -1366,4 +1284,113 @@ hr {
   background-color: #e0e0e0;
   border-color: #ccc;
   transform: scale(1.05);
+}
+
+
+/* =============================================================================
+   BREAKPOINT: 640px — tablet and up
+   ============================================================================= */
+
+@media (min-width: 640px) {
+  /* Spacing scale-up */
+  :root {
+    --space-60: 20px;
+    --space-70: 28px;
+  }
+
+  /* Typography */
+  body {
+    font-size: var(--font-size-large);
+  }
+
+  /* Figures — constrain from full-width to percentages */
+  .figure-blog {
+    max-width: 60%;
+    margin: 2rem auto;
+  }
+
+  .figure-blog-small img {
+    width: 30%;
+  }
+
+  .figure-blog-medium img {
+    width: 50%;
+  }
+
+  /* Post item — switch from stacked to thumbnail + content grid */
+  .post-item {
+    display: grid;
+    grid-template-columns: 50px 1fr;
+    gap: 24px;
+  }
+
+  .post-header {
+    grid-column: 2;
+  }
+
+  .post-excerpt {
+    grid-column: 1 / -1;
+  }
+
+  .post-spacer {
+    grid-column: 1 / -1;
+  }
+}
+
+
+/* =============================================================================
+   BREAKPOINT: 960px — desktop
+   ============================================================================= */
+
+@media (min-width: 960px) {
+  /* Spacing scale-up + layout variable activation */
+  :root {
+    --space-60: 24px;
+    --space-70: 32px;
+    --wide-width: calc(100% - 2 * var(--space-60));
+    --content-width: min(calc(100% - 2 * var(--space-60)), max(68vw, calc(80vw + (500px - 100vw) * 0.5)));
+  }
+
+  /* Container — center and constrain */
+  .container {
+    max-width: var(--wide-width);
+    margin: 0 auto;
+  }
+
+  /* Columns — two-column layout (about page) */
+  .columns {
+    grid-template-columns: 2fr 1fr;
+    max-width: var(--content-width);
+    margin: 0 auto;
+  }
+
+  /* Sidebar — stick to viewport top */
+  .col-side {
+    position: sticky;
+    top: var(--space-60);
+  }
+
+  /* Page and posts containers — center and constrain */
+  .page-container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  .posts-container {
+    max-width: 1000px;
+    margin: 0 auto;
+  }
+
+  /* Posts wrapper — sidebar + list two-column */
+  .posts-wrapper {
+    grid-template-columns: minmax(220px, 340px) 1fr;
+    gap: var(--space-60);
+  }
+
+  /* Posts sidebar — stick to viewport top */
+  .posts-sidebar {
+    position: sticky;
+    top: var(--space-60);
+    padding: var(--space-50) 0 var(--space-70);
+  }
 }

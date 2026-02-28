@@ -6,24 +6,27 @@ import VersionTag from "./VersionTag.astro";
 <div class="header-container">
   <header class="site-header">
     <div class="header-contents">
-			<!-- Titulo del sitio con link a la pagina principal -->
+      <!-- Titulo del sitio con link a la pagina principal -->
       <div class="header-start">
         <div class="branding-bundle">
           <div class="site-branding" style="position:relative;display:inline-flex;align-items:flex-end;">
-            <a href="/" class="site-title" style="font-size:2rem;text-decoration:none;line-height:1;">
+            <a href="/" class="site-title">
               {SITE.title}
             </a>
             <span style="position:relative;bottom:-0.2em;margin-left:0.25rem;opacity:.6;font-size:.75rem;">
               <VersionTag />
             </span>
           </div>
-          <p class="site-tagline">{SITE.tagline}</p>
+          <div class="tagline-wrapper">
+            <p class="site-tagline">{SITE.tagline}</p>
+            <span class="tagline-cursor" aria-hidden="true"></span>
+          </div>
         </div>
       </div>
 
       <!-- Navigation Group -->
       <div class="header-end">
-        <nav class="site-navigation">
+        <nav class="site-navigation" id="site-nav">
           <ul class="nav-menu">
             <li><a href="/">./inicio</a></li>
             <li><a href="/blog/init_escritura_extendida">./init_escritura_extendida</a></li>
@@ -37,10 +40,50 @@ import VersionTag from "./VersionTag.astro";
   </header>
 </div>
 
+<script>
+  // Mobile typewriter — character by character so text wraps naturally
+  function setupMobileTypewriter() {
+    if (window.innerWidth >= 640) return; // CSS animation handles desktop
+
+    const taglineEl = document.querySelector<HTMLElement>('.site-tagline');
+    const cursorEl = document.querySelector<HTMLElement>('.tagline-cursor');
+    if (!taglineEl) return;
+
+    const text = taglineEl.textContent?.trim() ?? '';
+
+    // Reveal immediately if reduced motion is preferred
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+      taglineEl.style.clipPath = 'none';
+      return;
+    }
+
+    taglineEl.textContent = '';
+    taglineEl.style.clipPath = 'none';
+    taglineEl.style.animation = 'none';
+    if (cursorEl) cursorEl.style.display = 'none';
+
+    taglineEl.classList.add('is-typing');
+
+    let i = 0;
+    setTimeout(() => {
+      const id = setInterval(() => {
+        taglineEl.textContent = text.slice(0, ++i);
+        if (i >= text.length) {
+          clearInterval(id);
+          setTimeout(() => taglineEl.classList.remove('is-typing'), 500);
+        }
+      }, 55);
+    }, 1000);
+  }
+
+  setupMobileTypewriter();
+  document.addEventListener('astro:page-load', setupMobileTypewriter);
+</script>
+
 <style>
   .header-container {
     width: 100%;
-    padding: var(--space-30) var(--space-50);
+    padding: var(--space-30) var(--space-60);
     margin: 0;
   }
 
@@ -51,20 +94,22 @@ import VersionTag from "./VersionTag.astro";
     border-bottom: none;
   }
 
+  /* Mobile: stack title and nav vertically */
   .header-contents {
     display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: nowrap;
+    flex-direction: column;
+    gap: var(--space-30);
     margin: 0;
     padding: 0;
   }
 
-  .header-start,
+  .header-start {
+    min-width: 0;
+  }
+
   .header-end {
     display: flex;
     align-items: center;
-    gap: var(--space-30);
   }
 
   .site-branding {
@@ -77,10 +122,13 @@ import VersionTag from "./VersionTag.astro";
     flex-direction: column;
     align-items: flex-start;
     gap: 4px;
+    width: 100%;   /* bound by .header-start so tagline wrapper can clip */
+    min-width: 0;
   }
 
   .site-title {
-    font-size: var(--font-size-large);
+    font-size: clamp(1.25rem, 5vw, 2rem);
+    line-height: 1;
     font-weight: 300;
     color: var(--color-primary);
     text-decoration: none;
@@ -92,17 +140,20 @@ import VersionTag from "./VersionTag.astro";
     color: var(--color-primary);
   }
 
+  /* Nav always visible, stacks vertically on mobile */
   .site-navigation {
     display: flex;
+    width: 100%;
   }
 
+  /* Nav links stack vertically on mobile */
   .nav-menu {
     display: flex;
+    flex-direction: column;
     list-style: none;
-    margin: 0;
+    margin: var(--space-30) 0 0;
     padding: 0;
-    gap: var(--space-30);
-    flex-wrap: nowrap;
+    gap: var(--space-20);
   }
 
   .nav-menu li {
@@ -124,83 +175,131 @@ import VersionTag from "./VersionTag.astro";
     color: var(--color-secondary);
   }
 
+  /* Tagline wrapper — mobile: bounds the tagline */
+  .tagline-wrapper {
+    position: relative;
+    width: 100%;
+    margin-top: var(--space-20);
+  }
+
+  /* Mobile: tagline starts hidden (clip), JS takes over */
   .site-tagline {
-    display: inline-block;
-    margin: var(--space-20) 0 0 0;
-    overflow: hidden;
-    white-space: nowrap;
-    width: auto;
-    max-width: 0;
+    display: block;
+    margin: 0;
+    white-space: normal; /* allow wrapping on mobile */
     font-size: var(--font-size-small);
     color: var(--color-secondary);
     font-weight: 300;
-    border-right: 2px solid var(--color-secondary);
-    animation:
-      typewriter 4s steps(80, end) 1s forwards,
-      removeCursor 0s linear 5s forwards;
+    clip-path: inset(0 100% 0 0); /* hidden until JS or desktop animation starts */
+  }
+
+  /* Mobile cursor via ::after while JS is typing */
+  .site-tagline.is-typing::after {
+    content: '|';
+    display: inline;
+    color: var(--color-secondary);
+    animation: cursorBlink 0.7s step-start infinite;
+  }
+
+  /* Desktop cursor bar — hidden on mobile */
+  .tagline-cursor {
+    display: none;
   }
 
   @keyframes typewriter {
-    from { max-width: 0; }
-    to   { max-width: 100%; }
+    from { clip-path: inset(0 100% 0 0); }
+    to   { clip-path: inset(0 0% 0 0); }
   }
 
-  @keyframes removeCursor {
-    to { border-right: none; }
+  @keyframes cursorSlide {
+    from { left: 0%; }
+    to   { left: 100%; }
   }
 
-
-/* Respect reduced motion preferences */
-@media (prefers-reduced-motion: reduce) {
-  .site-tagline {
-    animation: none;
-    border-right: none;
-    width: 100%;
-  }
-}
-
-@media (max-width: 640px) {
-  .header-container {
-    padding: var(--space-30);
+  @keyframes cursorBlink {
+    50% { opacity: 0; }
   }
 
-  .header-contents {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--space-30);
+  @keyframes cursorDisappear {
+    to { opacity: 0; }
   }
 
-  .site-navigation {
-    display: grid;
-    flex-direction: row;
+  /* Respect reduced motion preferences (desktop) */
+  @media (prefers-reduced-motion: reduce) {
+    .site-tagline {
+      animation: none;
+      clip-path: none;
+    }
 
-    margin-left: -10px;
+    .tagline-cursor {
+      display: none !important;
+    }
   }
 
-  /* Ensure the branding bundle stays left-aligned and can wrap internally */
-  .branding-bundle {
-    width: 100%;
-    align-items: flex-start;
-  }
+  /* Desktop (640px+): show nav inline, hide hamburger, CSS typewriter */
+  @media (min-width: 640px) {
+    .header-contents {
+      flex-direction: row;
+      justify-content: space-between;
+      align-items: center;
+    }
 
-  /* Make the tagline wrap on small screens and stop the typewriter animation */
-  .site-tagline {
-    white-space: normal;        /* allow wrapping */
-    display: block;             /* behave as a block element */
-    width: 100%;                /* full width under the title */
-    max-width: none;            /* don't clip */
-    overflow: visible;          /* show wrapped lines */
-    border-right: none;         /* remove the typewriter cursor */
-    animation: none;            /* disable animation on small screens */
-    overflow-wrap: anywhere;    /* break long words/URLs if necessary */
-    word-break: break-word;     /* extra safety for long strings */
-    line-height: 1.2;           /* slightly tighter line height */
-    margin-top: var(--space-10);
-  }
+    /* Title: sized to title text only (tagline is out of flow) */
+    .header-start {
+      flex: none;
+    }
 
-  .nav-menu {
-    flex-direction: column;
-    gap: var(--space-20);
+    /* Nav: shrinks as window narrows, clips content when squeezed */
+    .header-end {
+      flex: 0 1 auto;
+      overflow: hidden;
+      min-width: 0;
+    }
+
+    /* Nav links hold their full width so they overflow header-end (not compress) */
+    .nav-menu a {
+      white-space: nowrap;
+    }
+
+    .nav-menu {
+      flex-direction: row;
+      gap: var(--space-30);
+      margin: 0;
+    }
+
+    /* Desktop: title sizes to its own text; tagline is out of flex flow */
+    .branding-bundle {
+      width: auto;
+      position: relative;
+      padding-bottom: calc(1.6rem + 4px);
+    }
+
+    .tagline-wrapper {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: max-content;
+    }
+
+    /* Desktop: CSS clip-path typewriter animation */
+    .site-tagline {
+      white-space: nowrap;
+      animation: typewriter 4s steps(80, end) 1s forwards;
+    }
+
+    /* Desktop cursor bar */
+    .tagline-cursor {
+      display: block;
+      position: absolute;
+      top: 0;
+      height: 1.5em;
+      font-size: var(--font-size-small);
+      left: 0;
+      width: 2px;
+      background-color: var(--color-secondary);
+      animation:
+        cursorSlide 4s steps(80, end) 1s forwards,
+        cursorDisappear 0s 5s forwards;
+    }
   }
-}
 </style>

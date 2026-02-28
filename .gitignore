@@ -30,5 +30,6 @@ bump-version.sh
 .obsidian/
 _templates
 
-# AI tools
-.claude
+# Claude Code files (personal and project skills, commands, agents, memory)
+.claude/
+CLAUDE.md
