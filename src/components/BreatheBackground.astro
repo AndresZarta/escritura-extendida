@@ -5,6 +5,7 @@ interface Props {
   speed?: number;
   decayMidpoint?: number;
   decayK?: number;
+  debug?: boolean;
 }
 
 const {
@@ -13,6 +14,7 @@ const {
   speed = 0.3,
   decayMidpoint = 30,
   decayK = 0.15,
+  debug = false,
 } = Astro.props;
 ---
 
@@ -23,8 +25,44 @@ const {
   data-breathe-speed={speed}
   data-decay-midpoint={decayMidpoint}
   data-decay-k={decayK}
+  data-debug={debug}
   hidden
 ></span>
+
+{debug && (
+  <div class="breathe-debug" id="breathe-debug">
+    <canvas id="breathe-graph" width="300" height="120"></canvas>
+    <div class="breathe-stats" id="breathe-stats"></div>
+  </div>
+)}
+
+<style>
+  .breathe-debug {
+    position: fixed;
+    bottom: 12px;
+    right: 12px;
+    z-index: 9999;
+    background: rgba(0, 0, 0, 0.85);
+    color: #0f0;
+    font-family: 'DM Mono', monospace;
+    font-size: 11px;
+    padding: 8px;
+    border-radius: 6px;
+    pointer-events: none;
+    line-height: 1.5;
+  }
+
+  .breathe-debug canvas {
+    display: block;
+    margin-bottom: 6px;
+    border-radius: 3px;
+    background: rgba(0, 0, 0, 0.4);
+  }
+
+  .breathe-stats {
+    white-space: pre;
+  }
+</style>
 
 <script>
   const config = document.querySelector<HTMLElement>('.breathe-config');
@@ -36,6 +74,20 @@ const {
     const speed = parseFloat(config.dataset.breatheSpeed ?? '0.3');
     const decayMidpoint = parseFloat(config.dataset.decayMidpoint ?? '30');
     const decayK = parseFloat(config.dataset.decayK ?? '0.15');
+    const debug = config.dataset.debug === 'true';
+
+    // Debug: graph + stats
+    const canvas = document.getElementById('breathe-graph') as HTMLCanvasElement | null;
+    const statsEl = document.getElementById('breathe-stats');
+    const ctx = canvas?.getContext('2d') ?? null;
+    const graphW = canvas?.width ?? 0;
+    const graphH = canvas?.height ?? 0;
+    const historyLen = graphW;
+
+    const noiseHistory: number[] = [];
+    const envelopeHistory: number[] = [];
+    const opacityHistory: number[] = [];
+    const imageHistory: number[] = [];
 
     // Lightweight 1D Perlin noise
     const PERM = new Uint8Array(512);
@@ -64,9 +116,8 @@ const {
       return 0.5 + 0.5 * (a + u * (b - a));
     }
 
-    // Sigmoid decay: starts at ~1, drops to ~0 around the midpoint
-    // envelope(t) = 1 - 1/(1 + e^(-k*(t - midpoint)))
-    function envelope(seconds: number): number {
+    // Sigmoid: returns ~1 early, drops to ~0 around the midpoint
+    function sigmoid(seconds: number): number {
       return 1 - 1 / (1 + Math.exp(-decayK * (seconds - decayMidpoint)));
     }
 
@@ -75,6 +126,13 @@ const {
     let activeIndex = Math.floor(Math.random() * layers.length);
     let wasAtZero = false;
     let swapTime = performance.now();
+    let swapCount = 0;
+    const globalStart = performance.now();
+
+    // The actual envelope lerps smoothly toward the sigmoid target,
+    // so resetting the sigmoid on swap never causes a jump.
+    let currentEnv = sigmoid(0);
+    const lerpRate = 0.02;
 
     function pickNext(): void {
       if (layers.length <= 1) return;
@@ -84,19 +142,92 @@ const {
       } while (next === activeIndex);
       activeIndex = next;
       swapTime = performance.now();
+      swapCount++;
+    }
+
+    function drawDebug(rawNoise: number, env: number, opacity: number): void {
+      if (!ctx) return;
+
+      noiseHistory.push(rawNoise);
+      envelopeHistory.push(env);
+      opacityHistory.push(opacity);
+      imageHistory.push(activeIndex);
+      if (noiseHistory.length > historyLen) {
+        noiseHistory.shift();
+        envelopeHistory.shift();
+        opacityHistory.shift();
+        imageHistory.shift();
+      }
+
+      ctx.clearRect(0, 0, graphW, graphH);
+
+      // Image swap markers (vertical lines)
+      for (let i = 1; i < imageHistory.length; i++) {
+        if (imageHistory[i] !== imageHistory[i - 1]) {
+          ctx.strokeStyle = 'rgba(255, 255, 0, 0.5)';
+          ctx.beginPath();
+          ctx.moveTo(i, 0);
+          ctx.lineTo(i, graphH);
+          ctx.stroke();
+        }
+      }
+
+      function drawLine(data: number[], color: string, maxVal: number): void {
+        if (!ctx || data.length < 2) return;
+        ctx.strokeStyle = color;
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        for (let i = 0; i < data.length; i++) {
+          const x = i;
+          const y = graphH - (data[i] / maxVal) * graphH;
+          if (i === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+      }
+
+      drawLine(noiseHistory, 'rgba(255, 255, 255, 0.4)', 1);
+      drawLine(envelopeHistory, 'rgba(80, 160, 255, 0.7)', 1);
+      drawLine(opacityHistory, '#0f0', max);
+
+      // Legend
+      ctx.font = '9px monospace';
+      ctx.fillStyle = 'rgba(255,255,255,0.4)';
+      ctx.fillText('noise', 4, 10);
+      ctx.fillStyle = 'rgba(80,160,255,0.7)';
+      ctx.fillText('envelope', 44, 10);
+      ctx.fillStyle = '#0f0';
+      ctx.fillText('opacity', 100, 10);
+      ctx.fillStyle = 'rgba(255,255,0,0.5)';
+      ctx.fillText('swap', 148, 10);
+
+      // Stats text
+      if (statsEl) {
+        const elapsed = (performance.now() - globalStart) / 1000;
+        const sinceSwap = (performance.now() - swapTime) / 1000;
+        statsEl.textContent =
+          `noise:    ${rawNoise.toFixed(4)}\n` +
+          `envelope: ${env.toFixed(4)}\n` +
+          `opacity:  ${opacity.toFixed(4)}\n` +
+          `image:    ${activeIndex} / ${layers.length - 1}  (swaps: ${swapCount})\n` +
+          `time:     ${elapsed.toFixed(1)}s  (since swap: ${sinceSwap.toFixed(1)}s)`;
+      }
     }
 
     function animate(): void {
       t += speed * 0.01;
-      const n = noise1d(t);
+      const rawNoise = noise1d(t);
 
+      // Sigmoid target resets on each swap; currentEnv lerps toward it
       const elapsed = (performance.now() - swapTime) / 1000;
-      const env = envelope(elapsed);
+      const targetEnv = sigmoid(elapsed);
+      currentEnv += (targetEnv - currentEnv) * lerpRate;
 
-      const opacity = min + n * (max - min) * env;
+      // Envelope multiplies the noise — but because currentEnv transitions
+      // smoothly, there's never a jump on swap.
+      const n = rawNoise * currentEnv;
+      const opacity = min + n * (max - min);
 
-      // Only swap when the noise itself is at a trough, so the
-      // envelope reset doesn't cause a visible jump
       const noiseAtFloor = n < 0.05;
       if (noiseAtFloor && !wasAtZero) {
         pickNext();
@@ -105,6 +236,10 @@ const {
 
       for (let i = 0; i < layers.length; i++) {
         layers[i].style.opacity = i === activeIndex ? String(opacity) : '0';
+      }
+
+      if (debug) {
+        drawDebug(rawNoise, currentEnv, opacity);
       }
 
       frameId = requestAnimationFrame(animate);
