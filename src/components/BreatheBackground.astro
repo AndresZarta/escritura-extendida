@@ -1,0 +1,123 @@
+---
+interface Props {
+  min?: number;
+  max?: number;
+  speed?: number;
+  decayMidpoint?: number;
+  decayK?: number;
+}
+
+const {
+  min = 0.04,
+  max = 0.16,
+  speed = 0.3,
+  decayMidpoint = 30,
+  decayK = 0.15,
+} = Astro.props;
+---
+
+<span
+  class="breathe-config"
+  data-breathe-min={min}
+  data-breathe-max={max}
+  data-breathe-speed={speed}
+  data-decay-midpoint={decayMidpoint}
+  data-decay-k={decayK}
+  hidden
+></span>
+
+<script>
+  const config = document.querySelector<HTMLElement>('.breathe-config');
+  const layers = Array.from(document.querySelectorAll<HTMLElement>('.artifact-bg'));
+
+  if (config && layers.length > 0) {
+    const min = parseFloat(config.dataset.breatheMin ?? '0.04');
+    const max = parseFloat(config.dataset.breatheMax ?? '0.16');
+    const speed = parseFloat(config.dataset.breatheSpeed ?? '0.3');
+    const decayMidpoint = parseFloat(config.dataset.decayMidpoint ?? '30');
+    const decayK = parseFloat(config.dataset.decayK ?? '0.15');
+
+    // Lightweight 1D Perlin noise
+    const PERM = new Uint8Array(512);
+    const p = new Uint8Array(256);
+    for (let i = 0; i < 256; i++) p[i] = i;
+    for (let i = 255; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [p[i], p[j]] = [p[j], p[i]];
+    }
+    for (let i = 0; i < 512; i++) PERM[i] = p[i & 255];
+
+    function fade(t: number): number {
+      return t * t * t * (t * (t * 6 - 15) + 10);
+    }
+
+    function grad1d(hash: number, x: number): number {
+      return (hash & 1) === 0 ? x : -x;
+    }
+
+    function noise1d(x: number): number {
+      const xi = Math.floor(x) & 255;
+      const xf = x - Math.floor(x);
+      const u = fade(xf);
+      const a = grad1d(PERM[xi], xf);
+      const b = grad1d(PERM[xi + 1], xf - 1);
+      return 0.5 + 0.5 * (a + u * (b - a));
+    }
+
+    // Sigmoid decay: starts at ~1, drops to ~0 around the midpoint
+    // envelope(t) = 1 - 1/(1 + e^(-k*(t - midpoint)))
+    function envelope(seconds: number): number {
+      return 1 - 1 / (1 + Math.exp(-decayK * (seconds - decayMidpoint)));
+    }
+
+    let t = Math.random() * 1000;
+    let frameId: number;
+    let activeIndex = Math.floor(Math.random() * layers.length);
+    let wasAtZero = false;
+    let swapTime = performance.now();
+
+    function pickNext(): void {
+      if (layers.length <= 1) return;
+      let next: number;
+      do {
+        next = Math.floor(Math.random() * layers.length);
+      } while (next === activeIndex);
+      activeIndex = next;
+      swapTime = performance.now();
+    }
+
+    function animate(): void {
+      t += speed * 0.01;
+      const n = noise1d(t);
+
+      const elapsed = (performance.now() - swapTime) / 1000;
+      const env = envelope(elapsed);
+
+      const opacity = min + n * (max - min) * env;
+
+      // Only swap when the noise itself is at a trough, so the
+      // envelope reset doesn't cause a visible jump
+      const noiseAtFloor = n < 0.05;
+      if (noiseAtFloor && !wasAtZero) {
+        pickNext();
+      }
+      wasAtZero = noiseAtFloor;
+
+      for (let i = 0; i < layers.length; i++) {
+        layers[i].style.opacity = i === activeIndex ? String(opacity) : '0';
+      }
+
+      frameId = requestAnimationFrame(animate);
+    }
+
+    frameId = requestAnimationFrame(animate);
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden) {
+        cancelAnimationFrame(frameId);
+      } else {
+        frameId = requestAnimationFrame(animate);
+      }
+    });
+  }
+</script>

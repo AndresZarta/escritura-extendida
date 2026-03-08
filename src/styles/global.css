@@ -1166,6 +1166,7 @@ hr {
   .columns {
     grid-template-columns: 1fr;
   }
+}
 
 /* =============================================================================
    DEMO STYLES (used in html.mdx and js.mdx posts)
@@ -1394,3 +1395,4 @@ hr {
     padding: var(--space-50) 0 var(--space-70);
   }
 }
+

@@ -1,0 +1,13 @@
+---
+interface Props {
+  font?: string;
+}
+
+const { font = "'EB Garamond', serif" } = Astro.props;
+---
+
+<Fragment set:html={`<style>
+  [data-page-type="artifact"] .artifact-content {
+    font-family: ${font};
+  }
+</style>`} />

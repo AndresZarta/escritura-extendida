@@ -40,6 +40,7 @@ const artifactsCollection = defineCollection({
     pubDate: z.coerce.date(),
     upDate: z.coerce.date().optional(),
     image: image().optional(),
+    backgroundImages: z.array(image()).optional(),
     draft: z.boolean().optional().default(false),
   }),
 });

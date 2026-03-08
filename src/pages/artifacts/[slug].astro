@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
+import { getImage } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import HeaderToggle from '../../components/HeaderToggle.astro';
 import { formatCoercedDateAsCalendar, isSameCalendarDay } from '../../utils/formatDateET';
@@ -35,9 +36,24 @@ allEntries.sort((a, b) => +new Date(b.data.pubDate) - +new Date(a.data.pubDate))
 const currentIndex = allEntries.findIndex(e => e.slug === entry.slug);
 const previous = allEntries[currentIndex + 1] || null;
 const next = allEntries[currentIndex - 1] || null;
+
+const bgImages = entry.data.backgroundImages
+  ? await Promise.all(entry.data.backgroundImages.map((src) => getImage({ src })))
+  : [];
 ---
 
 <Base title={entry.data.title} description={entry.data.description} pageType="artifact" hideHeader={true}>
+  {bgImages.length > 0 && (
+    <div class="artifact-bg-container" aria-hidden="true">
+      {bgImages.map((img, i) => (
+        <div
+          class="artifact-bg"
+          data-bg-index={i}
+          style={`--bg-image: url(${img.src})`}
+        ></div>
+      ))}
+    </div>
+  )}
   <HeaderToggle title={entry.data.title} />
 
   <div class="spacer-large" aria-hidden="true"></div>
@@ -93,6 +109,23 @@ const next = allEntries[currentIndex - 1] || null;
 </Base>
 
 <style>
+  .artifact-bg-container {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    pointer-events: none;
+  }
+
+  .artifact-bg {
+    position: absolute;
+    inset: 0;
+    background-image: var(--bg-image);
+    background-size: cover;
+    background-position: center 30%;
+    background-repeat: no-repeat;
+    opacity: 0;
+  }
+
   .artifact-container {
     max-width: 900px;
     margin: 0 auto;
