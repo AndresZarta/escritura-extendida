@@ -1,0 +1,63 @@
+---
+title: "presentar_el_primer_artefacto"
+pubDate: 2026-03-21
+description: "¿Cuento, poema o experimento? Presento .pnlp.1.0 y el concepto de artefacto: una pieza literaria versionada, inseparable del medio digital que la alberga."
+image: ""
+draft: false
+---
+
+A mis posibles lectores les ofrezco, no sin cierta vacilación, [**.pnlp**](/artifacts/): la primera pieza literaria que se publica en **escritura::extendida**.
+
+Es difícil para mí determinar con qué nombre llamar a esta pieza. ¿Es un cuento? ¿Una especie rara de poema? ¿O es tan solo un experimento?
+
+Llamarlo cuento es aspirar a una excelencia técnica de la que aún, confieso, no me siento del todo merecedor. Escribo con torpeza y me cuesta dejar ir lo accesorio — algo que para [Cortázar](/blog/la_literatura_ergodica_como_espacio_navegable#cortázar_lector_cómplice_en_un_itinerario) es esencial. 
+
+En su charla _Algunos aspectos del cuento_, publicada en la revista _Casa de las Américas_ en La Habana a principios de los años sesenta, Cortázar se propuso pensar en voz alta sobre el oficio del cuentista latinoamericano: sus tensiones, sus límites, la relación entre tema y forma, y lo que distingue a un gran cuento de uno que simplemente funciona. Es un texto al que vuelvo seguido. Y quizás sus palabras me redimen:
+
+> Nadie puede pretender que los cuentos sólo deban escribirse luego de conocer sus leyes. En primer lugar, no hay tales leyes; a lo sumo cabe hablar de puntos de vista, de ciertas constantes.
+
+Yo aún estoy aprendiendo esas constantes.
+
+Llamarlo poesía, de cierta forma, me libera de la expectativa, pues todo acto de poesía es esencialmente íntimo y personal. Con todo lo que he escrito en este blog sobre mi mente dada a la tecnología, esta pieza es quizás la expresión más sincera de lo que yo soy: alguien que intenta verter lo que alberga su corazón en líneas de prosa y líneas de código, tratando de coextenderlas hasta que se encuentren en un mismo acto.
+
+Y ciertamente es un experimento, en tanto la pieza pone a prueba todo lo que hemos venido construyendo en **escritura::extendida**. Las ideas sobre [la no-linealidad](/blog/escribir_en_la_no-linealidad), [la literatura ergódica](/blog/la_literatura_ergodica_como_espacio_navegable), [el texto como comportamiento](/blog/programar_el_infinito_en_la_web) — todo eso está presente en la pieza como experiencia de lectura. La [infraestructura](/blog/construir_el_sitio_en_astro) y el [cuidado técnico](/blog/mantener_el_sitio) que hemos documentado a lo largo de este blog son lo que hace posible que el texto haga lo que hace.
+
+## .artefacto
+
+Es por esto que he dado con darle un nombre distinto: **artefacto**.
+
+Un artefacto, en su sentido más elemental, es un objeto producido por la actividad humana — algo hecho con intención, con técnica, con las manos o con las herramientas disponibles. En arqueología, un artefacto es lo que sobrevive de una cultura: una vasija, una punta de flecha, un fragmento de cerámica que revela, por su forma y su material, las condiciones de su fabricación. No es una obra de arte en el sentido convencional ni un documento en el sentido académico. Es algo intermedio: un objeto que porta significado porque fue hecho, y cuya forma es inseparable del proceso que lo produjo.
+
+En **escritura::extendida**, un artefacto es una pieza literaria que existe inseparablemente del medio digital que la alberga. No es un texto que _podría_ vivir en papel y que simplemente se muestra en pantalla. Es una pieza cuyo significado depende del navegador, del código, del comportamiento que el texto adquiere cuando es ejecutado. Las palabras se desvanecen, las frases se bifurcan, los párrafos se interrumpen — no como ornamento, sino como parte constitutiva de lo que la pieza quiere decir.
+
+## .un_artefacto_versionado
+
+**.pnlp** es, además, un artefacto versionado.
+
+A diferencia de la publicación convencional de un cuento — donde el texto se fija en una edición y cualquier cambio posterior requiere una nueva edición, una fe de erratas o una reescritura declarada —, este artefacto está abierto a la modificación. Su nomenclatura sigue la lógica del [versionado semántico](/blog/version_semantica) que ya describimos como práctica de **escritura::extendida**: el número **1.0.0** indica una primera versión estable, publicada e íntegra, pero no necesariamente definitiva.
+
+Esto significa que la pieza puede evolucionar. Un parche (1.0.1, 1.0.2...) podría corregir un error tipográfico, ajustar un efecto visual o mejorar un detalle de ritmo. Un cambio menor (1.1, 1.2...) podría añadir un nuevo pasaje, un nuevo efecto o una nueva capa de lectura. Un cambio mayor (2.0) implicaría una reconfiguración profunda de la pieza — una reescritura que altere su estructura o su sentido. Cada versión quedará documentada en el [repositorio de GitHub](https://github.com/AndresZarta/escritura-extendida), donde el lector podrá comparar las diferencias entre una versión y otra, como quien estudia las variantes de un manuscrito.
+
+La idea de versionar la pieza no es un capricho técnico. Es una consecuencia directa de lo que hemos venido explorando en este blog: que el texto digital no se fija como la tinta sobre el papel. Vive en un medio inestable, y esa inestabilidad puede ser abrazada como parte del proceso creativo en lugar de ser combatida.
+
+## .sobre_la_experiencia_de_lectura
+
+El artefacto puede encontrarse en [/artifacts/](/artifacts/). Vive en su propia sección del sitio, separada del blog y de las notas, porque su naturaleza es distinta: no es una reflexión sobre el proceso ni un material de referencia, sino la pieza misma.
+
+Debo señalar que **.pnlp** ha sido diseñado y optimizado para ser leído en un navegador de escritorio. Los efectos visuales e interactivos que constituyen parte esencial de la experiencia dependen de un viewport amplio, de la presencia de un cursor y de la capacidad del navegador para ejecutar las animaciones con fluidez. No ha sido probado exhaustivamente en dispositivos móviles, y es probable que la experiencia en una pantalla pequeña no transmita la pieza como fue concebida. Si es posible, recomiendo leerla en un computador.
+
+```javascript
+// NieblaTexto.astro — cuando el cursor abandona el párrafo,
+// la niebla regresa y el recuerdo se pierde.
+if (hoveredParagraph === p) hoveredParagraph = null;
+```
+
+## .lo_que_sigue
+
+Publicar esta pieza marca un momento importante para **escritura::extendida**. Todo lo que hemos construido hasta ahora — la infraestructura del sitio, las reflexiones sobre la no-linealidad, la literatura ergódica, el versionado semántico, el sistema de notas, las transiciones de vista, el mantenimiento — ha sido, de alguna manera, preparación para esto: para poder escribir.
+
+No pretendo que la pieza sea perfecta. Pero sí pretendo que sea honesta, y que sea el inicio de un nuevo momento.
+
+Con la publicación de este primer artefacto, **escritura::extendida** avanza a la [versión 3.0](/blog/version_semantica): un cambio mayor que marca el paso de un sitio que reflexionaba sobre la posibilidad de escribir a un sitio en el que se escribe.
+
+Si esta pieza causó algún efecto en ti — sea que te haya gustado o que te haya molestado —, me encantaría saberlo. Puedes encontrar cómo contactarme en [./sobre_mí](/about).

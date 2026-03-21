@@ -1,0 +1,106 @@
+---
+---
+
+<span class="amor-de-verano" data-adv>
+  <span class="adv-text" role="button" tabindex="0">un amor de verano.</span>
+</span>
+
+<style>
+  .amor-de-verano {
+    position: relative;
+    display: inline;
+  }
+
+  .adv-text {
+    font-family: 'Caveat', cursive;
+    font-size: 1.15em;
+    font-weight: 400;
+    color: #3d5a6e;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.6s ease;
+    white-space: nowrap;
+  }
+
+  .adv-text:focus-visible {
+    outline: 1px solid #3d5a6e;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  .adv-text.adv-struck {
+    color: rgba(26, 24, 20, 0.4);
+  }
+
+  .adv-text.adv-struck::after {
+    content: '';
+    position: absolute;
+    left: -2px;
+    right: -2px;
+    top: 52%;
+    height: 1.5px;
+    background: rgba(61, 90, 110, 0.7);
+    animation: adv-scratch 0.35s ease forwards;
+  }
+
+  @keyframes adv-scratch {
+    from { transform: scaleX(0); transform-origin: left; }
+    to { transform: scaleX(1); transform-origin: left; }
+  }
+
+  .adv-replacement {
+    font-family: 'Caveat', cursive;
+    font-size: 1.15em;
+    font-weight: 400;
+    color: #3d5a6e;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+  }
+
+  .adv-replacement.adv-visible {
+    opacity: 1;
+  }
+
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-adv]').forEach((container) => {
+    const textSpan = container.querySelector<HTMLElement>('.adv-text')!;
+    let clicked = false;
+
+    function activate(): void {
+      if (clicked) return;
+      clicked = true;
+      textSpan.removeAttribute('tabindex');
+
+      // Strike through
+      textSpan.classList.add('adv-struck');
+
+      // After scratch animation, type out replacement character by character
+      setTimeout(() => {
+        const replacement = document.createElement('span');
+        replacement.className = 'adv-replacement adv-visible';
+        container.appendChild(replacement);
+
+        const fullText = 'un simple sueño.';
+        let charIdx = 0;
+
+        function typeNext(): void {
+          if (charIdx >= fullText.length) return;
+          replacement.textContent = fullText.slice(0, charIdx + 1);
+          charIdx++;
+          setTimeout(typeNext, 60 + Math.random() * 40);
+        }
+        typeNext();
+      }, 500);
+    }
+
+    textSpan.addEventListener('click', activate);
+    textSpan.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        activate();
+      }
+    });
+  });
+</script>

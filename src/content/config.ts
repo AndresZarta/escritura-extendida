@@ -31,9 +31,26 @@ const notesCollection = defineCollection({
   }),
 });
 
+const artifactsCollection = defineCollection({
+  type: 'content',
+  schema: ({ image }) => z.object({
+    title: z.string(),
+    subtitle: z.string().optional(),
+    version: z.string().optional(),
+    experienciaDeLectura: z.string().optional(),
+    description: z.string(),
+    pubDate: z.coerce.date(),
+    upDate: z.coerce.date().optional(),
+    image: image().optional(),
+    backgroundImages: z.array(image()).optional(),
+    draft: z.boolean().optional().default(false),
+  }),
+});
+
 export const collections = {
   'blog': blogCollection,
   'notes': notesCollection,
+  'artifacts': artifactsCollection,
 };
 
 

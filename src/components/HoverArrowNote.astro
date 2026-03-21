@@ -1,0 +1,127 @@
+---
+interface Props {
+  label?: string;
+}
+
+const { label = 'Nota al margen' } = Astro.props;
+---
+
+<span class="hover-arrow-note" tabindex="0" data-han>
+  <span class="han-text"><slot /></span>
+  <span class="han-arrow" aria-hidden="true">
+    <svg class="han-curve" viewBox="0 0 100 75" xmlns="http://www.w3.org/2000/svg">
+      <g fill="none" stroke="#3d5a6e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" stroke-miterlimit="10">
+        <path d="M9.748 73.448c-5.466-9.41-12.212-20.124.532-26.994 9.499-5.12 21.629-3.752 30.447 1.811 8.999 5.677 16.714 14.104 28.574 9.748 18.443-6.774 19.853-35.315 22.447-50.898"/>
+        <path d="M97.003 12.678c-2.956-3.242-2.408-7.53-4.574-11.126-1.822 2.634-5.759 7.808-8.893 9.052"/>
+      </g>
+    </svg>
+    <span class="han-label">{label}</span>
+  </span>
+</span>
+
+<style>
+  .hover-arrow-note {
+    position: relative;
+    display: inline-block;
+  }
+
+  .han-text {
+    position: relative;
+    z-index: 0;
+    display: inline;
+    cursor: pointer;
+  }
+
+  .han-text::before {
+    content: '';
+    position: absolute;
+    inset: -1px -2px;
+    background: rgba(220, 200, 80, 0.35);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.28s ease;
+    z-index: -1;
+  }
+
+  .hover-arrow-note.han-highlighted .han-text::before {
+    transform: scaleX(1);
+  }
+
+  .han-arrow {
+    position: absolute;
+    top: 100%;
+    left: 60%;
+    opacity: 0;
+    transform: translate(4px, -3px);
+    transition: opacity 0.24s ease, transform 0.24s ease;
+    pointer-events: none;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    padding-top: 2px;
+    z-index: 4;
+  }
+
+  .hover-arrow-note:hover .han-arrow,
+  .hover-arrow-note:focus-within .han-arrow {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .han-curve {
+    width: 54px;
+    height: 42px;
+    flex-shrink: 0;
+    transform: scaleX(-1);
+  }
+
+  .han-label {
+    font-family: 'Caveat', cursive;
+    font-style: italic;
+    font-size: 15px;
+    font-weight: 500;
+    color: #3d5a6e;
+    white-space: nowrap;
+    margin-top: -4px;
+    padding-left: 30px;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('[data-han]').forEach((el) => {
+    let highlightTimer: number | null = null;
+
+    const markSeen = (): void => {
+      el.classList.add('han-highlighted');
+    };
+
+    if (!('IntersectionObserver' in window)) {
+      setTimeout(markSeen, 2000);
+      return;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+      for (const entry of entries) {
+        if (entry.isIntersecting) {
+          if (highlightTimer === null) {
+            highlightTimer = window.setTimeout(() => {
+              markSeen();
+              observer.disconnect();
+            }, 2000);
+          }
+        } else if (highlightTimer !== null) {
+          window.clearTimeout(highlightTimer);
+          highlightTimer = null;
+        }
+      }
+    }, { threshold: 0.85 });
+
+    observer.observe(el);
+
+    // Cleanup on navigation (view transitions)
+    document.addEventListener('astro:before-swap', () => {
+      observer.disconnect();
+      if (highlightTimer !== null) window.clearTimeout(highlightTimer);
+    }, { once: true });
+  });
+</script>

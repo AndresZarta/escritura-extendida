@@ -1,0 +1,237 @@
+---
+interface Props {
+  /** Mist density multiplier */
+  density?: number;
+  /** How fast the mist drifts */
+  driftSpeed?: number;
+  /** Mist color — should match the page background */
+  color?: string;
+  /** Feather radius (px) around hovered paragraph where fog thins */
+  feather?: number;
+}
+
+const {
+  density = 2.15,
+  driftSpeed = 0.9,
+  color = '#fafafa',
+  feather = 30,
+} = Astro.props;
+---
+
+<div
+  class="niebla-container"
+  data-niebla-density={density}
+  data-niebla-drift-speed={driftSpeed}
+  data-niebla-color={color}
+  data-niebla-feather={feather}
+>
+  <canvas class="niebla-canvas" aria-hidden="true"></canvas>
+  <div class="niebla-content">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .niebla-container {
+    position: relative;
+    overflow: visible;
+  }
+
+  .niebla-canvas {
+    position: absolute;
+    inset: -60px;
+    width: calc(100% + 120px);
+    height: calc(100% + 120px);
+    pointer-events: none;
+    z-index: 1;
+    mask-image:
+      linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%),
+      linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+    mask-composite: intersect;
+    -webkit-mask-image:
+      linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%),
+      linear-gradient(to right, transparent 0%, black 8%, black 92%, transparent 100%);
+    -webkit-mask-composite: source-in;
+  }
+
+  .niebla-content :global(p),
+  .niebla-content :global(.glitch-paragraph),
+  .niebla-content :global(.palabras-desvanecen) {
+    opacity: var(--niebla-p-opacity, 0.45);
+  }
+</style>
+
+<script>
+  import { makeNoise2D } from '../utils/noise';
+  import { observeVisibility } from '../utils/observeVisibility';
+
+  document.querySelectorAll<HTMLElement>('.niebla-container').forEach((container) => {
+    const canvas = container.querySelector<HTMLCanvasElement>('.niebla-canvas');
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const density = parseFloat(container.dataset.nieblaDensity ?? '1.95');
+    const driftSpeed = parseFloat(container.dataset.nieblaDriftSpeed ?? '0.4');
+    const color = container.dataset.nieblaColor ?? '#fafafa';
+    const feather = parseFloat(container.dataset.nieblaFeather ?? '30');
+
+    // Normalize any CSS color format to #rrggbb via canvas round-trip
+    const probe = document.createElement('canvas').getContext('2d')!;
+    probe.fillStyle = color;
+    const hex = probe.fillStyle; // always '#rrggbb'
+    const r = parseInt(hex.slice(1, 3), 16);
+    const g = parseInt(hex.slice(3, 5), 16);
+    const b = parseInt(hex.slice(5, 7), 16);
+
+    // Track which paragraph is hovered and smoothly animate the fog hole
+    const contentEl = container.querySelector('.niebla-content');
+    const paragraphs = contentEl ? Array.from(contentEl.querySelectorAll('p, .glitch-paragraph, .palabras-desvanecen')) as HTMLElement[] : [];
+
+    let hoveredParagraph: HTMLElement | null = null;
+
+    // Per-paragraph state: clear strength (0 = fogged, 1 = clear) and text opacity
+    const pClearStrength = new Map<HTMLElement, number>();
+    const pOpacities = new Map<HTMLElement, number>();
+    paragraphs.forEach((p) => {
+      pClearStrength.set(p, 0);
+      pOpacities.set(p, 0.45);
+      p.addEventListener('mouseenter', () => { hoveredParagraph = p; });
+      p.addEventListener('mouseleave', () => {
+        if (hoveredParagraph === p) hoveredParagraph = null;
+      });
+    });
+
+    const { warpedFbm } = makeNoise2D();
+
+    const scale = 4;
+    let time = Math.random() * 1000;
+    let frameId: number;
+    let running = false;
+    let frameCount = 0;
+    const IDLE_SKIP = 3; // render every Nth frame when no interaction
+
+    const bleed = 60;
+    function resize(): void {
+      const rect = container.getBoundingClientRect();
+      canvas!.width = Math.ceil((rect.width + bleed * 2) / scale);
+      canvas!.height = Math.ceil((rect.height + bleed * 2) / scale);
+    }
+
+    resize();
+    const resizeObserver = new ResizeObserver(resize);
+    resizeObserver.observe(container);
+
+    function render(): void {
+      // Per-paragraph: fade clear strength and text opacity in/out independently
+      const openSpeed = 0.06;
+      const closeSpeed = 0.025;
+
+      // Check if any clear zone is animating (hovered or settling back)
+      let isAnimating = hoveredParagraph !== null;
+
+      for (const p of paragraphs) {
+        const isHovered = p === hoveredParagraph;
+        const targetClear = isHovered ? 1 : 0;
+        const speed = isHovered ? openSpeed : closeSpeed;
+
+        const curClear = pClearStrength.get(p) ?? 0;
+        const nextClear = curClear + (targetClear - curClear) * speed;
+        pClearStrength.set(p, nextClear);
+
+        // Still settling if strength is meaningful but not at target
+        if (Math.abs(nextClear - targetClear) > 0.001) isAnimating = true;
+
+        const curOpacity = pOpacities.get(p) ?? 0.45;
+        const targetOpacity = isHovered ? 1 : 0.45;
+        const nextOpacity = curOpacity + (targetOpacity - curOpacity) * speed;
+        pOpacities.set(p, nextOpacity);
+        p.style.setProperty('--niebla-p-opacity', String(nextOpacity));
+      }
+
+      // Throttle: skip expensive pixel work when idle (no hover, no animation settling)
+      frameCount++;
+      if (!isAnimating && frameCount % IDLE_SKIP !== 0) {
+        frameId = requestAnimationFrame(render);
+        return;
+      }
+
+      time += driftSpeed * 0.005;
+
+      // Build clear zones array for the render loop
+      const cRect = container.getBoundingClientRect();
+      const clearZones: { top: number; bottom: number; strength: number }[] = [];
+      for (const p of paragraphs) {
+        const strength = pClearStrength.get(p) ?? 0;
+        if (strength > 0.001) {
+          const pRect = p.getBoundingClientRect();
+          clearZones.push({
+            top: (pRect.top - cRect.top + bleed) / scale,
+            bottom: (pRect.bottom - cRect.top + bleed) / scale,
+            strength,
+          });
+        }
+      }
+
+      const w = canvas!.width;
+      const h = canvas!.height;
+      if (w === 0 || h === 0) {
+        frameId = requestAnimationFrame(render);
+        return;
+      }
+
+      const imgData = ctx!.createImageData(w, h);
+      const data = imgData.data;
+
+      const noiseScale = 0.018;
+      const featherScaled = feather / scale;
+
+      for (let y = 0; y < h; y++) {
+        for (let x = 0; x < w; x++) {
+          const raw = warpedFbm(x * noiseScale, y * noiseScale, time);
+          const threshold = 0.2;
+          const clamped = Math.max(raw - threshold, 0) / (1 - threshold);
+          const n = Math.pow(clamped, 0.8);
+
+          let alpha = Math.min(n * density, 1);
+
+          // Each paragraph's clear zone fades independently
+          for (const zone of clearZones) {
+            let zoneEffect = 0;
+            if (y >= zone.top && y <= zone.bottom) {
+              zoneEffect = 1;
+            } else if (y > zone.top - featherScaled && y < zone.top) {
+              zoneEffect = 1 - (zone.top - y) / featherScaled;
+            } else if (y > zone.bottom && y < zone.bottom + featherScaled) {
+              zoneEffect = 1 - (y - zone.bottom) / featherScaled;
+            }
+            alpha *= 1 - zoneEffect * zone.strength;
+          }
+
+          const idx = (y * w + x) * 4;
+          data[idx] = r;
+          data[idx + 1] = g;
+          data[idx + 2] = b;
+          data[idx + 3] = Math.floor(alpha * 255);
+        }
+      }
+
+      ctx!.putImageData(imgData, 0, 0);
+      frameId = requestAnimationFrame(render);
+    }
+
+    const cleanupVisibility = observeVisibility(container,
+      () => { if (!running) { running = true; frameId = requestAnimationFrame(render); } },
+      () => { if (running) { running = false; cancelAnimationFrame(frameId); } }
+    );
+
+    // Cleanup on navigation (view transitions)
+    document.addEventListener('astro:before-swap', () => {
+      cleanupVisibility();
+      resizeObserver.disconnect();
+      running = false;
+      cancelAnimationFrame(frameId);
+    }, { once: true });
+  });
+</script>

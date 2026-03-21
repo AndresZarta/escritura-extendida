@@ -1,0 +1,26 @@
+---
+const ALLOWED_FONTS = new Set([
+  "'EB Garamond', serif",
+  "'IM Fell English', serif",
+  "'Caveat', cursive",
+  "'DM Mono', monospace",
+  "serif",
+  "sans-serif",
+  "monospace",
+]);
+
+const DEFAULT_FONT = "'EB Garamond', serif";
+
+interface Props {
+  font?: string;
+}
+
+const rawFont = Astro.props.font;
+const safeFont = (rawFont !== undefined && ALLOWED_FONTS.has(rawFont)) ? rawFont : DEFAULT_FONT;
+---
+
+<Fragment set:html={`<style>
+  [data-page-type="artifact"] .artifact-content {
+    font-family: ${safeFont};
+  }
+</style>`} />

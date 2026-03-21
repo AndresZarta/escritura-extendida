@@ -1,0 +1,114 @@
+---
+interface Props {
+  /** First option (standalone word when clicked) */
+  optionA: string;
+  /** Second option suffix displayed in brackets */
+  optionB: string;
+  /** Full combined word when optionB is clicked (overrides simple concatenation) */
+  combined?: string;
+}
+
+const {
+  optionA,
+  optionB,
+  combined,
+} = Astro.props;
+---
+
+<span
+  class="bifurca-palabra"
+  data-bp-option-a={optionA}
+  data-bp-option-b={optionB}
+  data-bp-combined={combined ?? (optionA + optionB)}
+>
+  <span class="bp-bracket">[</span><span
+    class="bp-choice bp-choice-a"
+    role="button"
+    tabindex="0"
+  >{optionA}</span><span
+    class="bp-slash">/</span><span
+    class="bp-choice bp-choice-b"
+    role="button"
+    tabindex="0"
+  >{optionB}</span><span class="bp-bracket">]</span>
+</span>
+
+<style>
+  .bifurca-palabra {
+    display: inline;
+  }
+
+  .bp-choice {
+    cursor: pointer;
+    font-family: 'Caveat', cursive;
+    font-size: 1.15em;
+    color: #3d5a6e;
+    transition: opacity 1.2s ease;
+    border-radius: 2px;
+  }
+
+  .bp-choice:focus-visible {
+    outline: 1px solid #3d5a6e;
+    outline-offset: 2px;
+  }
+
+  .bp-bracket,
+  .bp-slash {
+    color: #3d5a6e;
+    opacity: 0.4;
+    transition: opacity 1.2s ease;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.bifurca-palabra').forEach((el) => {
+    const optionA = el.dataset.bpOptionA ?? '';
+    const combined = el.dataset.bpCombined ?? '';
+    const choiceA = el.querySelector<HTMLElement>('.bp-choice-a')!;
+    const choiceB = el.querySelector<HTMLElement>('.bp-choice-b')!;
+    const brackets = el.querySelectorAll<HTMLElement>('.bp-bracket');
+    const slash = el.querySelector<HTMLElement>('.bp-slash')!;
+    let chosen = false;
+
+    function collapseElements(...elements: HTMLElement[]): void {
+      for (const e of elements) {
+        // Set explicit width and prepare for collapse
+        const w = e.getBoundingClientRect().width;
+        e.style.display = 'inline-block';
+        e.style.overflow = 'hidden';
+        e.style.verticalAlign = 'bottom';
+        e.style.transition = 'opacity 1.2s ease, width 1.2s ease';
+        e.style.width = `${w}px`;
+        // Force reflow
+        void e.offsetWidth;
+        e.style.opacity = '0';
+        e.style.width = '0';
+      }
+    }
+
+    choiceA.addEventListener('click', () => {
+      if (chosen) return;
+      chosen = true;
+      choiceA.style.cursor = 'default';
+      choiceA.removeAttribute('tabindex');
+      choiceB.removeAttribute('tabindex');
+      collapseElements(choiceB, slash, ...Array.from(brackets));
+    });
+    choiceA.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choiceA.click(); }
+    });
+
+    choiceB.addEventListener('click', () => {
+      if (chosen) return;
+      chosen = true;
+      choiceA.textContent = combined;
+      choiceA.style.cursor = 'default';
+      choiceA.removeAttribute('tabindex');
+      choiceB.removeAttribute('tabindex');
+      collapseElements(choiceB, slash, ...Array.from(brackets));
+    });
+    choiceB.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choiceB.click(); }
+    });
+  });
+</script>

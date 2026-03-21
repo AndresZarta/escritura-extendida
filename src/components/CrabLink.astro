@@ -1,0 +1,600 @@
+---
+interface Props {
+  /** Color for the highlighted "hoy" words */
+  color?: string;
+  /** Color for the crab, trail, and particles */
+  crabColor?: string;
+  /** Crab walking speed in px/s */
+  crabSpeed?: number;
+  /** Extra vertical gap (px) between first and second hoy paragraphs */
+  gap?: number;
+}
+
+const {
+  color = 'rgb(70, 130, 230)',
+  crabColor = 'rgb(255, 140, 50)',
+  crabSpeed = 35,
+  gap = 300,
+} = Astro.props;
+---
+
+<div
+  class="crab-link"
+  data-hl-color={color}
+  data-hl-crab-color={crabColor}
+  data-hl-speed={crabSpeed}
+  data-hl-gap={gap}
+>
+  <canvas class="crab-canvas" aria-hidden="true"></canvas>
+  <div class="crab-content">
+    <slot />
+  </div>
+</div>
+
+<style>
+  .crab-link {
+    position: relative;
+  }
+
+  .crab-canvas {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  .crab-content :global(.hl-hoy) {
+    font-weight: inherit;
+  }
+
+  .crab-content :global(.hl-hoy-clickable) {
+    cursor: pointer;
+    display: inline-block;
+    animation: hoy-nudge 4s ease-in-out infinite;
+  }
+
+  .crab-content :global(.hl-hoy-clickable:focus-visible) {
+    outline: 1px solid currentColor;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
+  @keyframes hoy-nudge {
+    0%, 82%, 100% { transform: rotate(0deg); }
+    84% { transform: rotate(-6deg); }
+    86% { transform: rotate(6deg); }
+    88% { transform: rotate(-5deg); }
+    90% { transform: rotate(5deg); }
+    92% { transform: rotate(-3deg); }
+    94% { transform: rotate(3deg); }
+    96% { transform: rotate(-1.5deg); }
+    98% { transform: rotate(0deg); }
+  }
+
+  .crab-content :global(.hl-hidden) {
+    opacity: 0;
+    transition: opacity 1.5s ease;
+  }
+
+  .crab-content :global(.hl-hidden.hl-revealed) {
+    opacity: 1;
+  }
+
+  /* Hide all text in second hoy paragraph except the hoy word itself */
+  .crab-content :global(.hl-hidden-paragraph) {
+    color: transparent;
+    transition: color 1.5s ease;
+  }
+
+  .crab-content :global(.hl-hidden-paragraph .hl-hoy) {
+    opacity: 0;
+    transition: opacity 0.4s ease;
+  }
+
+  .crab-content :global(.hl-hidden-paragraph .hl-hoy.hl-hoy-visible) {
+    opacity: 1;
+  }
+
+  .crab-content :global(.hl-hidden-paragraph.hl-revealed) {
+    color: inherit;
+  }
+
+  .crab-content :global(.hl-hidden-paragraph.hl-revealed .hl-hoy) {
+    opacity: 1;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.crab-link').forEach((container) => {
+    const canvas = container.querySelector<HTMLCanvasElement>('.crab-canvas');
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const content = container.querySelector<HTMLElement>('.crab-content');
+    if (!content) return;
+
+    const color = container.dataset.hlColor ?? 'rgb(140, 180, 255)';
+    const crabColor = container.dataset.hlCrabColor ?? 'rgb(255, 140, 50)';
+    const crabSpeed = parseFloat(container.dataset.hlSpeed ?? '35');
+    const gap = parseFloat(container.dataset.hlGap ?? '300');
+    const dpr = window.devicePixelRatio || 1;
+
+    // --- 1. Find and wrap "hoy" words in colored spans ---
+    // NOTE: The word "hoy" is hardcoded — this is a bespoke effect for the Penelope artifact.
+    function wrapHoyWords(): HTMLSpanElement[] {
+      const walker = document.createTreeWalker(content!, NodeFilter.SHOW_TEXT);
+      const hoySpans: HTMLSpanElement[] = [];
+      const targets: Text[] = [];
+
+      let node: Text | null;
+      while ((node = walker.nextNode() as Text | null)) {
+        if (node.textContent && /\bhoy\b/.test(node.textContent)) {
+          targets.push(node);
+        }
+      }
+
+      for (const textNode of targets) {
+        if (hoySpans.length >= 2) break;
+        const text = textNode.textContent ?? '';
+        const regex = /\bhoy\b/g;
+        let match: RegExpExecArray | null;
+        let lastIdx = 0;
+        const frag = document.createDocumentFragment();
+
+        while ((match = regex.exec(text)) !== null && hoySpans.length < 2) {
+          if (match.index > lastIdx) {
+            frag.appendChild(document.createTextNode(text.slice(lastIdx, match.index)));
+          }
+          const span = document.createElement('span');
+          span.className = 'hl-hoy';
+          span.textContent = 'hoy';
+          span.style.color = color;
+          frag.appendChild(span);
+          hoySpans.push(span);
+          lastIdx = match.index + match[0].length;
+        }
+
+        if (lastIdx < text.length) {
+          frag.appendChild(document.createTextNode(text.slice(lastIdx)));
+        }
+        textNode.parentNode?.replaceChild(frag, textNode);
+      }
+
+      return hoySpans;
+    }
+
+    const hoySpans = wrapHoyWords();
+    if (hoySpans.length < 2) return;
+
+    hoySpans[0].classList.add('hl-hoy-clickable');
+    hoySpans[0].setAttribute('role', 'button');
+    hoySpans[0].setAttribute('tabindex', '0');
+    hoySpans[0].setAttribute('aria-label', 'Activar la travesía del cangrejo');
+
+    // --- 2. Add gap between first and second hoy paragraphs ---
+    const firstHoyP = hoySpans[0].closest('p');
+    const secondHoyP = hoySpans[1].closest('p');
+    if (firstHoyP && secondHoyP && firstHoyP !== secondHoyP) {
+      (firstHoyP as HTMLElement).style.marginBottom = `${gap}px`;
+    }
+
+    // --- 3. Hide second hoy paragraph (text invisible, hoy word hidden until click) and everything after ---
+    function hideFromSecondHoy(): HTMLElement[] {
+      if (!secondHoyP) return [];
+      const hidden: HTMLElement[] = [];
+
+      // Second hoy's paragraph: text transparent, hoy word hidden until click
+      (secondHoyP as HTMLElement).classList.add('hl-hidden-paragraph');
+      hidden.push(secondHoyP as HTMLElement);
+
+      let el: Element | null = secondHoyP.nextElementSibling;
+      while (el) {
+        (el as HTMLElement).classList.add('hl-hidden');
+        hidden.push(el as HTMLElement);
+        el = el.nextElementSibling;
+      }
+      return hidden;
+    }
+
+    const hiddenEls = hideFromSecondHoy();
+
+    // --- 4. Canvas sizing ---
+    function resize(): void {
+      const rect = container.getBoundingClientRect();
+      canvas!.width = rect.width * dpr;
+      canvas!.height = rect.height * dpr;
+      ctx!.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    const ro = new ResizeObserver(resize);
+    ro.observe(container);
+
+    // --- 5. Path generation ---
+    function generateWindingPath(
+      sx: number, sy: number, ex: number, ey: number
+    ): { x: number; y: number }[] {
+      const n = 200;
+      const points: { x: number; y: number }[] = [];
+
+      const dx = ex - sx;
+      const dy = ey - sy;
+      const len = Math.sqrt(dx * dx + dy * dy);
+      const perpX = len > 0 ? -dy / len : 0;
+      const perpY = len > 0 ? dx / len : 1;
+
+      const waves = [
+        { freq: 2 + Math.random() * 1.5, amp: 40 + Math.random() * 30, phase: Math.random() * Math.PI * 2 },
+        { freq: 4 + Math.random() * 2, amp: 20 + Math.random() * 15, phase: Math.random() * Math.PI * 2 },
+        { freq: 7 + Math.random() * 3, amp: 8 + Math.random() * 8, phase: Math.random() * Math.PI * 2 },
+      ];
+
+      for (let i = 0; i <= n; i++) {
+        const t = i / n;
+        const baseX = sx + dx * t;
+        const baseY = sy + dy * t;
+
+        const envelope = Math.sin(t * Math.PI);
+        let disp = 0;
+        for (const w of waves) {
+          disp += w.amp * Math.sin(t * Math.PI * w.freq + w.phase);
+        }
+        disp *= envelope;
+
+        points.push({
+          x: baseX + perpX * disp,
+          y: baseY + perpY * disp,
+        });
+      }
+      return points;
+    }
+
+    function computeArcLengths(pts: { x: number; y: number }[]): number[] {
+      const lens = [0];
+      for (let i = 1; i < pts.length; i++) {
+        const dx = pts[i].x - pts[i - 1].x;
+        const dy = pts[i].y - pts[i - 1].y;
+        lens.push(lens[i - 1] + Math.sqrt(dx * dx + dy * dy));
+      }
+      return lens;
+    }
+
+    function getPositionAt(
+      pts: { x: number; y: number }[], arcs: number[], d: number
+    ): { x: number; y: number } {
+      const total = arcs[arcs.length - 1];
+      const dist = Math.max(0, Math.min(total, d));
+      let i = 1;
+      while (i < arcs.length - 1 && arcs[i] < dist) i++;
+      const segLen = arcs[i] - arcs[i - 1];
+      const t = segLen > 0 ? (dist - arcs[i - 1]) / segLen : 0;
+      return {
+        x: pts[i - 1].x + (pts[i].x - pts[i - 1].x) * t,
+        y: pts[i - 1].y + (pts[i].y - pts[i - 1].y) * t,
+      };
+    }
+
+    function getAngleAt(
+      pts: { x: number; y: number }[], arcs: number[], d: number
+    ): number {
+      const p1 = getPositionAt(pts, arcs, d);
+      const p2 = getPositionAt(pts, arcs, d + 2);
+      return Math.atan2(p2.y - p1.y, p2.x - p1.x);
+    }
+
+    // --- 6. Pixel-art crab ---
+    // Grid of filled rectangles, retro style.
+    // Crab walks sideways along the path.
+    const PX = 1.5; // pixel size
+
+    // Body pixels (shared between frames) — crab faces "up" (-Y)
+    // Eye pixels drawn in black
+    const crabEyes: [number, number][] = [
+      [-2, -5], [2, -5],   // eye tips
+      [-2, -4], [2, -4],   // eye stalks
+    ];
+
+    const crabBody: [number, number][] = [
+      // Shell top
+      [-3, -3], [-2, -3], [-1, -3], [0, -3], [1, -3], [2, -3], [3, -3],
+      // Shell wide
+      [-4, -2], [-3, -2], [-2, -2], [-1, -2], [0, -2], [1, -2], [2, -2], [3, -2], [4, -2],
+      // Shell mid
+      [-4, -1], [-3, -1], [-2, -1], [-1, -1], [0, -1], [1, -1], [2, -1], [3, -1], [4, -1],
+      // Shell bottom
+      [-3, 0], [-2, 0], [-1, 0], [0, 0], [1, 0], [2, 0], [3, 0],
+      // Belly
+      [-2, 1], [-1, 1], [0, 1], [1, 1], [2, 1],
+      // Claws — left
+      [-5, -3], [-6, -4], [-6, -5], [-5, -5],
+      // Claws — right
+      [5, -3], [6, -4], [6, -5], [5, -5],
+    ];
+
+    // Legs per frame (scuttling gait — alternating reach)
+    const crabLegsA: [number, number][] = [
+      // Left legs
+      [-5, -1], [-6, 0],   // front: far
+      [-4, 0], [-5, 1],    // mid: close
+      [-5, 1], [-6, 2],    // back: far
+      // Right legs
+      [4, 0], [5, 1],      // front: close
+      [5, -1], [6, 0],     // mid: far
+      [4, 1], [5, 2],      // back: close
+    ];
+
+    const crabLegsB: [number, number][] = [
+      // Left legs
+      [-4, -1], [-5, 0],   // front: close
+      [-5, 0], [-6, 1],    // mid: far
+      [-4, 1], [-5, 2],    // back: close
+      // Right legs
+      [5, -1], [6, 0],     // front: far
+      [4, 0], [5, 1],      // mid: close
+      [5, 1], [6, 2],      // back: far
+    ];
+
+    function drawCrab(
+      cx: CanvasRenderingContext2D,
+      x: number, y: number,
+      angle: number, walkPhase: number, scale: number
+    ): void {
+      if (scale <= 0) return;
+
+      const frame = Math.floor(walkPhase / Math.PI) % 2;
+      const legs = frame === 0 ? crabLegsA : crabLegsB;
+      const allPixels = crabBody.concat(legs);
+
+      // Crab faces perpendicular to movement (sideways walk)
+      const rot = angle;
+      const cosR = Math.cos(rot);
+      const sinR = Math.sin(rot);
+      const px = PX * scale;
+
+      cx.fillStyle = crabColor;
+      for (const [ox, oy] of allPixels) {
+        const fx = ox;
+        const fy = -oy;
+        const rx = fx * px * cosR - fy * px * sinR;
+        const ry = fx * px * sinR + fy * px * cosR;
+        cx.fillRect(
+          Math.round(x + rx - px / 2),
+          Math.round(y + ry - px / 2),
+          Math.ceil(px),
+          Math.ceil(px)
+        );
+      }
+
+      // Draw eyes in black
+      cx.fillStyle = '#000';
+      for (const [ox, oy] of crabEyes) {
+        const fx = ox;
+        const fy = -oy;
+        const rx = fx * px * cosR - fy * px * sinR;
+        const ry = fx * px * sinR + fy * px * cosR;
+        cx.fillRect(
+          Math.round(x + rx - px / 2),
+          Math.round(y + ry - px / 2),
+          Math.ceil(px),
+          Math.ceil(px)
+        );
+      }
+    }
+
+    // --- 7. Crumb trail ---
+    interface Crumb {
+      x: number;
+      y: number;
+      size: number;
+    }
+    const crumbs: Crumb[] = [];
+    const crumbSpacing = 6; // px between crumbs
+    let distSinceLastCrumb = 0;
+
+    // --- 8. Burst particles ---
+    interface Particle {
+      x: number; y: number;
+      vx: number; vy: number;
+      life: number; size: number;
+    }
+
+    function createBurst(bx: number, by: number): Particle[] {
+      const parts: Particle[] = [];
+      const count = 10;
+      for (let i = 0; i < count; i++) {
+        const a = (Math.PI * 2 * i) / count + (Math.random() - 0.5) * 0.6;
+        const spd = 30 + Math.random() * 40;
+        parts.push({
+          x: bx, y: by,
+          vx: Math.cos(a) * spd,
+          vy: Math.sin(a) * spd,
+          life: 1,
+          size: 1 + Math.random() * 1.5,
+        });
+      }
+      return parts;
+    }
+
+    function drawParticles(
+      cx: CanvasRenderingContext2D, parts: Particle[], dt: number
+    ): void {
+      for (const p of parts) {
+        if (p.life <= 0) continue;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        p.vx *= 0.94;
+        p.vy *= 0.94;
+        p.life -= dt * 2.5;
+        if (p.life > 0) {
+          cx.save();
+          cx.globalAlpha = p.life;
+          cx.fillStyle = crabColor;
+          cx.beginPath();
+          cx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          cx.fill();
+          cx.restore();
+        }
+      }
+    }
+
+    // --- 9. Animation state ---
+    let animating = false;
+    let crabDist = 0;
+    let prevPos: { x: number; y: number } | null = null;
+    let path: { x: number; y: number }[] = [];
+    let arcLens: number[] = [];
+    let totalLen = 0;
+    let lastTime = 0;
+    let particles: Particle[] = [];
+    let journeyStart = 0;
+    const crabAppearDelay = 200;
+
+    let activated = false;
+
+    function activateCrab(): void {
+      if (activated) return;
+      activated = true;
+
+      hoySpans[0].classList.remove('hl-hoy-clickable');
+      hoySpans[0].removeAttribute('role');
+      hoySpans[0].removeAttribute('tabindex');
+      hoySpans[0].removeAttribute('aria-label');
+
+      // Reveal the second "hoy" as a destination
+      hoySpans[1].classList.add('hl-hoy-visible');
+
+      const cRect = container.getBoundingClientRect();
+      const r1 = hoySpans[0].getBoundingClientRect();
+      const r2 = hoySpans[1].getBoundingClientRect();
+
+      const sx = r1.left + r1.width / 2 - cRect.left;
+      const sy = r1.top + r1.height / 2 - cRect.top;
+      const ex = r2.left + r2.width / 2 - cRect.left;
+      const ey = r2.top + r2.height / 2 - cRect.top;
+
+      path = generateWindingPath(sx, sy, ex, ey);
+      arcLens = computeArcLengths(path);
+      totalLen = arcLens[arcLens.length - 1];
+
+      particles = createBurst(sx, sy);
+      crabDist = 0;
+      prevPos = null;
+      crumbs.length = 0;
+      distSinceLastCrumb = 0;
+      lastTime = 0;
+      journeyStart = performance.now();
+      animating = true;
+
+      requestAnimationFrame(animate);
+    }
+
+    hoySpans[0].addEventListener('click', activateCrab);
+    hoySpans[0].addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        activateCrab();
+      }
+    });
+
+    function drawCrumbs(cx: CanvasRenderingContext2D, alpha: number): void {
+      cx.fillStyle = crabColor;
+      cx.globalAlpha = alpha * 0.7;
+      for (const c of crumbs) {
+        cx.beginPath();
+        cx.arc(c.x, c.y, c.size, 0, Math.PI * 2);
+        cx.fill();
+      }
+      cx.globalAlpha = 1;
+    }
+
+    function animate(now: number): void {
+      if (!animating) return;
+      if (!lastTime) lastTime = now;
+      const dt = Math.min((now - lastTime) / 1000, 0.05);
+      lastTime = now;
+
+      const elapsed = now - journeyStart;
+
+      ctx!.clearRect(0, 0, canvas!.width / dpr, canvas!.height / dpr);
+
+      // Draw crumb trail
+      drawCrumbs(ctx!, 1);
+
+      // Particles
+      drawParticles(ctx!, particles, dt);
+
+      // Crab after delay
+      if (elapsed > crabAppearDelay) {
+        const scaleIn = Math.min(1, (elapsed - crabAppearDelay) / 200);
+        crabDist += crabSpeed * dt;
+
+        let scale = scaleIn;
+        if (crabDist > totalLen - 10) {
+          scale = Math.max(0, (totalLen - crabDist) / 10) * scaleIn;
+        }
+
+        if (crabDist >= totalLen) {
+          animating = false;
+          finishAndReveal();
+          return;
+        }
+
+        const pos = getPositionAt(path, arcLens, crabDist);
+        const angle = getAngleAt(path, arcLens, crabDist);
+        const walkPhase = (crabDist / 10) * Math.PI * 2;
+
+        // Drop crumbs at intervals
+        if (prevPos) {
+          const dx = pos.x - prevPos.x;
+          const dy = pos.y - prevPos.y;
+          distSinceLastCrumb += Math.sqrt(dx * dx + dy * dy);
+          while (distSinceLastCrumb >= crumbSpacing) {
+            distSinceLastCrumb -= crumbSpacing;
+            // Place crumb with slight random offset
+            crumbs.push({
+              x: pos.x + (Math.random() - 0.5) * 2,
+              y: pos.y + (Math.random() - 0.5) * 2,
+              size: 0.8 + Math.random() * 0.8,
+            });
+          }
+        }
+        prevPos = { x: pos.x, y: pos.y };
+
+        drawCrab(ctx!, pos.x, pos.y, angle, walkPhase, scale);
+      }
+
+      requestAnimationFrame(animate);
+    }
+
+    // --- 10. Keep crumbs and reveal hidden text ---
+    function finishAndReveal(): void {
+      // Draw crumbs one final time (they stay permanently)
+      ctx!.clearRect(0, 0, canvas!.width / dpr, canvas!.height / dpr);
+      drawCrumbs(ctx!, 1);
+
+      // Reveal paragraphs with stagger
+      hiddenEls.forEach((el, i) => {
+        setTimeout(() => {
+          el.classList.add('hl-revealed');
+        }, i * 150);
+      });
+    }
+
+    // Pause when tab hidden
+    const onVisChange = (): void => {
+      if (document.hidden && animating) {
+        lastTime = 0;
+      }
+    };
+    document.addEventListener('visibilitychange', onVisChange);
+
+    // Cleanup on navigation (view transitions)
+    document.addEventListener('astro:before-swap', () => {
+      animating = false;
+      ro.disconnect();
+      document.removeEventListener('visibilitychange', onVisChange);
+    }, { once: true });
+  });
+</script>

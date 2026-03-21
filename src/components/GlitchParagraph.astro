@@ -1,0 +1,367 @@
+---
+interface Props {
+  /** The word that is always glitching */
+  trigger: string;
+/** Min glitch intensity for the trigger word (default 0.05) */
+  minIntensity?: number;
+  /** Max glitch intensity for the trigger word (default 0.65) */
+  maxIntensity?: number;
+  /** Noise walk speed (default 0.09) */
+  oscSpeed?: number;
+  /** How long the click-triggered full glitch lasts in ms (default 2000) */
+  burstDuration?: number;
+}
+
+const {
+  trigger,
+  minIntensity = 0.05,
+  maxIntensity = 0.65,
+  oscSpeed = 0.09,
+  burstDuration = 2000,
+} = Astro.props;
+---
+
+<div
+  class="glitch-paragraph"
+  data-glitch-trigger={trigger}
+  data-glitch-min={minIntensity}
+  data-glitch-max={maxIntensity}
+  data-glitch-osc={oscSpeed}
+  data-glitch-burst-duration={burstDuration}
+><slot /></div>
+
+<style>
+  .glitch-paragraph {
+    position: relative;
+  }
+
+  .glitch-paragraph :global(canvas) {
+    display: block;
+  }
+</style>
+
+<script>
+  import { GlitchState, computeSparkleAlpha, renderSparkle, renderMicroSlice, renderTears, glitchDisplacement } from '../utils/glitchEngine';
+  import { observeVisibility } from '../utils/observeVisibility';
+
+  // --- Per-instance setup ---
+  document.querySelectorAll<HTMLElement>('.glitch-paragraph').forEach((container) => {
+    const originalText = container.textContent?.trim() ?? '';
+    if (!originalText) return;
+
+    const triggerWord = container.dataset.glitchTrigger ?? '';
+    const minI = parseFloat(container.dataset.glitchMin ?? '0.05');
+    const maxI = parseFloat(container.dataset.glitchMax ?? '0.65');
+    const oscSpeed = parseFloat(container.dataset.glitchOsc ?? '0.09');
+    const burstDuration = parseFloat(container.dataset.glitchBurstDuration ?? '2000');
+    // Get computed styles from the container
+    const cs = getComputedStyle(container);
+    const fontFamily = cs.fontFamily;
+    const fontSize = parseFloat(cs.fontSize);
+    const lh = parseFloat(cs.lineHeight) || fontSize * 1.5;
+    const color = cs.color;
+    const font = `${fontSize}px ${fontFamily}`;
+    let containerWidth = container.clientWidth;
+
+    // Measurement context with caching
+    const measureCanvas = document.createElement('canvas');
+    const mCtx = measureCanvas.getContext('2d')!;
+    const charWidthCache = new Map<string, number>();
+
+    function measureChar(ch: string): number {
+      let w = charWidthCache.get(ch);
+      if (w === undefined) {
+        mCtx.font = font;
+        w = mCtx.measureText(ch).width;
+        charWidthCache.set(ch, w);
+      }
+      return w;
+    }
+
+    // --- Layout engine ---
+    interface CharInfo {
+      ch: string;
+      x: number;
+      y: number;
+      w: number;
+      origIdx: number;
+      isTrigger: boolean;
+    }
+
+    function buildLayout(): { chars: CharInfo[]; totalLines: number } {
+      const tStart = originalText.indexOf(triggerWord);
+      const tEnd = tStart >= 0 ? tStart + triggerWord.length : -1;
+
+      const words = originalText.split(/(\s+)/);
+      const chars: CharInfo[] = [];
+      let curX = 0;
+      let curLine = 0;
+      let globalIdx = 0;
+
+      for (const word of words) {
+        if (word.match(/^\s+$/)) {
+          for (const ch of word) {
+            chars.push({
+              ch,
+              x: curX,
+              y: curLine,
+              w: measureChar(' '),
+              origIdx: globalIdx,
+              isTrigger: false,
+            });
+            curX += measureChar(' ');
+            globalIdx++;
+          }
+          continue;
+        }
+
+        let wordW = 0;
+        for (let i = 0; i < word.length; i++) {
+          wordW += measureChar(word[i]);
+        }
+
+        if (curX > 0 && curX + wordW > containerWidth) {
+          curLine++;
+          curX = 0;
+        }
+
+        for (let i = 0; i < word.length; i++) {
+          const idx = globalIdx + i;
+          const chW = measureChar(word[i]);
+          const isTrig = tStart >= 0 && idx >= tStart && idx < tEnd;
+
+          chars.push({
+            ch: word[i],
+            x: curX,
+            y: curLine,
+            w: chW,
+            origIdx: idx,
+            isTrigger: isTrig,
+          });
+          curX += chW;
+        }
+        globalIdx += word.length;
+      }
+
+      const totalLines = curLine + 1;
+
+      // Justify: distribute extra space across word gaps on each line except the last
+      for (let line = 0; line < totalLines - 1; line++) {
+        const lineStart = chars.findIndex((c) => c.y === line);
+        if (lineStart < 0) continue;
+        let lineEndIdx = lineStart;
+        while (lineEndIdx + 1 < chars.length && chars[lineEndIdx + 1].y === line) lineEndIdx++;
+
+        const lastChar = chars[lineEndIdx];
+        const lineEnd = lastChar.x + lastChar.w;
+        const extraSpace = containerWidth - lineEnd;
+        if (extraSpace <= 1) continue;
+
+        let spaceCount = 0;
+        for (let i = lineStart; i <= lineEndIdx; i++) {
+          if (chars[i].ch === ' ') spaceCount++;
+        }
+        if (spaceCount === 0) continue;
+
+        const perGap = extraSpace / spaceCount;
+        let accumulated = 0;
+
+        for (let i = lineStart; i <= lineEndIdx; i++) {
+          chars[i].x += accumulated;
+          if (chars[i].ch === ' ') {
+            chars[i].w += perGap;
+            accumulated += perGap;
+          }
+        }
+      }
+
+      return { chars, totalLines };
+    }
+
+    let chars: CharInfo[] = [];
+    let cachedTriggerChars: CharInfo[] = [];
+    let canvasH = 0;
+
+    // Canvas
+    const canvas = document.createElement('canvas');
+    const dpr = window.devicePixelRatio || 1;
+    canvas.style.cursor = 'default';
+    const ctx = canvas.getContext('2d')!;
+
+    function applyLayout(): void {
+      containerWidth = container.clientWidth;
+      const layout = buildLayout();
+      chars = layout.chars;
+      cachedTriggerChars = chars.filter((c) => c.isTrigger);
+      canvasH = Math.ceil(layout.totalLines * lh + lh * 0.4);
+
+      canvas.width = containerWidth * dpr;
+      canvas.height = canvasH * dpr;
+      canvas.style.width = `${containerWidth}px`;
+      canvas.style.height = `${canvasH}px`;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    applyLayout();
+
+    // Screen reader text
+    const srSpan = document.createElement('span');
+    srSpan.textContent = originalText;
+    srSpan.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);';
+
+    container.textContent = '';
+    container.appendChild(srSpan);
+    container.appendChild(canvas);
+
+    // Observe after DOM insertion so the initial resize doesn't fire with empty container
+    const ro = new ResizeObserver(applyLayout);
+    ro.observe(container);
+
+    const baselineOffset = lh * 0.76;
+    const state = new GlitchState(originalText);
+
+    // --- Trigger word range in original text ---
+    const triggerStart = originalText.indexOf(triggerWord);
+    const triggerEnd = triggerStart >= 0 ? triggerStart + triggerWord.length : -1;
+
+    // --- Click burst state ---
+    let burstActive = false;
+    let burstStart = 0;
+    let burstIntensity = 0;
+
+    canvas.addEventListener('click', (e) => {
+      const rect = canvas.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const clickY = e.clientY - rect.top;
+      const clickLine = Math.floor(clickY / lh);
+
+      if (cachedTriggerChars.length > 0) {
+        const hit = cachedTriggerChars.some((tc) => tc.y === clickLine && clickX >= tc.x && clickX <= tc.x + tc.w);
+        if (hit) {
+          burstActive = true;
+          burstStart = performance.now();
+        }
+      }
+    });
+
+    // --- Main draw ---
+
+    let frameId: number;
+
+    function draw(): void {
+      const now = performance.now();
+
+      ctx.clearRect(0, 0, containerWidth, canvasH);
+
+      const { intensity: triggerIntensity, corruption: triggerCorruption } = state.advanceNoise(oscSpeed, minI, maxI);
+
+      // Burst decay
+      if (burstActive) {
+        const elapsed = now - burstStart;
+        const progress = elapsed / burstDuration;
+        if (progress >= 1) {
+          burstActive = false;
+          burstIntensity = 0;
+        } else {
+          burstIntensity = progress < 0.1 ? progress / 0.1 : 1 - ((progress - 0.1) / 0.9);
+          burstIntensity *= 0.8;
+        }
+      }
+
+      // --- Process trigger characters ---
+      if (triggerStart >= 0) {
+        state.mutateRange(triggerStart, triggerEnd, triggerCorruption);
+      }
+
+      // --- Process non-trigger chars (only during burst) ---
+      if (burstActive && burstIntensity > 0.01) {
+        const bCorruption = burstIntensity;
+        const len = state.baseChars.length;
+
+        // Heal with burst-specific chance
+        if (triggerStart > 0) state.applyHeal(0, triggerStart, 0.05 * (1 - bCorruption));
+        if (triggerEnd >= 0 && triggerEnd < len) state.applyHeal(triggerEnd, len, 0.05 * (1 - bCorruption));
+
+        // Swaps
+        if (Math.random() < 0.5 * bCorruption) {
+          if (triggerStart > 0) state.applySwaps(0, triggerStart, 0.12 * bCorruption);
+          if (triggerEnd >= 0 && triggerEnd < len) state.applySwaps(triggerEnd, len, 0.12 * bCorruption);
+        }
+
+        // Zalgo
+        if (triggerStart > 0) state.applyZalgoAccum(0, triggerStart, bCorruption);
+        if (triggerEnd >= 0 && triggerEnd < len) state.applyZalgoAccum(triggerEnd, len, bCorruption);
+      } else if (!burstActive) {
+        state.healAll(triggerStart, triggerEnd);
+      }
+
+      // --- Activate sparkles on trigger chars ---
+      if (triggerStart >= 0) {
+        state.activateSparkles(triggerStart, triggerEnd, now);
+      }
+
+      // --- Render characters ---
+      ctx.fillStyle = color;
+      ctx.textBaseline = 'alphabetic';
+      ctx.font = font;
+
+      for (let i = 0; i < chars.length; i++) {
+        const info = chars[i];
+        const origIdx = info.origIdx;
+        const displayCh = origIdx >= 0 ? state.getDisplayChar(origIdx) : info.ch;
+
+        let charIntensity = 0;
+        if (info.isTrigger) {
+          charIntensity = triggerIntensity;
+        } else if (burstActive) {
+          charIntensity = burstIntensity * maxI;
+        }
+
+        const x = info.x;
+        const y = info.y * lh + baselineOffset;
+        const { dx, dy } = glitchDisplacement(charIntensity);
+
+        ctx.fillText(displayCh, x + dx, y + dy);
+
+        // Per-character sparkle overlay
+        if (origIdx >= 0) {
+          const sparkleAlpha = computeSparkleAlpha(state.sparkleStarts, origIdx, now);
+          if (sparkleAlpha > 0) {
+            renderSparkle(ctx, displayCh, x + dx, y + dy, sparkleAlpha, color);
+          }
+        }
+
+        // Micro-slice
+        renderMicroSlice(ctx, canvas, x, y, info.w, fontSize, charIntensity, dpr);
+      }
+
+      // --- Horizontal tears ---
+      const tearIntensity = burstActive ? Math.max(triggerIntensity, burstIntensity) : triggerIntensity;
+
+      if (burstActive) {
+        renderTears(ctx, canvas, tearIntensity, 0, 0, containerWidth, canvasH, dpr);
+      } else if (cachedTriggerChars.length > 0) {
+        const tLine = cachedTriggerChars[0].y;
+        const tX = cachedTriggerChars[0].x;
+        const tRight = cachedTriggerChars[cachedTriggerChars.length - 1].x + cachedTriggerChars[cachedTriggerChars.length - 1].w;
+        renderTears(ctx, canvas, tearIntensity, tX, tLine * lh, tRight - tX, lh, dpr);
+      }
+
+      frameId = requestAnimationFrame(draw);
+    }
+
+    let visible = false;
+
+    const cleanupVisibility = observeVisibility(container,
+      () => { if (!visible) { visible = true; frameId = requestAnimationFrame(draw); } },
+      () => { if (visible) { visible = false; cancelAnimationFrame(frameId); } }
+    );
+
+    // Cleanup on navigation (view transitions)
+    document.addEventListener('astro:before-swap', () => {
+      cleanupVisibility();
+      ro.disconnect();
+      cancelAnimationFrame(frameId);
+    }, { once: true });
+  });
+</script>
