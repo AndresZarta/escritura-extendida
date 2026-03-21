@@ -1,0 +1,143 @@
+---
+interface Props {
+  /** Min glitch intensity for the word (default 0.05) */
+  minIntensity?: number;
+  /** Max glitch intensity for the word (default 0.65) */
+  maxIntensity?: number;
+  /** Noise walk speed (default 0.09) */
+  oscSpeed?: number;
+}
+
+const {
+  minIntensity = 0.05,
+  maxIntensity = 0.65,
+  oscSpeed = 0.09,
+} = Astro.props;
+---
+
+<span
+  class="glitch-text"
+  data-glitch-min={minIntensity}
+  data-glitch-max={maxIntensity}
+  data-glitch-osc={oscSpeed}
+><slot /></span>
+
+<style>
+  .glitch-text {
+    display: inline;
+  }
+
+  .glitch-text :global(canvas) {
+    display: inline-block;
+    vertical-align: baseline;
+  }
+</style>
+
+<script>
+  import { GlitchState, computeSparkleAlpha, renderSparkle, renderMicroSlice, renderTears, glitchDisplacement } from '../utils/glitchEngine';
+  import { observeVisibility } from '../utils/observeVisibility';
+
+  document.querySelectorAll<HTMLElement>('.glitch-text').forEach((el) => {
+    const baseText = el.textContent ?? '';
+    if (!baseText.trim()) return;
+
+    const minI = parseFloat(el.dataset.glitchMin ?? '0.05');
+    const maxI = parseFloat(el.dataset.glitchMax ?? '0.65');
+    const oscSpeed = parseFloat(el.dataset.glitchOsc ?? '0.09');
+
+    // Inherit font from parent
+    const computedStyle = getComputedStyle(el.parentElement ?? el);
+    const fontFamily = computedStyle.fontFamily;
+    const fontSize = parseFloat(computedStyle.fontSize);
+    const lineHeight = parseFloat(computedStyle.lineHeight) || fontSize * 1.4;
+    const color = computedStyle.color;
+    const font = `${fontSize}px ${fontFamily}`;
+
+    // Measure per-character positions
+    const measureCanvas = document.createElement('canvas');
+    const measureCtx = measureCanvas.getContext('2d')!;
+    measureCtx.font = font;
+    const textW = measureCtx.measureText(baseText).width;
+
+    const charXOffsets: number[] = [];
+    const charWidths: number[] = [];
+    for (let i = 0; i < baseText.length; i++) {
+      charXOffsets.push(measureCtx.measureText(baseText.slice(0, i)).width);
+      charWidths.push(measureCtx.measureText(baseText[i]).width);
+    }
+
+    const padX = 15;
+    const canvasW = Math.ceil(textW + padX * 2);
+    const canvasH = Math.ceil(lineHeight);
+
+    const canvas = document.createElement('canvas');
+    const dpr = window.devicePixelRatio || 1;
+    canvas.width = canvasW * dpr;
+    canvas.height = canvasH * dpr;
+    canvas.style.width = `${canvasW}px`;
+    canvas.style.height = `${canvasH}px`;
+    canvas.style.margin = `0 -${padX}px`;
+    canvas.style.verticalAlign = 'bottom';
+    canvas.setAttribute('aria-hidden', 'true');
+
+    const ctx = canvas.getContext('2d')!;
+    ctx.scale(dpr, dpr);
+
+    // No ResizeObserver needed: this is an inline word whose canvas size depends
+    // on font metrics (constant), not on container width (unlike GlitchParagraph).
+
+    // Screen reader text
+    const srSpan = document.createElement('span');
+    srSpan.textContent = baseText;
+    srSpan.style.cssText = 'position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);';
+
+    el.textContent = '';
+    el.appendChild(srSpan);
+    el.appendChild(canvas);
+
+    const baselineY = lineHeight * 0.76;
+    const state = new GlitchState(baseText);
+
+    let frameId: number;
+
+    function draw(): void {
+      const now = performance.now();
+      ctx.clearRect(0, 0, canvasW, canvasH);
+
+      const { intensity, corruption } = state.advanceNoise(oscSpeed, minI, maxI);
+      state.mutateRange(0, baseText.length, corruption);
+      state.activateSparkles(0, baseText.length, now);
+
+      ctx.fillStyle = color;
+      ctx.textBaseline = 'alphabetic';
+      ctx.font = font;
+
+      for (let i = 0; i < baseText.length; i++) {
+        const displayCh = state.getDisplayChar(i);
+        const x = padX + charXOffsets[i];
+        const y = baselineY;
+        const { dx, dy } = glitchDisplacement(intensity);
+
+        ctx.fillText(displayCh, x + dx, y + dy);
+
+        const sparkleAlpha = computeSparkleAlpha(state.sparkleStarts, i, now);
+        if (sparkleAlpha > 0) {
+          renderSparkle(ctx, displayCh, x + dx, y + dy, sparkleAlpha, color);
+        }
+
+        renderMicroSlice(ctx, canvas, x, y, charWidths[i], fontSize, intensity, dpr);
+      }
+
+      renderTears(ctx, canvas, intensity, padX, 0, textW, canvasH, dpr);
+
+      frameId = requestAnimationFrame(draw);
+    }
+
+    let visible = false;
+
+    observeVisibility(el,
+      () => { if (!visible) { visible = true; frameId = requestAnimationFrame(draw); } },
+      () => { if (visible) { visible = false; cancelAnimationFrame(frameId); } }
+    );
+  });
+</script>

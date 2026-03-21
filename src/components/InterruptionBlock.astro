@@ -1,0 +1,138 @@
+---
+interface Props {
+  topMarker?: string;
+  bottomMarker?: string;
+  marker?: string;
+  closingMarker?: string;
+  collapsible?: boolean;
+}
+
+const {
+  topMarker,
+  bottomMarker,
+  marker,
+  closingMarker,
+  collapsible = false,
+} = Astro.props;
+
+const resolvedTopMarker = topMarker ?? marker ?? '§';
+const resolvedBottomMarker = bottomMarker ?? closingMarker ?? resolvedTopMarker;
+---
+
+{
+  collapsible ? (
+    <aside class="interruption-block interruption-block--collapsible" role="note" aria-label="Interruption">
+      <button class="interruption-marker interruption-marker--button" type="button" aria-expanded="false">
+        {resolvedTopMarker}
+      </button>
+      <div class="interruption-panel" aria-hidden="true">
+        <div class="interruption-panel-inner">
+          <div class="interruption-content">
+            <slot />
+          </div>
+          <p class="interruption-marker interruption-marker--closing" aria-hidden="true">{resolvedBottomMarker}</p>
+        </div>
+      </div>
+    </aside>
+  ) : (
+    <aside class="interruption-block" role="note" aria-label="Interruption">
+      <p class="interruption-marker" aria-hidden="true">{resolvedTopMarker}</p>
+      <div class="interruption-content">
+        <slot />
+      </div>
+      <p class="interruption-marker interruption-marker--closing" aria-hidden="true">{resolvedBottomMarker}</p>
+    </aside>
+  )
+}
+
+<style>
+  .interruption-block {
+    margin: 2.25rem auto;
+    max-width: 62ch;
+  }
+
+  .interruption-block--collapsible {
+    overflow-anchor: none;
+  }
+
+  .interruption-marker {
+    margin: 0 0 0.7rem;
+    text-align: center;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.8rem;
+    letter-spacing: 0.2em;
+    color: #4a4a4a;
+  }
+
+  .interruption-marker--button {
+    display: block;
+    width: fit-content;
+    margin: 0 auto 0.7rem;
+    border: 0;
+    padding: 0 0.24rem;
+    background: transparent;
+    cursor: pointer;
+    user-select: none;
+    transition: background-color 150ms ease;
+  }
+
+  .interruption-marker--button:hover,
+  .interruption-marker--button:focus-visible {
+    background-color: rgba(61, 90, 110, 0.25);
+  }
+
+  .interruption-marker--button:focus-visible {
+    outline: 1px solid #5a5a5a;
+    outline-offset: 2px;
+  }
+
+  .interruption-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    opacity: 0;
+    transition: grid-template-rows 260ms ease, opacity 220ms ease;
+  }
+
+  .interruption-panel-inner {
+    overflow: hidden;
+  }
+
+  .interruption-block--collapsible.is-open .interruption-panel {
+    grid-template-rows: 1fr;
+    opacity: 1;
+  }
+
+  .interruption-content {
+    font-family: var(--font-philosophy);
+    font-style: normal;
+    font-size: 1.02rem;
+    line-height: 1.75;
+    text-align: justify;
+    text-justify: inter-word;
+    color: #2f2f2f;
+    hyphens: auto;
+  }
+
+  .interruption-content :global(p) {
+    margin: 0;
+  }
+
+  .interruption-marker--closing {
+    margin: 0.7rem 0 0;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.interruption-block--collapsible').forEach((block) => {
+    const button = block.querySelector<HTMLButtonElement>('.interruption-marker--button');
+    const panel = block.querySelector<HTMLElement>('.interruption-panel');
+    if (!button || !panel) return;
+
+    button.addEventListener('click', () => {
+      const willOpen = !block.classList.contains('is-open');
+      block.classList.toggle('is-open', willOpen);
+      button.setAttribute('aria-expanded', String(willOpen));
+      panel.setAttribute('aria-hidden', String(!willOpen));
+    });
+  });
+</script>

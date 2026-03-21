@@ -22,7 +22,7 @@ const artifacts = allArtifacts.sort(
     <div class="artifacts-intro">
       <h1 class="artifacts-heading">Artefactos</h1>
       <p class="artifacts-description">
-        Textos ceremoniales, declaraciones y documentos literarios presentados con la dignidad tipográfica que merecen.
+        Piezas literarias inseparables del medio digital que las alberga. Cada artefacto es versionado: abierto a la modificación, documentado en su evolución.
       </p>
     </div>
 
@@ -40,13 +40,23 @@ const artifacts = allArtifacts.sort(
             </a>
           </h2>
 
+          {artifact.data.version && (
+            <span class="artifact-item-version">v{artifact.data.version}</span>
+          )}
+
           <time class="artifact-item-date" datetime={artifact.data.pubDate.toISOString()}>
             {formatCoercedDateAsCalendar(artifact.data.pubDate)}
           </time>
 
-          <p class="artifact-item-description">
-            {artifact.data.description}
-          </p>
+          {artifact.data.experienciaDeLectura && (
+            <p class="artifact-item-reading-experience">{artifact.data.experienciaDeLectura}</p>
+          )}
+
+          {artifact.data.description && (
+            <p class="artifact-item-description">
+              {artifact.data.description}
+            </p>
+          )}
         </article>
       ))}
     </section>
@@ -135,12 +145,30 @@ const artifacts = allArtifacts.sort(
     margin-bottom: var(--space-30);
   }
 
+  .artifact-item-version {
+    display: block;
+    font-family: 'DM Mono', monospace;
+    font-size: var(--font-size-small);
+    color: var(--color-tertiary);
+    margin-bottom: var(--space-20);
+  }
+
+  .artifact-item-reading-experience {
+    font-family: 'DM Mono', monospace;
+    font-size: var(--font-size-small);
+    font-style: italic;
+    color: var(--color-tertiary);
+    max-width: 500px;
+    margin: var(--space-30) auto 0;
+    line-height: 1.5;
+  }
+
   .artifact-item-description {
     font-family: 'DM Mono', monospace;
     font-size: 1rem;
     line-height: 1.6;
     color: var(--color-secondary);
     max-width: 600px;
-    margin: 0 auto;
+    margin: var(--space-30) auto 0;
   }
 </style>

@@ -36,6 +36,8 @@ const artifactsCollection = defineCollection({
   schema: ({ image }) => z.object({
     title: z.string(),
     subtitle: z.string().optional(),
+    version: z.string().optional(),
+    experienciaDeLectura: z.string().optional(),
     description: z.string(),
     pubDate: z.coerce.date(),
     upDate: z.coerce.date().optional(),

@@ -44,6 +44,23 @@
   src: url('../assets/fonts/dm-mono_italic_500.ttf') format('truetype');
 }
 
+/* Caveat - Handwritten font for artifact annotations */
+@font-face {
+  font-family: 'Caveat';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../assets/fonts/caveat_normal_400.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Caveat';
+  font-style: normal;
+  font-weight: 500;
+  src: url('../assets/fonts/caveat_normal_500.ttf') format('truetype');
+  font-display: swap;
+}
+
 /* EB Garamond - For artifacts only */
 @font-face {
   font-family: 'EB Garamond';
@@ -77,6 +94,24 @@
   font-display: swap;
 }
 
+/* IM Fell English - old-style philosophical insertion serif */
+@font-face {
+  font-family: 'IM Fell English';
+  font-style: normal;
+  font-weight: 400;
+  src: url('../assets/fonts/im-fell-english_normal_400.ttf') format('truetype');
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'IM Fell English';
+  font-style: italic;
+  font-weight: 400;
+  src: url('../assets/fonts/im-fell-english_italic_400.ttf') format('truetype');
+  font-display: swap;
+}
+
+
 /* CSS Variables (from theme.json) */
 
 /* =============================================================================
@@ -104,6 +139,7 @@
 
   /* Typography */
   --font-family: 'DM Mono', monospace;
+  --font-philosophy: 'IM Fell English', 'EB Garamond', Garamond, 'Times New Roman', serif;
   --font-size-tiny: 0.8rem;
   --font-size-small: 1rem;
   --font-size-medium: 1.125rem;
@@ -1048,8 +1084,7 @@ hr {
   font-weight: 500;
   line-height: 1.2;
   text-align: center;
-  margin: var(--space-70) auto;
-  max-width: 800px;
+  margin: var(--space-70) 0 var(--space-80);
   color: var(--color-secondary);
 }
 
@@ -1071,12 +1106,14 @@ hr {
   max-width: 680px;
   margin: 0 auto;
   padding: 0 var(--space-60);
+  text-align: justify;
 }
 
 .artifact-content p {
   margin: 1.5rem 0;
   font-size: 1.125rem;
   line-height: 1.7;
+  text-align: justify;
 }
 
 /* Headings use EB Garamond */

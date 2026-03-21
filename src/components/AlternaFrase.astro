@@ -1,0 +1,68 @@
+---
+interface Props {
+  /** First phrase */
+  optionA: string;
+  /** Second phrase */
+  optionB: string;
+}
+
+const {
+  optionA,
+  optionB,
+} = Astro.props;
+---
+
+<span
+  class="alterna-frase"
+  data-ap-option-a={optionA}
+  data-ap-option-b={optionB}
+>
+  <span class="ap-text">{optionA}</span>
+</span>
+
+<style>
+  .alterna-frase {
+    display: inline;
+  }
+
+  .ap-text {
+    cursor: pointer;
+    font-family: 'Caveat', cursive;
+    font-size: 1.15em;
+    color: #3d5a6e;
+    transition: opacity 0.8s ease;
+  }
+</style>
+
+<script>
+  document.querySelectorAll<HTMLElement>('.alterna-frase').forEach((el) => {
+    const optionA = el.dataset.apOptionA ?? '';
+    const optionB = el.dataset.apOptionB ?? '';
+    const textSpan = el.querySelector<HTMLElement>('.ap-text')!;
+
+    // Start with a random option
+    let current: 'a' | 'b' = Math.random() < 0.5 ? 'a' : 'b';
+    textSpan.textContent = current === 'a' ? optionA : optionB;
+
+    // Toggle on click with slow fade
+    let transitioning = false;
+
+    textSpan.addEventListener('click', () => {
+      if (transitioning) return;
+      transitioning = true;
+      textSpan.style.opacity = '0';
+
+      setTimeout(() => {
+        if (current === 'a') {
+          textSpan.textContent = optionB;
+          current = 'b';
+        } else {
+          textSpan.textContent = optionA;
+          current = 'a';
+        }
+        textSpan.style.opacity = '1';
+        transitioning = false;
+      }, 850);
+    });
+  });
+</script>

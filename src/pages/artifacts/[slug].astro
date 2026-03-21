@@ -4,7 +4,6 @@ import type { CollectionEntry } from 'astro:content';
 import { getImage } from 'astro:assets';
 import Base from '../../layouts/Base.astro';
 import HeaderToggle from '../../components/HeaderToggle.astro';
-import { formatCoercedDateAsCalendar, isSameCalendarDay } from '../../utils/formatDateET';
 
 type StaticPath = { params: { slug: string }; props: { entry: CollectionEntry<'artifacts'> } };
 
@@ -25,10 +24,6 @@ interface Props {
 
 const { entry } = Astro.props;
 const { Content } = await entry.render();
-
-const pubDate = entry.data.pubDate;
-const upDate = entry.data.upDate;
-const hasUpdate = upDate && !isSameCalendarDay(pubDate, upDate);
 
 // Compute prev/next navigation
 const allEntries = await getCollection('artifacts', ({ data }) => data.draft !== true);
@@ -67,29 +62,20 @@ const bgImages = entry.data.backgroundImages
       )}
     </h1>
 
-    <!-- Metadata -->
-    <div class="artifact-metadata">
-      <time datetime={pubDate.toISOString()}>
-        Publicado: {formatCoercedDateAsCalendar(pubDate)}
-      </time>
-      {hasUpdate && upDate && (
-        <>
-          <span aria-hidden="true"> • </span>
-          <time datetime={upDate.toISOString()}>
-            Actualizado: {formatCoercedDateAsCalendar(upDate)}
-          </time>
-        </>
-      )}
-    </div>
+    {entry.data.version && (
+      <div class="artifact-metadata">
+        <span class="artifact-version">v{entry.data.version}</span>
+      </div>
+    )}
 
-    <hr />
+    <div class="spacer-large" aria-hidden="true"></div>
+    <div class="spacer-large" aria-hidden="true"></div>
+    <div class="spacer-large" aria-hidden="true"></div>
 
     <!-- Content -->
     <div class="artifact-content">
       <Content />
     </div>
-
-    <hr />
 
     <!-- Navigation -->
     <nav class="post-nav" aria-label="Navegación de artefactos">
@@ -149,5 +135,15 @@ const bgImages = entry.data.backgroundImages
 
   .post-nav a:hover {
     color: var(--color-primary);
+  }
+
+  .artifact-metadata {
+    text-align: center;
+  }
+
+  .artifact-version {
+    font-family: 'DM Mono', monospace;
+    font-size: var(--font-size-small);
+    color: var(--color-tertiary);
   }
 </style>
