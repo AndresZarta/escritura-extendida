@@ -17,7 +17,7 @@ const {
   data-ap-option-a={optionA}
   data-ap-option-b={optionB}
 >
-  <span class="ap-text">{optionA}</span>
+  <span class="ap-text" role="button" tabindex="0">{optionA}</span>
 </span>
 
 <style>
@@ -31,6 +31,12 @@ const {
     font-size: 1.15em;
     color: #3d5a6e;
     transition: opacity 0.8s ease;
+  }
+
+  .ap-text:focus-visible {
+    outline: 1px solid #3d5a6e;
+    outline-offset: 2px;
+    border-radius: 2px;
   }
 </style>
 
@@ -47,7 +53,7 @@ const {
     // Toggle on click with slow fade
     let transitioning = false;
 
-    textSpan.addEventListener('click', () => {
+    function toggle(): void {
       if (transitioning) return;
       transitioning = true;
       textSpan.style.opacity = '0';
@@ -63,6 +69,14 @@ const {
         textSpan.style.opacity = '1';
         transitioning = false;
       }, 850);
+    }
+
+    textSpan.addEventListener('click', toggle);
+    textSpan.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        toggle();
+      }
     });
   });
 </script>

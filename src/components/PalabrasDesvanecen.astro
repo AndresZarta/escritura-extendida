@@ -189,9 +189,22 @@ const {
 
     let visible = false;
 
-    observeVisibility(container,
+    const stopObserving = observeVisibility(
+      container,
       () => { if (!visible) { visible = true; frameId = requestAnimationFrame(animate); } },
       () => { if (visible) { visible = false; cancelAnimationFrame(frameId); } }
+    );
+
+    document.addEventListener(
+      'astro:before-swap',
+      () => {
+        stopObserving();
+        if (visible) {
+          visible = false;
+          cancelAnimationFrame(frameId);
+        }
+      },
+      { once: true }
     );
   });
 </script>

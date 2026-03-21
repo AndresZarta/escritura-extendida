@@ -108,6 +108,7 @@ const {
     const scale = 4;
     let time = Math.random() * 1000;
     let frameId: number;
+    let running = false;
     let frameCount = 0;
     const IDLE_SKIP = 3; // render every Nth frame when no interaction
 
@@ -221,14 +222,15 @@ const {
     }
 
     const cleanupVisibility = observeVisibility(container,
-      () => { frameId = requestAnimationFrame(render); },
-      () => { cancelAnimationFrame(frameId); }
+      () => { if (!running) { running = true; frameId = requestAnimationFrame(render); } },
+      () => { if (running) { running = false; cancelAnimationFrame(frameId); } }
     );
 
     // Cleanup on navigation (view transitions)
     document.addEventListener('astro:before-swap', () => {
       cleanupVisibility();
       resizeObserver.disconnect();
+      running = false;
       cancelAnimationFrame(frameId);
     }, { once: true });
   });

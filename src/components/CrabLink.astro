@@ -55,6 +55,12 @@ const {
     animation: hoy-nudge 4s ease-in-out infinite;
   }
 
+  .crab-content :global(.hl-hoy-clickable:focus-visible) {
+    outline: 1px solid currentColor;
+    outline-offset: 2px;
+    border-radius: 2px;
+  }
+
   @keyframes hoy-nudge {
     0%, 82%, 100% { transform: rotate(0deg); }
     84% { transform: rotate(-6deg); }
@@ -164,6 +170,9 @@ const {
     if (hoySpans.length < 2) return;
 
     hoySpans[0].classList.add('hl-hoy-clickable');
+    hoySpans[0].setAttribute('role', 'button');
+    hoySpans[0].setAttribute('tabindex', '0');
+    hoySpans[0].setAttribute('aria-label', 'Activar la travesía del cangrejo');
 
     // --- 2. Add gap between first and second hoy paragraphs ---
     const firstHoyP = hoySpans[0].closest('p');
@@ -444,11 +453,14 @@ const {
 
     let activated = false;
 
-    hoySpans[0].addEventListener('click', () => {
+    function activateCrab(): void {
       if (activated) return;
       activated = true;
 
       hoySpans[0].classList.remove('hl-hoy-clickable');
+      hoySpans[0].removeAttribute('role');
+      hoySpans[0].removeAttribute('tabindex');
+      hoySpans[0].removeAttribute('aria-label');
 
       // Reveal the second "hoy" as a destination
       hoySpans[1].classList.add('hl-hoy-visible');
@@ -476,6 +488,14 @@ const {
       animating = true;
 
       requestAnimationFrame(animate);
+    }
+
+    hoySpans[0].addEventListener('click', activateCrab);
+    hoySpans[0].addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        activateCrab();
+      }
     });
 
     function drawCrumbs(cx: CanvasRenderingContext2D, alpha: number): void {

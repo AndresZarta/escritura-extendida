@@ -21,7 +21,7 @@ const resolvedBottomMarker = bottomMarker ?? closingMarker ?? resolvedTopMarker;
 
 {
   collapsible ? (
-    <aside class="interruption-block interruption-block--collapsible" role="note" aria-label="Interruption">
+    <aside class="interruption-block interruption-block--collapsible" role="note" aria-label="Interrupción">
       <button class="interruption-marker interruption-marker--button" type="button" aria-expanded="false">
         {resolvedTopMarker}
       </button>
@@ -35,7 +35,7 @@ const resolvedBottomMarker = bottomMarker ?? closingMarker ?? resolvedTopMarker;
       </div>
     </aside>
   ) : (
-    <aside class="interruption-block" role="note" aria-label="Interruption">
+    <aside class="interruption-block" role="note" aria-label="Interrupción">
       <p class="interruption-marker" aria-hidden="true">{resolvedTopMarker}</p>
       <div class="interruption-content">
         <slot />
