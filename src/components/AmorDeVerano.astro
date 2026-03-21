@@ -2,7 +2,7 @@
 ---
 
 <span class="amor-de-verano" data-adv>
-  <span class="adv-text">un amor de verano.</span>
+  <span class="adv-text" role="button" tabindex="0">un amor de verano.</span>
 </span>
 
 <style>
@@ -20,6 +20,12 @@
     position: relative;
     transition: color 0.6s ease;
     white-space: nowrap;
+  }
+
+  .adv-text:focus-visible {
+    outline: 1px solid #3d5a6e;
+    outline-offset: 2px;
+    border-radius: 2px;
   }
 
   .adv-text.adv-struck {
@@ -62,9 +68,10 @@
     const textSpan = container.querySelector<HTMLElement>('.adv-text')!;
     let clicked = false;
 
-    textSpan.addEventListener('click', () => {
+    function activate(): void {
       if (clicked) return;
       clicked = true;
+      textSpan.removeAttribute('tabindex');
 
       // Strike through
       textSpan.classList.add('adv-struck');
@@ -86,6 +93,14 @@
         }
         typeNext();
       }, 500);
+    }
+
+    textSpan.addEventListener('click', activate);
+    textSpan.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        activate();
+      }
     });
   });
 </script>

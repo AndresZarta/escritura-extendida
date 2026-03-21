@@ -7,7 +7,7 @@ const { title } = Astro.props;
   <button
     id="header-toggle-btn"
     class="header-toggle-btn"
-    aria-label="Toggle navigation"
+    aria-label="Mostrar u ocultar navegación"
     aria-expanded="false"
   >
     <span class="toggle-icon">+</span>
@@ -115,6 +115,10 @@ const { title } = Astro.props;
 
     if (!toggleBtn || !header) return;
 
+    // Prevent re-initializing on the same DOM nodes across repeated calls
+    if (toggleBtn.dataset.initialized === 'true') return;
+    toggleBtn.dataset.initialized = 'true';
+
     // Calculate and set header height as CSS variable
     const updateHeaderHeight = (): void => {
       const headerHeight = header.scrollHeight;
@@ -125,9 +129,10 @@ const { title } = Astro.props;
     updateHeaderHeight();
 
     // Recalculate on window resize
-    window.addEventListener('resize', updateHeaderHeight);
+    const onResize = (): void => updateHeaderHeight();
+    window.addEventListener('resize', onResize);
 
-    toggleBtn.addEventListener('click', () => {
+    const onToggleClick = (): void => {
       const isExpanded = toggleBtn.getAttribute('aria-expanded') === 'true';
       const newState = !isExpanded;
 
@@ -140,10 +145,11 @@ const { title } = Astro.props;
       } else {
         header.classList.remove('is-visible');
       }
-    });
+    };
+    toggleBtn.addEventListener('click', onToggleClick);
 
     // Close header when clicking outside
-    document.addEventListener('click', (e) => {
+    const onDocClick = (e: Event): void => {
       const target = e.target as HTMLElement;
       if (!toggleBtn.contains(target) && !header.contains(target)) {
         if (toggleBtn.getAttribute('aria-expanded') === 'true') {
@@ -152,16 +158,25 @@ const { title } = Astro.props;
           header.classList.remove('is-visible');
         }
       }
-    });
+    };
+    document.addEventListener('click', onDocClick);
 
     // Close header on escape key
-    document.addEventListener('keydown', (e) => {
+    const onKeyDown = (e: KeyboardEvent): void => {
       if (e.key === 'Escape' && toggleBtn.getAttribute('aria-expanded') === 'true') {
         toggleBtn.setAttribute('aria-expanded', 'false');
         header.setAttribute('aria-hidden', 'true');
         header.classList.remove('is-visible');
       }
-    });
+    };
+    document.addEventListener('keydown', onKeyDown);
+
+    // Clean up listeners before view transition to avoid accumulation
+    document.addEventListener('astro:before-swap', () => {
+      window.removeEventListener('resize', onResize);
+      document.removeEventListener('click', onDocClick);
+      document.removeEventListener('keydown', onKeyDown);
+    }, { once: true });
   }
 
   // Initialize on page load

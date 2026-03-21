@@ -23,9 +23,13 @@ const {
 >
   <span class="bp-bracket">[</span><span
     class="bp-choice bp-choice-a"
+    role="button"
+    tabindex="0"
   >{optionA}</span><span
     class="bp-slash">/</span><span
     class="bp-choice bp-choice-b"
+    role="button"
+    tabindex="0"
   >{optionB}</span><span class="bp-bracket">]</span>
 </span>
 
@@ -41,6 +45,11 @@ const {
     color: #3d5a6e;
     transition: opacity 1.2s ease;
     border-radius: 2px;
+  }
+
+  .bp-choice:focus-visible {
+    outline: 1px solid #3d5a6e;
+    outline-offset: 2px;
   }
 
   .bp-bracket,
@@ -81,7 +90,12 @@ const {
       if (chosen) return;
       chosen = true;
       choiceA.style.cursor = 'default';
+      choiceA.removeAttribute('tabindex');
+      choiceB.removeAttribute('tabindex');
       collapseElements(choiceB, slash, ...Array.from(brackets));
+    });
+    choiceA.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choiceA.click(); }
     });
 
     choiceB.addEventListener('click', () => {
@@ -89,7 +103,12 @@ const {
       chosen = true;
       choiceA.textContent = combined;
       choiceA.style.cursor = 'default';
+      choiceA.removeAttribute('tabindex');
+      choiceB.removeAttribute('tabindex');
       collapseElements(choiceB, slash, ...Array.from(brackets));
+    });
+    choiceB.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); choiceB.click(); }
     });
   });
 </script>

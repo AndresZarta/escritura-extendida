@@ -135,9 +135,17 @@ const {
 
     let visible = false;
 
-    observeVisibility(el,
+    const cleanupVisibility = observeVisibility(el,
       () => { if (!visible) { visible = true; frameId = requestAnimationFrame(draw); } },
       () => { if (visible) { visible = false; cancelAnimationFrame(frameId); } }
     );
+
+    document.addEventListener('astro:before-swap', () => {
+      if (visible) {
+        visible = false;
+        cancelAnimationFrame(frameId);
+      }
+      cleanupVisibility();
+    }, { once: true });
   });
 </script>
