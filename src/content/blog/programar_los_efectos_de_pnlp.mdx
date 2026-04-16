@@ -1,0 +1,230 @@
+---
+title: "programar_los_efectos_de_pnlp::las_palabras_que_se_desvanecen"
+pubDate: 2026-04-16
+description: "Primera parte de la bitácora técnica de .pnlp. Cómo un TreeWalker, curvas de easing asimétricas y reclutamiento estocástico hacen que las palabras de un párrafo se desvanezcan como recuerdos inestables."
+image: ""
+draft: false
+---
+
+import { Image } from 'astro:assets';
+import PalabrasDesvanecen from '../../components/PalabrasDesvanecen.astro';
+import relieveInscripcion from '../../assets/images/programar_efectos_pnlp/met_548097.jpg';
+
+<figure class="figure-blog-small">
+  <a href="https://www.metmuseum.org/art/collection/search/548097" target="_blank" rel="noopener noreferrer">
+    <Image
+      src={relieveInscripcion}
+      alt="Fragmento de relieve con parte de una inscripción, piedra caliza (664–610 a.C.)"
+    />
+  </a>
+  <figcaption>Fragmento de relieve con parte de una inscripción, 664–610 a.C. The Met Museum.</figcaption>
+</figure>
+
+[**.pnlp**](/artifacts/) es el [primer artefacto](/blog/presentar_el_primer_artefacto) de este blog, y está compuesto por más de diez componentes distintos, algunos interactivos, otros meramente visuales, que se combinan para crear la experiencia de lectura que el texto busca transmitir.
+
+Conceptualizar, escribir y programar toda la pieza me tomó varios meses, incluso algunos previos al inicio de mis entradas en este blog, y cada efecto ha requerido un proceso de prueba y error para que se sintiera justo como yo quería.
+
+En esta serie de entradas que inicia con esta publicación, quiero entrar en el detalle de algunos de ellos y mostrar cómo funcionan por dentro: cómo el código produce los comportamientos que el lector experimenta al leer la pieza. 
+
+En esta primera entrada, me enfocaré en el efecto de desvanecimiento de palabras que ocurre en el párrafo que comienza con *"Pero se me pierde..."* y que busca enactuar la sensación de un recuerdo que se va desdibujando.
+## .las_palabras_que_se_desvanecen
+
+---
+
+<PalabrasDesvanecen>
+Pero se me pierde. Se me pierde la imagen, y se me pierde su aroma. Se me pierde la sensación de tenerla en frente, a meros centímetros de mi rostro, y en su lugar me empiezan a confundir las historias que luego escribí y reescribí para tratar de sanar todo eso que nos hicimos. El intento de capturarla en mis cuentos la fue desvaneciendo.
+</PalabrasDesvanecen>
+
+---
+
+Este párrafo describe al narrador perdiendo el agarre de un recuerdo. La imagen se disuelve, el aroma se pierde, las historias que escribió para capturar a Penélope la fueron desvaneciendo. Mi idea era que el texto pudiera enactuar esa pérdida.
+
+El componente de [Astro](/notes/astro) `PalabrasDesvanecen` no requiere que yo intencionalmente marque y anime palabras específicas ni defina una secuencia individual exacta. Cualquier párrafo puede ser envuelto de la siguiente forma:
+
+```astro
+<PalabrasDesvanecen>
+  Las palabras se desvanecen lentamente, como recuerdos que el tiempo va difuminando 
+  sin que uno lo note.
+</PalabrasDesvanecen>
+```
+---
+<PalabrasDesvanecen>
+Las palabras se desvanecen lentamente, como recuerdos que el tiempo va difuminando sin que uno lo note.
+</PalabrasDesvanecen>
+---
+Internamente, un `TreeWalker` o `caminante` recorre los nodos de texto dentro del componente — la porción del [árbol del DOM](/notes/arbol_del_dom) que corresponde al contenido envuelto. El caminante los separa en palabras individuales y envuelve cada una en su propio `<span>`. Los espacios se preservan como nodos de texto crudos para no alterar el flujo tipográfico. El resultado es un párrafo que se ve idéntico al original, pero donde cada palabra puede ser controlada de forma independiente.
+
+```typescript
+// TreeWalker recorre el DOM buscando nodos de texto
+const caminante = document.createTreeWalker(contenedor, NodeFilter.SHOW_TEXT);
+const nodosTexto: Text[] = [];
+let nodo: Text | null;
+while ((nodo = caminante.nextNode() as Text | null)) {
+  if (nodo.textContent && nodo.textContent.trim()) nodosTexto.push(nodo);
+}
+
+// Cada nodo de texto se fragmenta en palabras individuales
+for (const nodoTexto of nodosTexto) {
+  const texto = nodoTexto.textContent ?? '';
+  const partes = texto.split(/(\s+)/);  // captura los espacios como grupo
+  const fragmento = document.createDocumentFragment();
+
+  for (const parte of partes) {
+    if (parte.match(/^\s+$/)) {
+      // Los espacios se preservan como nodos de texto crudos
+      fragmento.appendChild(document.createTextNode(parte));
+    } else if (parte.length > 0) {
+      // Cada palabra se envuelve en un <span> controlable
+      const palabraSpan = document.createElement('span');
+      palabraSpan.className = 'pd-word';
+      palabraSpan.textContent = parte;
+      fragmento.appendChild(palabraSpan);
+      spansPalabras.push(palabraSpan);
+    }
+  }
+
+  // El nodo original se reemplaza por el fragmento
+  nodoTexto.parentNode?.replaceChild(fragmento, nodoTexto);
+}
+```
+Los props con valores por defecto hacen que el componente funcione sin configuración explícita. Pero si otro artefacto necesita un efecto más sutil o más agresivo, basta con ajustar los parámetros:
+
+```astro
+<PalabrasDesvanecen
+  opacidadMinima={0.25}
+  fraccionActivas={0.15}
+  duracionCicloMinima={3000}
+  duracionCicloMaxima={7000}
+>
+  <!-- opacidadMinima: las palabras nunca desaparecen del todo -->
+  <!-- fraccionActivas: solo el 15% se desvanece a la vez -->
+  <!-- duracionCicloMinima / duracionCicloMaxima: ciclos más lentos -->
+  Aquí las palabras apenas se difuminan. Es un desvanecimiento
+  más lento, más gentil, como somnoliento.
+</PalabrasDesvanecen>
+```
+---
+<PalabrasDesvanecen
+  minOpacity={0.25}
+  activeFraction={0.15}
+  minCycleDuration={3000}
+  maxCycleDuration={7000}
+>
+  Aquí las palabras apenas se difuminan. Es un desvanecimiento
+  más lento, más gentil, como somnoliento.
+</PalabrasDesvanecen>
+---
+Por defecto, `fraccionActivas` es 0.3: en todo momento, aproximadamente el 30% de las palabras están en algún estado de desvanecimiento, ya sea oscureciéndose hacia la casi-invisibilidad, sosteniéndose en su opacidad mínima, o recuperándose hacia la plenitud. El efecto es continuo y estocástico: ninguna lectura se ve igual que otra.
+
+Ese 30% no apareció de inmediato ni pretende ser universal: funcionaba para este párrafo. Probé densidades más bajas (10-20%) y el párrafo seguía sintiéndose demasiado estable; el lector casi no percibía la fragilidad del recuerdo. También probé densidades más altas (40-60%) y la lectura empezaba a romperse: ya no había inquietud, había fricción. Ese punto intermedio terminó siendo una negociación entre atmósfera y legibilidad.
+
+Cada palabra cicla por cuatro fases:
+
+```
+visible → desvaneciéndose → desvanecida (pausa) → reapareciendo → visible
+```
+
+```typescript
+// Cada palabra tiene su propio estado independiente
+interface EstadoPalabra {
+  fase: 'visible' | 'desvaneciendo' | 'desvanecida' | 'reapareciendo';
+  opacidad: number;
+  inicioCiclo: number;
+  duracionCiclo: number;
+  duracionPausa: number;
+}
+
+// En cada cuadro de animación, cada palabra avanza según su fase:
+if (estado.fase === 'desvaneciendo') {
+  const progreso = Math.min(1, transcurrido / estado.duracionCiclo);
+  const suavizado = 1 - Math.pow(1 - progreso, 2);  // ease-out
+  estado.opacidad = 1 - suavizado * (1 - opacidadMinima);
+
+  if (progreso >= 1) {
+    estado.fase = 'desvanecida';  // pausa en opacidad mínima
+  }
+} else if (estado.fase === 'desvanecida') {
+  if (ahora - estado.inicioCiclo >= estado.duracionPausa) {
+    estado.fase = 'reapareciendo';
+    estado.duracionCiclo = duracionCicloAleatoria() * 0.7;  // 30% más rápida
+  }
+} else if (estado.fase === 'reapareciendo') {
+  const progreso = Math.min(1, transcurrido / estado.duracionCiclo);
+  const suavizado = progreso * progreso;  // ease-in
+  estado.opacidad = opacidadMinima + suavizado * (1 - opacidadMinima);
+
+  if (progreso >= 1) {
+    estado.fase = 'visible';  // ciclo completo
+  }
+}
+```
+
+La variable `progreso` es un número entre 0 y 1 que mide cuánto ha avanzado la palabra en su fase actual: `transcurrido / duracionCiclo`. Cuando `progreso` vale 0 la transición acaba de empezar; cuando vale 1, terminó. Pero si la opacidad siguiera a `progreso` linealmente, el desvanecimiento se sentiría mecánico — constante, predecible, como una persiana bajando. Las curvas de easing transforman ese avance lineal en algo que se acelera o desacelera.
+
+Para el desvanecimiento se usa la misma fórmula del código: `suavizado = 1 - Math.pow(1 - progreso, 2)`. Al principio `progreso` es pequeño, `Math.pow(1 - progreso, 2)` es cercano a 1, y `suavizado` crece rápido. Al final, `Math.pow(1 - progreso, 2)` se acerca a 0 lentamente — la palabra se desvanece con rapidez al inicio y luego se demora en los últimos grados de opacidad, como si se resistiera a desaparecer del todo. Para la reaparición se invierte con la expresión directa del snippet: `suavizado = progreso * progreso`, lento al principio y rápido al final — la palabra tarda en arrancar pero se recompone con decisión. Después, la opacidad se calcula como `estado.opacidad = 1 - suavizado * (1 - opacidadMinima)` al desvanecer y como `estado.opacidad = opacidadMinima + suavizado * (1 - opacidadMinima)` al reaparecer: cuando `suavizado` es 0 la opacidad está en el inicio de la fase; cuando es 1 llega al extremo opuesto de esa fase (1 u `opacidadMinima`, según corresponda).
+
+La pausa en opacidad mínima (`duracionPausa`, entre 500 y 1500 milisegundos) es el momento en que la palabra permanece casi borrada antes de empezar a recuperarse. La reaparición dura un 30% menos que el desvanecimiento (`duracionCiclo * 0.7`) — la recuperación es ligeramente más veloz que la pérdida.
+
+```typescript
+// Reclutamiento: mantener ~30% de las palabras activas
+const objetivoActivas = Math.floor(spansPalabras.length * 0.3);
+
+// En cada cuadro de animación:
+if (contarActivas() < objetivoActivas) {
+  // Elegir una palabra visible al azar y empezar a desvanecerla
+  const eleccion = indicesVisibles[Math.floor(Math.random() * indicesVisibles.length)];
+  iniciarDesvanecimiento(eleccion, ahora);
+}
+```
+
+También hay una dimensión práctica en la programación del efecto: este efecto corre en `requestAnimationFrame`, así que su costo crece con la cantidad de palabras animadas y con el tiempo de permanencia del lector en pantalla. Para contenerlo, el componente sólo anima cuando el bloque está visible (vía observación de visibilidad) y se detiene cuando deja de estarlo.
+
+```typescript
+let idCuadro: number;
+let estaVisible = false;
+
+const detenerObservacion = observeVisibility(
+  contenedor,
+  () => {
+    if (!estaVisible) {
+      estaVisible = true;
+      idCuadro = requestAnimationFrame(animar);
+    }
+  },
+  () => {
+    if (estaVisible) {
+      estaVisible = false;
+      cancelAnimationFrame(idCuadro);
+    }
+  }
+);
+
+// También limpiamos al cambiar de vista en Astro
+document.addEventListener(
+  'astro:before-swap',
+  () => {
+    detenerObservacion();
+    if (estaVisible) {
+      estaVisible = false;
+      cancelAnimationFrame(idCuadro);
+    }
+  },
+  { once: true }
+);
+```
+
+## .el_texto_como_sistema_orgánico
+
+La clave para que el efecto se leyera orgánico está en que varias técnicas trabajan en conjunto. En [*The Nature of Code*](https://natureofcode.com/), Daniel Shiffman dedica [su capítulo inicial](https://natureofcode.com/random/) a explorar cómo un programador puede producir comportamientos que se sienten orgánicos — no caóticos como el ruido blanco ni predecibles como una función periódica, sino con esa irregularidad que reconocemos como natural. Aquí se combinan varias de esas técnicas: el reclutamiento estocástico (el sistema no decide *cuáles* palabras se desvanecen ni *cuándo* — simplemente mantiene una densidad objetivo y deja que el azar elija), las duraciones aleatorias por palabra (cada ciclo dura entre 2 y 5 segundos, nunca dos palabras sincronizan) y las curvas de easing asimétricas (ease-out para desvanecer, ease-in para recuperar, la pérdida más lenta que la recuperación).
+
+El resultado es un párrafo que respira como un recuerdo inestable: algunas palabras parpadean al borde de la desaparición mientras otras permanecen firmes, y la composición cambia constantemente. El lector puede leer el texto, la densidad del 30% nunca lo vuelve completamente ilegible, pero la experiencia de lectura busca estar teñida de una inquietud que proviene del comportamiento del medio.
+
+## .el_código_como_material
+
+Con un `TreeWalker`, una máquina de estados de cuatro fases, dos curvas de easing y un reclutador estocástico, el párrafo *"Pero se me pierde..."* deja de ser texto estático y busca convertirse en un micro-sistema que enactúa su propio contenido. Si entendemos [texto](/notes/texto) en el sentido amplio — no como escritura lineal sino como un entramado de signos capaz de producir significado — entonces el código que anima estas palabras es parte del texto mismo. 
+
+Esa es la idea que recorre esta serie: el código no es solo la infraestructura que hace posible la pieza, sino parte del material con el que está escrita. En las próximas entradas voy a abrir otros componentes de **.pnlp** con el mismo enfoque. No me adentraré en todos, solo los que mejor muestren cómo una decisión de implementación termina siendo una declaración narrativa.
+
+## Referencias
+
+- Shiffman, D. (2024). Randomness. En *The Nature of Code*. [https://natureofcode.com/random/](https://natureofcode.com/random/)
