@@ -1,0 +1,214 @@
+---
+title: "programar_los_efectos_de_pnlp::la_niebla_que_se_aparta"
+pubDate: 2026-05-03
+description: "Segunda parte de la bitácora técnica de .pnlp. Cómo el ruido de Perlin en dos dimensiones, la deformación de dominio y un puñado de intentos fallidos terminaron produciendo una niebla que se aparta cuando el lector se acerca al texto."
+image: ""
+draft: false
+---
+
+import { Image } from 'astro:assets';
+import NieblaTexto from '../../components/NieblaTexto.astro';
+import ochanomizuEnLaNiebla from '../../assets/images/programar_efectos_pnlp_la_niebla/met_56679.jpg';
+
+<figure class="figure-blog">
+  <a href="https://www.metmuseum.org/art/collection/search/56679" target="_blank" rel="noopener noreferrer">
+    <Image
+      src={ochanomizuEnLaNiebla}
+      alt="Ochanomizu in the Mist, grabado en madera (mediados del siglo XIX)"
+    />
+  </a>
+  <figcaption>Utagawa Kunisada. Ochanomizu in the Mist, mediados del siglo XIX. The Met Museum.</figcaption>
+</figure>
+
+Esta es la segunda entrega de la serie sobre los efectos de [**.pnlp**](/artifacts/). En la [primera entrega](/blog/programar_los_efectos_de_pnlp) discutimos la implementación del componente `PalabrasDesvanecen`, que hace que las palabras de un párrafo respiren como un recuerdo inestable. Esta entrega se ocupa del primer efecto que el lector encuentra al entrar a la pieza: una niebla que cubre el texto y solo se aparta cuando el lector pasa el cursor sobre un párrafo.
+
+Toda la sección inicial del artefacto; los párrafos sobre despertar y darse cuenta de que Penélope ha sido olvidada, necesitaba sentirse oscurecida. Recuerdos vistos a través de la bruma. El lector debía esforzarse por leer, y luego apartar la niebla al interactuar con el texto. El componente que produce ese efecto se llama `NieblaTexto`.
+
+## .la_niebla_que_se_aparta
+
+---
+
+<NieblaTexto>
+
+Al despertar, la mañana del primero de diciembre de 2025, me di cuenta de que había olvidado recordar a Penélope.
+
+Pero no solo había sido esa mañana; en los últimos doce meses no había dado con recordarla ni una sola vez.
+
+Y qué vacío sentí en mi alma esa mañana, cuando, sepultado en una cama de cobijas pesadas, al ver la tenue luz filtrándose entre los pliegues apenas separados de las cortinas, comprendí que me había sido arrancado algo esencial.
+
+</NieblaTexto>
+
+---
+
+(Pasa el cursor sobre cualquier párrafo para apartar la niebla.)
+
+El componente envuelve el contenido y superpone un `<canvas>` sobre el texto. El canvas lleva `pointer-events: none`, así que los clics y movimientos del cursor lo atraviesan y llegan a los párrafos que están debajo — esto es lo que permitirá detectar el hover en cada párrafo más adelante. Cada píxel del canvas tiene el mismo color que el fondo de la página (blanco); solo varía la opacidad. La niebla parece entonces una intensificación del fondo — bruma blanca sobre página blanca, no una capa coloreada distinguible.
+
+```astro
+<NieblaTexto>
+  El texto envuelto aparece bajo una capa de niebla animada.
+  Pasa el cursor por encima para apartarla.
+</NieblaTexto>
+```
+
+La textura de la niebla y la mecánica para apartarla fueron dos problemas independientes; cada uno tomó varios intentos. Lo que sigue es el recorrido de ambos.
+
+### .la_textura
+
+Necesitábamos una textura que se viera como nubes: regiones densas y huecos, manchas suaves y bordes irregulares, en constante movimiento sin repetirse nunca. La herramienta natural para eso es el **ruido de Perlin**, descrito con claridad en [el primer capítulo](https://natureofcode.com/random/) de *The Nature of Code* de Daniel Shiffman. A diferencia de `Math.random()`, que produce ruido caótico (puntos sin relación con sus vecinos), o de `Math.sin()`, que produce ondas perfectamente periódicas, el ruido de Perlin genera valores que varían suavemente en el espacio sin repetirse nunca. Es esa cualidad la que reconocemos como orgánica — vetas de madera, ondulaciones de terreno, formaciones de nubes. Es la misma familia de ruido que la primera entrega usó en una dimensión para regular las opacidades de las palabras; aquí pasamos a dos dimensiones para generar una textura espacial.
+
+Pero una sola capa de Perlin no basta. Produce manchas grandes y suaves, sin detalle fino. Las nubes, en cambio, tienen formas a múltiples escalas: hay grandes acumulaciones, hay rizos medianos, hay pequeños bordes irregulares. Para conseguir esa multi-escala se usa el **movimiento browniano fraccional** (FBM), que consiste simplemente en sumar varias capas de Perlin: una capa grande y suave, encima una capa más pequeña y con menos peso, encima otra aún más pequeña, y así sucesivamente. Cada capa adicional se llama una *octava*, en analogía con la música. La primera versión de la niebla usó cuatro octavas y produjo un desenfoque suave, pero demasiado uniforme. Como vidrio esmerilado, no como nubes.
+
+La segunda versión añadió **deformación de dominio** (*domain warping*), una técnica de Inigo Quilez. La idea es dejar que el ruido se "perturbe a sí mismo": antes de evaluar el ruido en un punto `(x, y)`, se calcula primero un pequeño desplazamiento usando el propio ruido en otra parte, y luego se evalúa el ruido en las coordenadas desplazadas. En la práctica son tres evaluaciones de FBM: dos para calcular el desplazamiento (una para la componente x, otra para la y), una tercera para obtener el valor final en el punto desplazado.
+
+Esto produjo patrones turbulentos y hermosos. Pero seguía siendo demasiado suave — como pañuelos de seda bajo el agua, no como nubes en el cielo. Las nubes tienen bordes irregulares, como coliflor.
+
+La versión final combinó tres ajustes: cinco octavas de ruido en lugar de cuatro (para añadir detalle de alta frecuencia), un multiplicador de frecuencia de 2.2 en lugar de 2 (para más textura entre octavas), y una sola pasada de deformación de dominio con fuerza reducida (movimiento orgánico sin suavizar en exceso).
+
+```typescript
+function fbm(x: number, y: number): number {
+  let valor = 0;
+  let amplitud = 0.5;
+  let frecuencia = 1;
+  for (let i = 0; i < 5; i++) {
+    valor += amplitud * ruido2d(x * frecuencia, y * frecuencia);
+    amplitud *= 0.5;
+    frecuencia *= 2.2;  // ligeramente agresivo: añade textura entre octavas
+  }
+  return valor;
+}
+
+function fbmDeformado(x: number, y: number, t: number): number {
+  // Una sola pasada de deformación con fuerza 2.0
+  const q0 = fbm(x + t * 0.4, y + t * 0.3);
+  const q1 = fbm(x + 5.2 + t * 0.2, y + 1.3 - t * 0.35);
+  return fbm(x + 2.0 * q0, y + 2.0 * q1);
+}
+```
+
+En palabras: `q0` y `q1` son dos lecturas distintas del mismo ruido de fondo (con offsets diferentes para que no estén correlacionadas); juntas forman un pequeño vector que empuja el punto `(x, y)` antes de que evaluemos el FBM ahí. La constante `2.0` controla qué tan fuerte es ese empujón — más alto, más turbulento; más bajo, más calmado. Quilez en su artículo original usa una fuerza de 4.0 con dos pasadas anidadas; aquí simplificamos a una sola pasada con fuerza menor para preservar algo de aspereza en la textura final.
+
+Los desplazamientos temporales (`t * 0.4`, `t * 0.3`, `t * 0.2`, `-t * 0.35`) hacen que la niebla se desplace en direcciones sutilmente distintas a velocidades diferentes, evitando cualquier sensación de deslizamiento uniforme. El parámetro `driftSpeed` del componente regula la velocidad global con la que avanza el tiempo `t`.
+
+Una vez generado el ruido, todavía hay que convertirlo en alfa para los píxeles del canvas. Si se usa el valor del ruido directamente, se obtiene una bruma uniforme — todo el canvas es algo opaco. Las nubes, en cambio, necesitan **contraste**: regiones densas y huecos despejados. Un umbral de 0.2 corta el ruido por debajo y crea esos huecos; cualquier valor por debajo de 0.2 se vuelve completamente transparente:
+
+```typescript
+const umbral = 0.2;
+const limitado = Math.max(crudo - umbral, 0) / (1 - umbral);
+const n = Math.pow(limitado, 0.8);  // levanta los medios tonos sin aplastar las cimas
+const alfa = Math.min(n * densidad, 1);
+```
+
+La fórmula hace cuatro cosas en cuatro líneas. Primero, todo lo que esté por debajo del umbral 0.2 se vuelve cero: estos son los huecos en las nubes. Segundo, el rango restante (de 0.2 a 1) se reescala a (0 a 1) para no perder fuerza tras el corte. Tercero, `Math.pow(limitado, 0.8)` con un exponente moderadamente menor a 1 levanta los valores intermedios sin aplastar las cimas, lo que añade densidad sin volver la niebla opaca. Cuarto, la `densidad` (2.15 por defecto) multiplica todo, y el `Math.min(..., 1)` evita que la opacidad se pase del máximo posible.
+
+El canvas se renderiza a 1/4 de resolución — para un contenedor de 900px de ancho, el canvas interno tiene unos 255px. El navegador lo escala mediante CSS, lo cual provee un filtrado bilineal natural — la niebla se ve suave, no pixelada — y el costo computacional se reduce 16 veces. Con ruido de Perlin, deformación de dominio y un doble bucle anidado por píxel ejecutándose hasta sesenta veces por segundo, esa reducción es la diferencia entre una animación fluida y un navegador atascado. (Cuando no hay interacción activa, el componente además salta dos de cada tres cuadros para no malgastar cálculo en una textura que casi no cambia; y cuando el bloque envuelto sale por completo del viewport, la animación se detiene y se reanuda solo cuando el lector vuelve a la sección.)
+
+Un detalle más, este sí relacionado con cómo la niebla se integra a la página. El canvas no termina exactamente donde termina el contenedor: se extiende sesenta píxeles más allá en cada dirección (`inset: -60px` en la CSS). Y dos gradientes lineales aplicados como máscara — uno vertical, uno horizontal, combinados con `mask-composite: intersect` — desvanecen sus cuatro bordes hacia el transparente:
+
+```css
+.niebla-canvas {
+  inset: -60px;
+  mask-image:
+    linear-gradient(to bottom, transparent 0%, black 8%, black 92%, transparent 100%),
+    linear-gradient(to right,  transparent 0%, black 8%, black 92%, transparent 100%);
+  mask-composite: intersect;
+}
+```
+
+Sin esto, la niebla tendría un borde rectangular duro, una caja flotando sobre la página. Con el bleed y la máscara, los bordes se disuelven de a poco y la niebla parece parte del fondo en vez de una capa pegada encima. Es uno de esos detalles que el lector no nombra, pero que percibe inmediatamente en su ausencia.
+
+### .apartar_la_niebla
+
+El lector debía poder leer. Pasar el cursor sobre un párrafo debía despejar la niebla encima de él y llevar el texto a opacidad completa.
+
+Esto tomó cinco intentos. Cada fracaso enseñó algo sobre contextos de apilamiento CSS, continuidad visual y la distancia entre "técnicamente funcional" y "correcto".
+
+El primer intento fue `z-index`: al hacer hover, el párrafo subía por encima del canvas. Falló porque CSS no permite que un elemento hijo escape el contexto de apilamiento de su padre — el párrafo estaba atrapado dentro del `.niebla-content`, debajo del canvas, sin importar qué `z-index` reclamara.
+
+El segundo intento le dio un fondo blanco a cada párrafo en hover. Cada párrafo mostraba un rectángulo visible: aunque el color coincidiera con el fondo de la página, las dimensiones (padding, márgenes, alturas de línea) creaban un bloque rectangular distinguible.
+
+El tercer intento combinó transiciones CSS de opacidad (de 0.45 a 1) con z-index. La transición de opacidad era suave pero el cambio de z-index era binario, un salto abrupto entre "bajo la niebla" y "sobre la niebla".
+
+El cuarto intento fue un cambio fundamental: en lugar de mover el párrafo sobre la niebla, *cortar un agujero en la niebla* a la altura del párrafo. El bucle de renderizado del canvas saltaba los píxeles del rango Y correspondiente al párrafo activo, con bordes degradados. Pero al pasar del párrafo A al B, el agujero se *deslizaba* de uno a otro, barriendo los párrafos intermedios — un bloque despejado movible que se sentía artificial.
+
+La solución final: cada párrafo tiene su propia `intensidadDespeje` independiente (0 = cubierto de niebla, 1 = despejado) que sube y baja en su propia línea temporal. Sin deslizamiento. Sin un único agujero. La niebla de cada párrafo se despeja *in situ*.
+
+```typescript
+const velocidadAbrir = 0.06;   // revelación rápida — el lector quiere leer
+const velocidadCerrar = 0.025; // retorno lento — la niebla regresa gradualmente
+
+for (const p of parrafos) {
+  const tieneHover = p === parrafoConHover;
+  const objetivo = tieneHover ? 1 : 0;
+  const velocidad = tieneHover ? velocidadAbrir : velocidadCerrar;
+
+  const actual = pIntensidadDespeje.get(p) ?? 0;
+  const siguiente = actual + (objetivo - actual) * velocidad;
+  pIntensidadDespeje.set(p, siguiente);
+}
+```
+
+La fórmula `actual + (objetivo - actual) * velocidad` puede leerse así: en cada cuadro, el valor se acerca a su objetivo en una fracción del camino que le falta. Si la velocidad es 0.06, en el primer cuadro avanza un 6% del trayecto; en el siguiente, otro 6% del trayecto restante (que ya es más corto), y así sucesivamente. Esto se llama **interpolación lineal** (o *lerp*) y produce una curva suave que arranca rápido y va frenando al acercarse al objetivo, sin necesidad de matemática más compleja.
+
+La velocidad de cierre (0.025) es deliberadamente más lenta que la de apertura (0.06) — la niebla regresa gradualmente, como un recuerdo que se vuelve a oscurecer. La revelación es rápida porque el lector quiere leer, pero el ocultamiento es lento, como si la niebla respetara la atención del lector antes de reconquistar el texto.
+
+Eso es lo que controla *cuánto* despejar en cada cuadro. Falta dónde aplicarlo. Cuando llega el momento de pintar la niebla, el código revisa cada píxel del canvas y, para cada zona de despeje activa (cualquier párrafo cuya intensidad esté por encima de 0.001), pregunta: ¿este píxel está dentro del párrafo, en su borde superior, en su borde inferior, o fuera? Y reduce el alfa en consecuencia:
+
+```typescript
+for (const zona of zonasDespeje) {
+  let efectoZona = 0;
+  if (y >= zona.top && y <= zona.bottom) {
+    efectoZona = 1;  // dentro del párrafo: despeje completo
+  } else if (y > zona.top - plumaje && y < zona.top) {
+    efectoZona = 1 - (zona.top - y) / plumaje;  // borde superior degradado
+  } else if (y > zona.bottom && y < zona.bottom + plumaje) {
+    efectoZona = 1 - (y - zona.bottom) / plumaje;  // borde inferior degradado
+  }
+  alfa *= 1 - efectoZona * zona.intensidad;
+}
+```
+
+El `feather` o plumaje hace que el borde del agujero no sea un corte recto sino una transición de 30 píxeles entre niebla y claridad, replicando la suavidad del propio ruido. Sin él, los párrafos despejados se verían como ventanas cuadradas en la niebla.
+
+### .sincronizar_niebla_y_texto
+
+Hay un detalle sutil que casi arruina el efecto. La opacidad del texto estaba originalmente controlada por una transición CSS, mientras que el agujero en la niebla se cerraba con un lerp en JavaScript. Al quitar el cursor, el texto se oscurecía al ritmo del CSS y la niebla regresaba al ritmo del canvas. Durante unos pocos cuadros se veía texto oscuro *sin* niebla encima — un espejismo desagradable de "casi limpio pero atenuado" que rompía la ilusión.
+
+La solución fue eliminar todas las transiciones CSS de la opacidad del párrafo y manejar ese valor desde el mismo bucle de animación que controla la niebla. (`requestAnimationFrame` es la función del navegador que ejecuta una porción de código en cada cuadro de pantalla, típicamente sesenta veces por segundo.) Tanto la intensidad del despeje como la opacidad del texto se calculan en el mismo cuadro, con las mismas velocidades:
+
+```typescript
+const opacidadActual = pOpacidades.get(p) ?? 0.45;
+const opacidadObjetivo = tieneHover ? 1 : 0.45;
+const opacidadSiguiente = opacidadActual
+  + (opacidadObjetivo - opacidadActual) * velocidad;
+pOpacidades.set(p, opacidadSiguiente);
+p.style.setProperty('--niebla-p-opacity', String(opacidadSiguiente));
+```
+
+La CSS lee la variable personalizada:
+
+```css
+.niebla-content :global(p) {
+  opacity: var(--niebla-p-opacity, 0.45);
+}
+```
+
+Las dos señales — el alfa de los píxeles de la niebla y la opacidad del texto — quedan perfectamente sincronizadas porque comparten la misma fuente: el mismo lerp, en el mismo cuadro. No hay forma de que una vaya por delante de la otra. Es una de esas situaciones donde la única solución estable es eliminar la posibilidad misma de la desincronización.
+
+## .la_lectura_como_esfuerzo
+
+La idea de un texto que exige al lector apartar la niebla para poder leerlo es ergódica en el sentido que [Espen Aarseth dio al término](/blog/la_literatura_ergodica_como_espacio_navegable): la lectura requiere un esfuerzo no trivial para atravesar el texto. La niebla no es un ornamento que dificulte la lectura por capricho. Es la forma material de una proposición: recordar exige esfuerzo.
+
+El narrador de **.pnlp** ha olvidado a Penélope durante doce meses, y el primer pasaje del texto trata sobre ese olvido. Que el lector tenga que pasar el cursor por cada párrafo para poder leerlo claramente — y ver cómo la niebla regresa lentamente cuando se aleja — es un eco de lo que se cuenta. La curva asimétrica entre apertura y cierre (rápido para revelar, lento para ocultar) refuerza esa relación: el recuerdo se aclara con un poco de atención, pero se oscurece de a poco, sin que uno logre evitarlo.
+
+## .el_código_como_material
+
+`NieblaTexto` está hecho de pocas piezas: ruido de Perlin en dos dimensiones, deformación de dominio para evitar la suavidad excesiva, un umbral para crear huecos en las nubes, una interpolación lineal por párrafo para apartar y restaurar la niebla, y la disciplina de mantener la opacidad del texto y la opacidad del canvas calculándose en el mismo cuadro. Ninguna de esas decisiones es exclusivamente técnica; cada una es una elección sobre cómo se debe sentir el acto de leer este pasaje.
+
+En la próxima entrega abriré `GlitchParagraph`, el componente que rompe la palabra *desincronización* dentro del texto — letras que se desordenan, marcas combinatorias que se apilan, franjas horizontales que se desgarran. Otro caso donde una palabra del texto se vuelve comportamiento del medio.
+
+## Referencias
+
+- Shiffman, D. (2024). Randomness. En *The Nature of Code*. [https://natureofcode.com/random/](https://natureofcode.com/random/)
+- Quilez, I. (2002). *Domain warping*. [https://iquilezles.org/articles/warp/](https://iquilezles.org/articles/warp/)
+- Aarseth, E. J. (1997). *Cybertext: Perspectives on Ergodic Literature*. The Johns Hopkins University Press.
